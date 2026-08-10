@@ -1,7 +1,7 @@
 mod actions;
-mod model;
-mod scanner;
-mod settings;
+pub mod model;
+pub mod scanner;
+pub mod settings;
 
 use model::ScanResult;
 use tauri::AppHandle;

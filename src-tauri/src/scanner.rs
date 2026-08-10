@@ -11,7 +11,7 @@ use sysinfo::{ProcessesToUpdate, System, MINIMUM_CPU_UPDATE_INTERVAL};
 use tauri::AppHandle;
 
 use crate::{
-    model::{PortRecord, ScanResult},
+    model::{AppSettings, PortRecord, ScanResult},
     settings::{load_settings, protection_reasons},
 };
 
@@ -22,6 +22,11 @@ struct DockerPort {
 }
 
 pub fn scan(app: &AppHandle) -> Result<ScanResult, String> {
+    let settings = load_settings(app);
+    scan_with_settings(&settings)
+}
+
+pub fn scan_with_settings(settings: &AppSettings) -> Result<ScanResult, String> {
     let af_flags = AddressFamilyFlags::IPV4 | AddressFamilyFlags::IPV6;
     let proto_flags = ProtocolFlags::TCP | ProtocolFlags::UDP;
     let sockets = get_sockets_info(af_flags, proto_flags)
@@ -32,7 +37,6 @@ pub fn scan(app: &AppHandle) -> Result<ScanResult, String> {
     system.refresh_processes(ProcessesToUpdate::All, true);
 
     let docker_ports = docker_port_map();
-    let settings = load_settings(app);
     let mut active_connections: HashMap<u32, u32> = HashMap::new();
 
     for socket in &sockets {
@@ -149,7 +153,7 @@ pub fn scan(app: &AppHandle) -> Result<ScanResult, String> {
                 protection_reasons: Vec::new(),
             };
 
-            record.protection_reasons = protection_reasons(&settings, &record);
+            record.protection_reasons = protection_reasons(settings, &record);
             record.protected = !record.protection_reasons.is_empty();
             records.push(record);
         }

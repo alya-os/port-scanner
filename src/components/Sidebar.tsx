@@ -1,9 +1,11 @@
 import {
   AppleLogo,
   Desktop,
+  LinuxLogo,
   LockSimple,
   PuzzlePiece,
   SquaresFour,
+  WindowsLogo,
   type Icon,
 } from "@phosphor-icons/react";
 import type { NavFilter, PortRecord } from "../types";
@@ -24,6 +26,7 @@ const navItems: Array<{ id: NavFilter; label: string; icon: Icon }> = [
 ];
 
 export function Sidebar({ active, onChange, records, platform }: SidebarProps) {
+  const SystemIcon = platform === "macos" ? AppleLogo : platform === "windows" ? WindowsLogo : LinuxLogo;
   const processCount = (filter: NavFilter) => {
     const selected = records.filter((record) => {
       if (filter === "all") return true;
@@ -42,8 +45,8 @@ export function Sidebar({ active, onChange, records, platform }: SidebarProps) {
       </div>
       <nav className="sidebar-nav">
         {navItems.map((item) => {
-          const IconComponent = item.icon;
-          const label = item.id === "system" && platform !== "macos" ? "Système" : item.label;
+          const IconComponent = item.id === "system" ? SystemIcon : item.icon;
+          const label = item.id === "system" ? systemLabel(platform) : item.label;
           return (
             <button
               key={item.id}
@@ -65,4 +68,11 @@ export function Sidebar({ active, onChange, records, platform }: SidebarProps) {
       <div className="sidebar-platform">{platform === "macos" ? "macOS" : platform || "Local"}</div>
     </aside>
   );
+}
+
+function systemLabel(platform: string): string {
+  if (platform === "macos") return "macOS";
+  if (platform === "windows") return "Windows";
+  if (platform === "linux") return "Linux";
+  return "Système";
 }

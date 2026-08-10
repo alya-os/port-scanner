@@ -6,12 +6,14 @@ import {
   Database,
   FilePy,
   FolderOpen,
+  LinuxLogo,
   LockSimple,
   ShieldCheck,
   ShieldPlus,
   Stop,
   TerminalWindow,
   Warning,
+  WindowsLogo,
 } from "@phosphor-icons/react";
 import { useState } from "react";
 import { evaluationCopy, formatDuration, formatMemory, formatStartedAt, scopeLabel } from "../lib/format";
@@ -19,13 +21,14 @@ import type { ProcessNode } from "../types";
 
 interface InspectorProps {
   process: ProcessNode | null;
+  platform: string;
   onReveal: (path: string) => void;
   onTerminal: (path: string) => void;
   onProtect: (process: ProcessNode) => void;
   onRequestStop: (process: ProcessNode) => void;
 }
 
-export function Inspector({ process, onReveal, onTerminal, onProtect, onRequestStop }: InspectorProps) {
+export function Inspector({ process, platform, onReveal, onTerminal, onProtect, onRequestStop }: InspectorProps) {
   const [copied, setCopied] = useState<string | null>(null);
 
   if (!process) {
@@ -54,7 +57,7 @@ export function Inspector({ process, onReveal, onTerminal, onProtect, onRequestS
     <aside className="inspector" aria-label={`Détails de ${process.identification}`}>
       <div className="inspector-scroll">
         <div className="inspector-heading">
-          <div className="inspector-app-icon"><InspectorIcon process={process} /></div>
+          <div className="inspector-app-icon"><InspectorIcon process={process} platform={platform} /></div>
           <div>
             <h2>{process.identification}</h2>
             <p>{process.name}</p>
@@ -159,8 +162,10 @@ export function Inspector({ process, onReveal, onTerminal, onProtect, onRequestS
   );
 }
 
-function InspectorIcon({ process }: { process: ProcessNode }) {
+function InspectorIcon({ process, platform }: { process: ProcessNode; platform: string }) {
   const name = `${process.name} ${process.groupName}`.toLowerCase();
+  if (process.category === "system" && platform === "windows") return <WindowsLogo className="icon-system" size={25} weight="fill" />;
+  if (process.category === "system" && platform === "linux") return <LinuxLogo className="icon-system" size={25} weight="fill" />;
   if (process.category === "system") return <AppleLogo className="icon-system" size={25} weight="fill" />;
   if (name.includes("docker")) return <Cube className="icon-docker" size={25} weight="duotone" />;
   if (name.includes("python")) return <FilePy className="icon-python" size={25} weight="duotone" />;

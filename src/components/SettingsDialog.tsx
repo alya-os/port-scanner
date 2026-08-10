@@ -1,5 +1,6 @@
 import { FloppyDisk, LockSimple, Plus, ShieldCheck, Trash, X } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
+import { useDialogFocus } from "../lib/useDialogFocus";
 import type { AppSettings, ProtectionRule, ThemeMode } from "../types";
 
 interface SettingsDialogProps {
@@ -15,6 +16,7 @@ export function SettingsDialog({ open, settings, onClose, onSave }: SettingsDial
   const [newKind, setNewKind] = useState<ProtectionRule["kind"]>("process");
   const [newValue, setNewValue] = useState("");
   const [newLabel, setNewLabel] = useState("");
+  const dialogRef = useDialogFocus<HTMLElement>(open);
 
   useEffect(() => setDraft(settings), [settings, open]);
   if (!open) return null;
@@ -52,13 +54,13 @@ export function SettingsDialog({ open, settings, onClose, onSave }: SettingsDial
 
   return (
     <div className="dialog-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
-      <section className="settings-dialog" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+      <section ref={dialogRef} className="settings-dialog" role="dialog" aria-modal="true" aria-labelledby="settings-title" tabIndex={-1}>
         <header className="dialog-header">
           <div>
             <h2 id="settings-title">Réglages</h2>
             <p>Personnalisez l’apparence et les barrières de sécurité.</p>
           </div>
-          <button className="icon-button" type="button" onClick={onClose} aria-label="Fermer les réglages"><X size={20} /></button>
+          <button className="icon-button" type="button" onClick={onClose} aria-label="Fermer les réglages" data-initial-focus><X size={20} /></button>
         </header>
 
         <div className="settings-content">
@@ -92,6 +94,7 @@ export function SettingsDialog({ open, settings, onClose, onSave }: SettingsDial
               <label className="switch">
                 <input
                   type="checkbox"
+                  aria-label="Protéger automatiquement les services système"
                   checked={draft.protectSystemProcesses}
                   onChange={(event) => setDraft((current) => ({ ...current, protectSystemProcesses: event.target.checked }))}
                 />
@@ -102,7 +105,7 @@ export function SettingsDialog({ open, settings, onClose, onSave }: SettingsDial
 
           <section className="settings-section rules-section">
             <div className="settings-section-title">
-              <div><strong>Règles de protection</strong><span>Une règle peut viser un port, un nom de processus ou un préfixe de chemin.</span></div>
+              <div><strong>Règles de protection</strong><span>Un chemin peut viser le dossier de travail ou l’exécutable d’un projet.</span></div>
               <span className="rule-count"><LockSimple size={14} /> {draft.rules.filter((rule) => rule.enabled).length} actives</span>
             </div>
             <div className="rules-list">
@@ -111,6 +114,7 @@ export function SettingsDialog({ open, settings, onClose, onSave }: SettingsDial
                   <label className="rule-enabled">
                     <input
                       type="checkbox"
+                      aria-label={`${rule.enabled ? "Désactiver" : "Activer"} la règle ${rule.label}`}
                       checked={rule.enabled}
                       onChange={(event) =>
                         setDraft((current) => ({

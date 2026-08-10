@@ -1,4 +1,4 @@
-import { LockSimple, Network, Warning } from "@phosphor-icons/react";
+import { Flask, LockSimple, Network, Warning } from "@phosphor-icons/react";
 import { formatScannedAt } from "../lib/format";
 
 interface StatusBarProps {
@@ -8,15 +8,17 @@ interface StatusBarProps {
   protectedCount: number;
   permissionLimited: boolean;
   scanning: boolean;
+  demoMode: boolean;
 }
 
-export function StatusBar({ scannedAt, processCount, portCount, protectedCount, permissionLimited, scanning }: StatusBarProps) {
+export function StatusBar({ scannedAt, processCount, portCount, protectedCount, permissionLimited, scanning, demoMode }: StatusBarProps) {
   return (
     <footer className="status-bar" aria-live="polite">
       <span className={scanning ? "status-scanning" : "status-ready"}>
         <i aria-hidden="true" /> {scanning ? "Analyse en cours" : "Analyse terminée"}
       </span>
       <span>{formatScannedAt(scannedAt)}</span>
+      {demoMode && <span className="demo-status" title="L’aperçu web utilise un jeu de données fictif. L’application installée analyse la machine."><Flask size={16} /> Données de démonstration</span>}
       <span className="status-spacer" />
       <span><Network size={16} /> {processCount} processus</span>
       <span>{portCount} ports</span>

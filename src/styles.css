@@ -27,7 +27,7 @@
   --text: #eaf0f2;
   --text-soft: #c3cdd1;
   --text-muted: #8fa1aa;
-  --text-faint: #667a84;
+  --text-faint: #8799a2;
   --accent: #12a9a8;
   --accent-bright: #22c3bd;
   --accent-ink: #021516;
@@ -56,7 +56,7 @@
   --text: #17262d;
   --text-soft: #344a53;
   --text-muted: #637780;
-  --text-faint: #89999f;
+  --text-faint: #5c7078;
   --accent: #087f80;
   --accent-bright: #066c6e;
   --accent-ink: #ffffff;
@@ -1170,6 +1170,7 @@ code {
 .status-scanning i { background: var(--warning); }
 .status-spacer { flex: 1; }
 .permission-warning { color: var(--warning); }
+.demo-status { color: var(--accent-bright); }
 .protected-status { color: var(--protected); }
 
 /* Dialogs */

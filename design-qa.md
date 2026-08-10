@@ -17,9 +17,9 @@ No actionable P0, P1, or P2 findings remain.
 - Spacing and layout rhythm: the sidebar, toolbar, relationship tree, inspector, and status bar retain the source composition. The 1440 × 1024 frame has no page overflow. At 1080 × 700 the compact grid has no horizontal or body overflow and keeps the persistent action area visible.
 - Colors and visual tokens: graphite surfaces, teal selection, green activity, amber review, red exposure/destruction, and lavender system protection match the source semantics in both themes. The light theme preserves the same information hierarchy.
 - Image and icon fidelity: the interface has no raster content requirement. All visible icons come from one Phosphor icon family; the requested grid, monitor, Apple, puzzle, and lock navigation semantics are present. Process icons adapt to Python, Node, Docker, database, and system types.
-- Copy and content: labels are French and actions name their consequence. Real runtime data replaces synthetic source values while preserving the selected layout.
+- Copy and content: labels are French and actions name their consequence. The browser evidence is explicitly marked “Données de démonstration”; the packaged Tauri application uses the native scanner.
 - States and interactions: search, category filters, sorting, expansion, selection, theme toggle, settings, protection rules, kill confirmation, loading, empty, disabled, success, and error states are implemented.
-- Accessibility: semantic buttons and regions, visible focus, keyboard search shortcut, Escape handling, reduced-motion support, and readable contrast are present.
+- Accessibility: semantic buttons and regions, visible focus, keyboard search shortcut, Escape handling, modal focus entry/trapping/restoration, accessible switch labels, reduced-motion support, and readable contrast are present. The faint-text tokens measure 6.49:1 in dark mode and 5.05:1 in light mode against their primary surfaces.
 
 ## Intentional Product Deviations
 
@@ -48,6 +48,14 @@ Fixes:
 - 1080 px layout: body `clientWidth` = `scrollWidth` = 1080 px; tree `clientWidth` = `scrollWidth` = 616 px; inspector actions end at y = 652 within a 700 px viewport.
 - Browser console: zero warnings and zero errors.
 
+### Pass 3
+
+- Corrected process identity grouping so two projects with the same leaf-folder and process names remain separate when their full executable or working-directory paths differ.
+- Changed one-click protection to create a project-path rule when a working folder is available, with the same check repeated by the native backend immediately before a stop request.
+- Made system icons platform-aware for macOS, Windows, and Linux.
+- Added an explicit demo-data indicator to the browser preview and strengthened faint-text contrast in both themes.
+- Keyboard checks confirm initial focus, forward and reverse tab trapping, and focus restoration for Settings and stop-confirmation dialogs.
+
 ## Primary Interactions Tested
 
 - Filter to Applications and return to Tous.
@@ -56,6 +64,8 @@ Fixes:
 - Open and close Settings.
 - Open and cancel the multi-process stop confirmation.
 - Confirm that the dialog explains backend protection revalidation.
+- Confirm that protecting Brandtracker creates a rule scoped to its full project directory, then remove the test rule.
+- Confirm Settings and stop-confirmation focus entry, tab wrapping, and focus restoration.
 
 ## Follow-up Polish
 

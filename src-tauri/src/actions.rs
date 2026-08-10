@@ -74,11 +74,20 @@ pub fn kill_process(app: AppHandle, request: KillRequest) -> Result<ActionResult
     let process_path = process
         .exe()
         .map(|path| path.to_string_lossy().into_owned());
+    let working_directory = process
+        .cwd()
+        .map(|path| path.to_string_lossy().into_owned());
     let ports = current_ports_for_pid(request.pid);
     let settings = load_settings(&app);
 
     for port in ports.iter().copied().chain(std::iter::once(0)) {
-        let record = guard_record(request.pid, &process_name, process_path.as_deref(), port);
+        let record = guard_record(
+            request.pid,
+            &process_name,
+            process_path.as_deref(),
+            working_directory.as_deref(),
+            port,
+        );
         let reasons = protection_reasons(&settings, &record);
         if !reasons.is_empty() {
             return Err(format!("Processus protégé : {}", reasons.join(" · ")));
@@ -124,7 +133,13 @@ pub fn kill_process(app: AppHandle, request: KillRequest) -> Result<ActionResult
     }
 }
 
-fn guard_record(pid: u32, name: &str, path: Option<&str>, port: u16) -> PortRecord {
+fn guard_record(
+    pid: u32,
+    name: &str,
+    path: Option<&str>,
+    working_directory: Option<&str>,
+    port: u16,
+) -> PortRecord {
     PortRecord {
         id: format!("guard-{pid}-{port}"),
         protocol: "TCP".into(),
@@ -136,7 +151,7 @@ fn guard_record(pid: u32, name: &str, path: Option<&str>, port: u16) -> PortReco
         process_name: name.into(),
         process_path: path.map(str::to_string),
         command: None,
-        working_directory: None,
+        working_directory: working_directory.map(str::to_string),
         group_name: name.into(),
         identification: name.into(),
         category: detect_category(name, path),
@@ -194,4 +209,38 @@ fn open_linux_terminal(path: &str) -> std::io::Result<std::process::ExitStatus> 
         std::io::ErrorKind::NotFound,
         "aucun terminal compatible trouvé",
     ))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{
+        model::{AppSettings, ProtectionRule},
+        settings::protection_reasons,
+    };
+
+    #[test]
+    fn kill_guard_preserves_the_working_directory_for_path_protections() {
+        let record = guard_record(
+            42,
+            "node",
+            Some("/opt/homebrew/bin/node"),
+            Some("/Users/jp/Projects/client-a/api"),
+            3000,
+        );
+        let settings = AppSettings {
+            theme: "dark".into(),
+            protect_system_processes: false,
+            rules: vec![ProtectionRule {
+                id: "project-a".into(),
+                label: "Projet A".into(),
+                kind: "path".into(),
+                value: "/Users/jp/Projects/client-a/api".into(),
+                enabled: true,
+                builtin: false,
+            }],
+        };
+
+        assert_eq!(protection_reasons(&settings, &record), vec!["Projet A"]);
+    }
 }

@@ -145,10 +145,13 @@ pub fn protection_reasons(settings: &AppSettings, record: &PortRecord) -> Vec<St
         let matches = match rule.kind.as_str() {
             "port" => rule.value.parse::<u16>().ok() == Some(record.port),
             "process" => record.process_name.eq_ignore_ascii_case(rule.value.trim()),
-            "path" => record
-                .process_path
-                .as_deref()
-                .is_some_and(|path| starts_with_case_insensitive(path, rule.value.trim())),
+            "path" => [
+                record.process_path.as_deref(),
+                record.working_directory.as_deref(),
+            ]
+            .into_iter()
+            .flatten()
+            .any(|path| starts_with_case_insensitive(path, rule.value.trim())),
             _ => false,
         };
 
@@ -184,6 +187,28 @@ mod tests {
         assert!(protection_reasons(&settings, &record)
             .iter()
             .any(|reason| reason.contains("système")));
+    }
+
+    #[test]
+    fn path_rules_match_working_directories_without_protecting_sibling_projects() {
+        let mut settings = default_settings();
+        settings.protect_system_processes = false;
+        settings.rules = vec![ProtectionRule {
+            id: "project-a".into(),
+            label: "Projet A".into(),
+            kind: "path".into(),
+            value: "/Users/jp/Projects/client-a/api".into(),
+            enabled: true,
+            builtin: false,
+        }];
+
+        let mut protected = sample_record();
+        protected.process_name = "node".into();
+        protected.working_directory = Some("/Users/jp/Projects/client-a/api".into());
+        assert_eq!(protection_reasons(&settings, &protected), vec!["Projet A"]);
+
+        protected.working_directory = Some("/Users/jp/Projects/client-b/api".into());
+        assert!(protection_reasons(&settings, &protected).is_empty());
     }
 
     fn sample_record() -> PortRecord {

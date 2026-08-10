@@ -31,7 +31,7 @@ export function buildProcessTree(
 
   const processMap = new Map<string, PortRecord[]>();
   for (const record of visibleRecords) {
-    const key = [record.category, record.groupName, record.processName, record.identification].join("::");
+    const key = processIdentityKey(record);
     const values = processMap.get(key) ?? [];
     values.push(record);
     processMap.set(key, values);
@@ -59,6 +59,17 @@ export function buildProcessTree(
     if (right.category === "system" && left.category !== "system") return -1;
     return left.label.localeCompare(right.label, "fr", { sensitivity: "base" });
   });
+}
+
+export function processIdentityKey(record: PortRecord): string {
+  return [
+    record.category,
+    record.groupName,
+    record.processName,
+    record.identification,
+    record.processPath ?? "<executable-inconnu>",
+    record.workingDirectory ?? "<dossier-inconnu>",
+  ].join("::");
 }
 
 function toProcessNode(id: string, records: PortRecord[]): ProcessNode {

@@ -33,6 +33,7 @@ interface ToastState {
 }
 
 export function App() {
+  const previewMode = !isTauriRuntime();
   const [scan, setScan] = useState<ScanResult | null>(null);
   const [settings, setSettings] = useState<AppSettings>({ theme: "dark", protectSystemProcesses: true, rules: [] });
   const [filter, setFilter] = useState<NavFilter>("all");
@@ -141,11 +142,12 @@ export function App() {
 
   const handleProtect = async (process: ProcessNode) => {
     if (process.protected) return;
+    const path = process.workingDirectory ?? process.processPath;
     const rule = {
-      id: `custom-process-${Date.now()}`,
-      label: process.identification,
-      kind: "process" as const,
-      value: process.name,
+      id: `custom-${path ? "path" : "process"}-${Date.now()}`,
+      label: path ? `Projet · ${process.identification}` : process.identification,
+      kind: path ? ("path" as const) : ("process" as const),
+      value: path ?? process.name,
       enabled: true,
       builtin: false,
     };
@@ -201,9 +203,10 @@ export function App() {
         onScan={runScan}
         scanning={scanning}
       />
-      <ProcessTree groups={groups} selectedId={selected?.id ?? null} onSelect={(process) => setSelectedId(process.id)} scanning={scanning} />
+      <ProcessTree groups={groups} selectedId={selected?.id ?? null} onSelect={(process) => setSelectedId(process.id)} scanning={scanning} platform={scan?.platform ?? "macos"} />
       <Inspector
         process={selected}
+        platform={scan?.platform ?? "macos"}
         onReveal={(path) => void handleReveal(path)}
         onTerminal={(path) => void handleTerminal(path)}
         onProtect={(process) => void handleProtect(process)}
@@ -216,6 +219,7 @@ export function App() {
         protectedCount={protectedCount}
         permissionLimited={scan?.permissionLimited ?? false}
         scanning={scanning}
+        demoMode={previewMode}
       />
       <SettingsDialog open={settingsOpen} settings={settings} onClose={() => setSettingsOpen(false)} onSave={persistSettings} />
       <KillDialog process={stopTarget} stopping={stopping} onCancel={() => setStopTarget(null)} onConfirm={() => void confirmStop()} />
@@ -244,7 +248,9 @@ function applyProtectionSettings(records: PortRecord[], settings: AppSettings): 
       const matches =
         (rule.kind === "port" && Number(rule.value) === record.port) ||
         (rule.kind === "process" && rule.value.toLocaleLowerCase() === record.processName.toLocaleLowerCase()) ||
-        (rule.kind === "path" && record.processPath?.toLocaleLowerCase().startsWith(rule.value.toLocaleLowerCase()));
+        (rule.kind === "path" && [record.processPath, record.workingDirectory]
+          .filter((path): path is string => Boolean(path))
+          .some((path) => path.toLocaleLowerCase().startsWith(rule.value.toLocaleLowerCase())));
       if (matches) reasons.push(rule.label);
     }
     return { ...record, protected: reasons.length > 0, protectionReasons: [...new Set(reasons)] };

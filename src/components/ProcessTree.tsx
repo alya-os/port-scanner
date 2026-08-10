@@ -10,8 +10,10 @@ import {
   Folder,
   GlobeHemisphereWest,
   LockSimple,
+  LinuxLogo,
   Network,
   TerminalWindow,
+  WindowsLogo,
 } from "@phosphor-icons/react";
 import { ActivityBars } from "./ActivityBars";
 import { evaluationCopy, formatDuration, shortAddress } from "../lib/format";
@@ -22,9 +24,10 @@ interface ProcessTreeProps {
   selectedId: string | null;
   onSelect: (process: ProcessNode) => void;
   scanning: boolean;
+  platform: string;
 }
 
-export function ProcessTree({ groups, selectedId, onSelect, scanning }: ProcessTreeProps) {
+export function ProcessTree({ groups, selectedId, onSelect, scanning, platform }: ProcessTreeProps) {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [expandedProcesses, setExpandedProcesses] = useState<Set<string>>(new Set());
 
@@ -89,7 +92,7 @@ export function ProcessTree({ groups, selectedId, onSelect, scanning }: ProcessT
               >
                 {groupOpen ? <CaretDown size={15} /> : <CaretRight size={15} />}
                 {group.category === "system" ? (
-                  <AppleLogo className="group-system-icon" size={21} weight="fill" />
+                  <SystemIcon platform={platform} className="group-system-icon" size={21} />
                 ) : (
                   <Folder className="group-folder-icon" size={21} weight="duotone" />
                 )}
@@ -126,7 +129,7 @@ export function ProcessTree({ groups, selectedId, onSelect, scanning }: ProcessT
                               {processOpen ? <CaretDown size={13} /> : <CaretRight size={13} />}
                             </button>
                             <button className="process-select" type="button" onClick={() => onSelect(process)}>
-                              <ProcessIcon process={process} />
+                              <ProcessIcon process={process} platform={platform} />
                               <span>
                                 <strong>{friendlyProcessName(process)}</strong>
                                 <small>
@@ -189,14 +192,20 @@ export function ProcessTree({ groups, selectedId, onSelect, scanning }: ProcessT
   );
 }
 
-function ProcessIcon({ process }: { process: ProcessNode }) {
+function ProcessIcon({ process, platform }: { process: ProcessNode; platform: string }) {
   const name = `${process.name} ${process.groupName}`.toLowerCase();
-  if (process.category === "system") return <AppleLogo className="process-icon icon-system" size={22} weight="fill" />;
+  if (process.category === "system") return <SystemIcon platform={platform} className="process-icon icon-system" size={22} />;
   if (name.includes("docker") || process.groupName === "Docker Desktop") return <Cube className="process-icon icon-docker" size={22} weight="duotone" />;
   if (name.includes("python")) return <FilePy className="process-icon icon-python" size={22} weight="duotone" />;
   if (name.includes("postgres") || name.includes("mysql")) return <Database className="process-icon icon-database" size={22} />;
   if (name.includes("node") || name.includes("vite")) return <BracketsCurly className="process-icon icon-node" size={22} weight="bold" />;
   return <TerminalWindow className="process-icon" size={22} weight="duotone" />;
+}
+
+function SystemIcon({ platform, className, size }: { platform: string; className: string; size: number }) {
+  if (platform === "windows") return <WindowsLogo className={className} size={size} weight="fill" />;
+  if (platform === "linux") return <LinuxLogo className={className} size={size} weight="fill" />;
+  return <AppleLogo className={className} size={size} weight="fill" />;
 }
 
 function friendlyProcessName(process: ProcessNode): string {

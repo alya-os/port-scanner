@@ -1,0 +1,14 @@
+node_modules/
+.npm-cache/
+dist/
+.DS_Store
+
+# Rust / Tauri
+src-tauri/target/
+
+# Local settings and editor state
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/

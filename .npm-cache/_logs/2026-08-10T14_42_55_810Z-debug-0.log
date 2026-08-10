@@ -1,0 +1,49 @@
+0 verbose cli /opt/homebrew/Cellar/node/25.6.1_1/bin/node /opt/homebrew/bin/npm
+1 info using npm@11.9.0
+2 info using node@v25.6.1
+3 silly config load:file:/opt/homebrew/lib/node_modules/npm/npmrc
+4 silly config load:file:/Users/jp/Documents/Codex/2026-08-10/j-ai-envie-que-tu-listes/outputs/connexions-locales/.npmrc
+5 silly config load:file:/Users/jp/.npmrc
+6 silly config load:file:/opt/homebrew/etc/npmrc
+7 verbose title npm install @tauri-apps/api @phosphor-icons/react
+8 verbose argv "install" "@tauri-apps/api" "@phosphor-icons/react"
+9 verbose logfile logs-max:10 dir:/Users/jp/Documents/Codex/2026-08-10/j-ai-envie-que-tu-listes/outputs/connexions-locales/.npm-cache/_logs/2026-08-10T14_42_55_810Z-
+10 verbose logfile /Users/jp/Documents/Codex/2026-08-10/j-ai-envie-que-tu-listes/outputs/connexions-locales/.npm-cache/_logs/2026-08-10T14_42_55_810Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly packumentCache heap:4496293888 maxSize:1124073472 maxEntrySize:562036736
+13 silly idealTree buildDeps
+14 silly fetch manifest @tauri-apps/api@*
+15 silly packumentCache full:https://registry.npmjs.org/@tauri-apps%2fapi cache-miss
+16 http fetch GET 200 https://registry.npmjs.org/@tauri-apps%2fapi 383ms (cache miss)
+17 silly packumentCache full:https://registry.npmjs.org/@tauri-apps%2fapi set size:undefined disposed:false
+18 silly fetch manifest @phosphor-icons/react@*
+19 silly packumentCache full:https://registry.npmjs.org/@phosphor-icons%2freact cache-miss
+20 http fetch GET 200 https://registry.npmjs.org/@phosphor-icons%2freact 200ms (cache miss)
+21 silly packumentCache full:https://registry.npmjs.org/@phosphor-icons%2freact set size:undefined disposed:false
+22 silly fetch manifest react@19.2.0
+23 silly packumentCache full:https://registry.npmjs.org/react cache-miss
+24 http cache https://registry.npmjs.org/react 11ms (cache hit)
+25 silly packumentCache full:https://registry.npmjs.org/react set size:6873639 disposed:false
+26 silly fetch manifest react-dom@19.2.0
+27 silly packumentCache full:https://registry.npmjs.org/react-dom cache-miss
+28 http cache https://registry.npmjs.org/react-dom 10ms (cache hit)
+29 silly packumentCache full:https://registry.npmjs.org/react-dom set size:9229396 disposed:false
+30 silly placeDep ROOT @phosphor-icons/react@2.1.10 OK for: connexions-locales@0.0.0 want: *
+31 silly placeDep ROOT @tauri-apps/api@2.11.1 OK for: connexions-locales@0.0.0 want: *
+32 silly reify moves {}
+33 http cache @tauri-apps/api@https://registry.npmjs.org/@tauri-apps/api/-/api-2.11.1.tgz 0ms (cache hit)
+34 http cache @phosphor-icons/react@https://registry.npmjs.org/@phosphor-icons/react/-/react-2.1.10.tgz 0ms (cache hit)
+35 http cache fsevents@https://registry.npmjs.org/fsevents/-/fsevents-2.3.3.tgz 0ms (cache hit)
+36 silly tarball no local data for @tauri-apps/api@https://registry.npmjs.org/@tauri-apps/api/-/api-2.11.1.tgz. Extracting by manifest.
+37 silly tarball no local data for @phosphor-icons/react@https://registry.npmjs.org/@phosphor-icons/react/-/react-2.1.10.tgz. Extracting by manifest.
+38 http fetch GET 200 https://registry.npmjs.org/@tauri-apps/api/-/api-2.11.1.tgz 57ms (cache miss)
+39 http fetch GET 200 https://registry.npmjs.org/@phosphor-icons/react/-/react-2.1.10.tgz 1407ms (cache miss)
+40 silly ADD node_modules/@tauri-apps/api
+41 silly ADD node_modules/@phosphor-icons/react
+42 silly ADD node_modules/fsevents
+43 verbose cwd /Users/jp/Documents/Codex/2026-08-10/j-ai-envie-que-tu-listes/outputs/connexions-locales
+44 verbose os Darwin 25.5.0
+45 verbose node v25.6.1
+46 verbose npm  v11.9.0
+47 verbose exit 0
+48 info ok

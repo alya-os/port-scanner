@@ -75,6 +75,8 @@ npm run tauri build
 
 La configuration contient les commandes adaptées à macOS, Windows et Linux. La version actuelle a été compilée et vérifiée sur macOS; les paquets Windows et Linux doivent être validés sur leurs plateformes respectives avant publication.
 
+Le bundle macOS local utilise une signature ad hoc. Une diffusion publique sans avertissement Gatekeeper nécessitera un certificat Developer ID et une notarisation Apple.
+
 ## Structure
 
 - `src/` — interface, thèmes, filtres, arborescence et dialogues.

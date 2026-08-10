@@ -40,6 +40,8 @@
   --protected-soft: rgba(180, 119, 255, 0.1);
   --overlay: rgba(1, 7, 10, 0.72);
   --shadow: 0 18px 48px rgba(0, 0, 0, 0.36);
+  --scrollbar-thumb: #35505a;
+  --scrollbar-thumb-hover: #12a9a8;
 }
 
 :root[data-theme="light"] {
@@ -69,6 +71,8 @@
   --protected-soft: rgba(124, 63, 193, 0.08);
   --overlay: rgba(17, 29, 34, 0.38);
   --shadow: 0 18px 48px rgba(34, 49, 55, 0.18);
+  --scrollbar-thumb: #a9babc;
+  --scrollbar-thumb-hover: #087f80;
 }
 
 * {
@@ -135,6 +139,11 @@ code {
   height: 100%;
   overflow: hidden;
   background: var(--app-bg);
+  transition: grid-template-columns var(--motion);
+}
+
+.app-shell.is-sidebar-collapsed {
+  --sidebar-width: 64px;
 }
 
 /* Sidebar */
@@ -148,25 +157,33 @@ code {
   border-right: 1px solid var(--line);
   background: var(--sidebar-bg);
   padding: 14px 7px 12px;
+  transition: padding var(--motion);
 }
 
-.sidebar-mark {
-  display: flex;
-  justify-content: center;
-  gap: 4px;
+.sidebar-collapse-button {
+  display: grid;
+  place-items: center;
+  align-self: center;
+  width: 40px;
   height: 50px;
-  padding-top: 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  transition: color var(--motion), background var(--motion), transform var(--motion);
 }
 
-.sidebar-mark span {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--line-strong);
+.sidebar-collapse-button:hover {
+  background: var(--surface-hover);
+  color: var(--accent-bright);
 }
 
-.sidebar-mark span:first-child {
-  background: var(--accent);
+.sidebar-collapse-button svg {
+  transition: transform var(--motion);
+}
+
+.app-shell.is-sidebar-collapsed .sidebar-collapse-button svg {
+  transform: scaleX(-1);
 }
 
 .sidebar-nav {
@@ -237,12 +254,69 @@ code {
 }
 
 .sidebar-platform {
-  margin-top: auto;
   color: var(--text-faint);
   font-size: 11px;
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+}
+
+.sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.sidebar-utilities {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.sidebar-utility-button {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  height: 38px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  color: var(--text-muted);
+  transition: color var(--motion), border-color var(--motion), background var(--motion);
+}
+
+.sidebar-utility-button:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-bright);
+}
+
+.app-shell.is-sidebar-collapsed .sidebar {
+  padding-right: 5px;
+  padding-left: 5px;
+}
+
+.app-shell.is-sidebar-collapsed .sidebar-item {
+  min-height: 58px;
+  gap: 0;
+}
+
+.app-shell.is-sidebar-collapsed .sidebar-item.is-active::before {
+  left: -5px;
+}
+
+.app-shell.is-sidebar-collapsed .sidebar-label,
+.app-shell.is-sidebar-collapsed .sidebar-platform {
+  display: none;
+}
+
+.app-shell.is-sidebar-collapsed .sidebar-utilities {
+  grid-template-columns: 1fr;
+}
+
+.app-shell.is-sidebar-collapsed .sidebar-count {
+  right: -5px;
 }
 
 /* Toolbar */
@@ -481,6 +555,7 @@ code {
   min-height: 0;
   overflow: auto;
   overscroll-behavior: contain;
+  --local-scrollbar-track: var(--surface);
 }
 
 .tree-group {
@@ -812,6 +887,55 @@ code {
   min-height: 0;
   overflow: auto;
   padding: 25px 24px 18px;
+  --local-scrollbar-track: var(--surface-raised);
+}
+
+.tree-scroll,
+.inspector-scroll,
+.settings-content,
+.rules-list {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--local-scrollbar-track, var(--surface-raised));
+}
+
+.tree-scroll::-webkit-scrollbar,
+.inspector-scroll::-webkit-scrollbar,
+.settings-content::-webkit-scrollbar,
+.rules-list::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.tree-scroll::-webkit-scrollbar-track,
+.inspector-scroll::-webkit-scrollbar-track,
+.settings-content::-webkit-scrollbar-track,
+.rules-list::-webkit-scrollbar-track {
+  background: var(--local-scrollbar-track, var(--surface-raised));
+  box-shadow: inset 1px 0 var(--line);
+}
+
+.tree-scroll::-webkit-scrollbar-thumb,
+.inspector-scroll::-webkit-scrollbar-thumb,
+.settings-content::-webkit-scrollbar-thumb,
+.rules-list::-webkit-scrollbar-thumb {
+  min-height: 38px;
+  border: 2px solid var(--local-scrollbar-track, var(--surface-raised));
+  border-radius: 6px;
+  background: var(--scrollbar-thumb);
+}
+
+.tree-scroll::-webkit-scrollbar-thumb:hover,
+.inspector-scroll::-webkit-scrollbar-thumb:hover,
+.settings-content::-webkit-scrollbar-thumb:hover,
+.rules-list::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+.tree-scroll::-webkit-scrollbar-corner,
+.inspector-scroll::-webkit-scrollbar-corner,
+.settings-content::-webkit-scrollbar-corner,
+.rules-list::-webkit-scrollbar-corner {
+  background: var(--local-scrollbar-track, var(--surface-raised));
 }
 
 .inspector-heading {

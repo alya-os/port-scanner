@@ -235,11 +235,13 @@ Light mode is a semantic remap, not a separate visual identity. Preserve the sam
 
 ## Layout
 
-The desktop shell is a fixed, full-height grid: a 102px category rail, a flexible center work area, and a 430px inspector; a 78px toolbar spans the two work columns and a 48px status strip anchors the bottom. The tree is the flexible center of gravity. It uses five aligned columns for element, port, scope, activity, and evaluation, with indentation lines making group → process → port ancestry visible.
+The desktop shell is a fixed, full-height grid: a 102px category rail, a flexible center work area, and a 430px inspector; a 78px toolbar spans the two work columns and a 48px status strip anchors the bottom. The rail can collapse to 64px from its top control, keeping category icons and counts visible while returning space to the relationship tree. Theme and settings utilities stay anchored at the bottom of the rail in both states. The tree is the flexible center of gravity. It uses five aligned columns for element, port, scope, activity, and evaluation, with indentation lines making group → process → port ancestry visible.
 
 At 1240px and below, the rail contracts to 88px and the inspector to 360px, secondary toolbar metadata disappears, activity copy yields to the bars, and the tree columns rebalance without changing the information order. The supported minimum canvas is 1080 × 700: controls and inspector actions must remain visible, the body must not scroll, and only the tree and inspector interiors may scroll independently.
 
 Spacing follows a compact 4px-derived rhythm with frequent 8px, 12px, 16px, 20px, and 24px steps. Rows use height to express hierarchy: group rows are 43px, process rows 54px, and port rows 40px. Do not loosen this rhythm into airy card spacing; the application earns clarity through alignment, repetition, and controlled contrast.
+
+Scrollable work regions use thin graphite tracks and thumbs that belong to their surrounding surface. Teal is reserved for scrollbar hover and active feedback, preserving the same focus semantics as the rest of PortRoot.
 
 ### Named Rules
 

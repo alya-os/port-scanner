@@ -7,7 +7,9 @@
 - Full-view comparison evidence: `design/qa/comparison-dark-final.png`
 - Focused sidebar evidence: `design/qa/comparison-sidebar-final.png`
 - Focused inspector evidence: `design/qa/comparison-inspector-final.png`
-- Additional states: `design/qa/implementation-light-v1.png`, `design/qa/implementation-compact-final.png`
+- Annotated feedback source: `design/annotations/sidebar-controls-and-scrollbars.png`
+- Annotated feedback comparison: `design/qa/comparison-annotation-sidebar-final.png`
+- Additional states: `design/qa/implementation-light-v1.png`, `design/qa/implementation-compact-final.png`, `design/qa/implementation-sidebar-collapsed-final.png`
 
 ## Findings
 
@@ -19,6 +21,8 @@ No actionable P0, P1, or P2 findings remain.
 - Image and icon fidelity: the interface has no raster content requirement. All visible icons come from one Phosphor icon family; the requested grid, monitor, Apple, puzzle, and lock navigation semantics are present. Process icons adapt to Python, Node, Docker, database, and system types.
 - Copy and content: labels are French and actions name their consequence. The browser evidence is explicitly marked “Données de démonstration”; the packaged Tauri application uses the native scanner.
 - States and interactions: search, category filters, sorting, expansion, selection, theme toggle, settings, protection rules, kill confirmation, loading, empty, disabled, success, and error states are implemented.
+- Sidebar utilities: the former decorative top mark is now the sidebar collapse control; theme and settings remain reachable at the bottom in both expanded and collapsed states.
+- Scroll ownership: the process tree, inspector, settings content, and rule list use graphite tracks and thumbs with teal hover feedback in dark and light themes.
 - Accessibility: semantic buttons and regions, visible focus, keyboard search shortcut, Escape handling, modal focus entry/trapping/restoration, accessible switch labels, reduced-motion support, and readable contrast are present. The faint-text tokens measure 6.49:1 in dark mode and 5.05:1 in light mode against their primary surfaces.
 
 ## Intentional Product Deviations
@@ -56,19 +60,25 @@ Fixes:
 - Added an explicit demo-data indicator to the browser preview and strengthened faint-text contrast in both themes.
 - Keyboard checks confirm initial focus, forward and reverse tab trapping, and focus restoration for Settings and stop-confirmation dialogs.
 
+### Pass 4
+
+- Applied the annotated sidebar feedback without changing the relationship-first hierarchy: the top control collapses the rail from 102 px to 64 px and expands the center workspace.
+- Moved theme and settings from the toolbar into a persistent bottom sidebar utility group. Both controls remain keyboard accessible and functional while the sidebar is collapsed.
+- Replaced generic browser scrollbars with PortRoot graphite thumbs/tracks and teal interaction states. Computed dark-mode inspector thumb color is `rgb(53, 80, 90)`.
+- 1440 × 1024 interaction checks: sidebar width = 64 px when collapsed, toolbar left edge = 64 px, and category labels are visually hidden while accessible button names remain available.
+- 1080 × 760 compact check: body `clientWidth` = `scrollWidth` = 1080 px; toolbar `clientWidth` = `scrollWidth` = 992 px; tree `clientWidth` = `scrollWidth` = 631 px.
+- Settings opens from the new sidebar position; theme changes dark → light → dark; collapse changes expanded → collapsed → expanded.
+
 ## Primary Interactions Tested
 
 - Filter to Applications and return to Tous.
 - Search for port 5432 and clear the search.
 - Toggle dark to light and back to dark.
 - Open and close Settings.
+- Collapse and expand the sidebar, including checking label visibility and gained workspace width.
 - Open and cancel the multi-process stop confirmation.
 - Confirm that the dialog explains backend protection revalidation.
 - Confirm that protecting Brandtracker creates a rule scoped to its full project directory, then remove the test rule.
 - Confirm Settings and stop-confirmation focus entry, tab wrapping, and focus restoration.
-
-## Follow-up Polish
-
-- P3: a signed release can replace the default Tauri bundle icon after the final public product name is chosen.
 
 final result: passed

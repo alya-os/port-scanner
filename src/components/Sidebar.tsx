@@ -1,10 +1,14 @@
 import {
   AppleLogo,
   Desktop,
+  GearSix,
   LinuxLogo,
   LockSimple,
+  Moon,
   PuzzlePiece,
+  SidebarSimple,
   SquaresFour,
+  Sun,
   WindowsLogo,
   type Icon,
 } from "@phosphor-icons/react";
@@ -15,6 +19,11 @@ interface SidebarProps {
   onChange: (filter: NavFilter) => void;
   records: PortRecord[];
   platform: string;
+  theme: "dark" | "light";
+  collapsed: boolean;
+  onToggleCollapsed: () => void;
+  onToggleTheme: () => void;
+  onOpenSettings: () => void;
 }
 
 const navItems: Array<{ id: NavFilter; label: string; icon: Icon }> = [
@@ -25,7 +34,17 @@ const navItems: Array<{ id: NavFilter; label: string; icon: Icon }> = [
   { id: "protected", label: "Protégés", icon: LockSimple },
 ];
 
-export function Sidebar({ active, onChange, records, platform }: SidebarProps) {
+export function Sidebar({
+  active,
+  onChange,
+  records,
+  platform,
+  theme,
+  collapsed,
+  onToggleCollapsed,
+  onToggleTheme,
+  onOpenSettings,
+}: SidebarProps) {
   const SystemIcon = platform === "macos" ? AppleLogo : platform === "windows" ? WindowsLogo : LinuxLogo;
   const processCount = (filter: NavFilter) => {
     const selected = records.filter((record) => {
@@ -37,13 +56,19 @@ export function Sidebar({ active, onChange, records, platform }: SidebarProps) {
   };
 
   return (
-    <aside className="sidebar" aria-label="Filtres principaux">
-      <div className="sidebar-mark" aria-hidden="true">
-        <span />
-        <span />
-        <span />
-      </div>
-      <nav className="sidebar-nav">
+    <aside className="sidebar" aria-label="Navigation principale">
+      <button
+        className="sidebar-collapse-button"
+        type="button"
+        onClick={onToggleCollapsed}
+        aria-label={collapsed ? "Déployer la barre latérale" : "Réduire la barre latérale"}
+        aria-expanded={!collapsed}
+        aria-controls="primary-navigation"
+        title={collapsed ? "Déployer la barre latérale" : "Réduire la barre latérale"}
+      >
+        <SidebarSimple size={22} weight="regular" />
+      </button>
+      <nav className="sidebar-nav" id="primary-navigation">
         {navItems.map((item) => {
           const IconComponent = item.id === "system" ? SystemIcon : item.icon;
           const label = item.id === "system" ? systemLabel(platform) : item.label;
@@ -60,12 +85,34 @@ export function Sidebar({ active, onChange, records, platform }: SidebarProps) {
                 <IconComponent size={24} weight={active === item.id ? "fill" : "regular"} />
                 <span className="sidebar-count">{processCount(item.id)}</span>
               </span>
-              <span>{label}</span>
+              <span className="sidebar-label">{label}</span>
             </button>
           );
         })}
       </nav>
-      <div className="sidebar-platform">{platform === "macos" ? "macOS" : platform || "Local"}</div>
+      <div className="sidebar-footer">
+        <div className="sidebar-utilities" aria-label="Affichage et réglages">
+          <button
+            className="sidebar-utility-button"
+            type="button"
+            onClick={onToggleTheme}
+            aria-label={theme === "dark" ? "Passer au thème clair" : "Passer au thème sombre"}
+            title={theme === "dark" ? "Thème clair" : "Thème sombre"}
+          >
+            {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+          <button
+            className="sidebar-utility-button"
+            type="button"
+            onClick={onOpenSettings}
+            aria-label="Ouvrir les réglages"
+            title="Réglages"
+          >
+            <GearSix size={21} />
+          </button>
+        </div>
+        <div className="sidebar-platform">{platform === "macos" ? "macOS" : platform || "Local"}</div>
+      </div>
     </aside>
   );
 }

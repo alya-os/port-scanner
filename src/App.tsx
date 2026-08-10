@@ -42,6 +42,7 @@ export function App() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [scanning, setScanning] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [stopTarget, setStopTarget] = useState<ProcessNode | null>(null);
   const [stopping, setStopping] = useState(false);
   const [toast, setToast] = useState<ToastState | null>(null);
@@ -190,16 +191,23 @@ export function App() {
   const protectedCount = records.filter((record) => record.protected).length;
 
   return (
-    <main className="app-shell">
-      <Sidebar active={filter} onChange={setFilter} records={records} platform={scan?.platform ?? "macos"} />
+    <main className={`app-shell ${sidebarCollapsed ? "is-sidebar-collapsed" : ""}`}>
+      <Sidebar
+        active={filter}
+        onChange={setFilter}
+        records={records}
+        platform={scan?.platform ?? "macos"}
+        theme={resolvedTheme}
+        collapsed={sidebarCollapsed}
+        onToggleCollapsed={() => setSidebarCollapsed((current) => !current)}
+        onToggleTheme={toggleTheme}
+        onOpenSettings={() => setSettingsOpen(true)}
+      />
       <Toolbar
         query={query}
         onQueryChange={setQuery}
         sort={sort}
         onSortChange={setSort}
-        theme={settings.theme}
-        onToggleTheme={toggleTheme}
-        onOpenSettings={() => setSettingsOpen(true)}
         onScan={runScan}
         scanning={scanning}
       />

@@ -230,6 +230,7 @@ mod tests {
         );
         let settings = AppSettings {
             theme: "dark".into(),
+            language: "fr".into(),
             protect_system_processes: false,
             rules: vec![ProtectionRule {
                 id: "project-a".into(),

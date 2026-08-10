@@ -17,6 +17,7 @@ When implementing from a selected generated mock, treat that image as the source
 - Keep the sidebar collapsible from its top control, with theme and settings utilities anchored at the bottom.
 - Scrollbars should use PortRoot's quiet graphite track/thumb treatment with teal interaction states.
 - Avoid native select popovers for themed controls; use PortRoot-styled menus so every option remains legible in dark and light modes.
+- French is the default interface language; users can persistently switch the full application between French and English from Settings.
 - Make the working directory, duplicate processes, process activity, scope, and protection state easy to scan.
 - Destructive process actions require confirmation and backend protection checks.
 - The production target is Tauri 2 + React/TypeScript + Rust for macOS, Windows, and Linux.

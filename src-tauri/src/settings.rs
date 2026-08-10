@@ -55,6 +55,7 @@ pub fn default_settings() -> AppSettings {
 
     AppSettings {
         theme: "dark".into(),
+        language: "fr".into(),
         protect_system_processes: true,
         rules,
     }
@@ -128,6 +129,9 @@ pub fn get_settings(app: AppHandle) -> AppSettings {
 pub fn save_settings(app: AppHandle, mut settings: AppSettings) -> Result<AppSettings, String> {
     if !matches!(settings.theme.as_str(), "dark" | "light" | "system") {
         settings.theme = "dark".into();
+    }
+    if !matches!(settings.language.as_str(), "fr" | "en") {
+        settings.language = "fr".into();
     }
 
     settings.rules.retain(|rule| {
@@ -204,6 +208,7 @@ mod tests {
     #[test]
     fn defaults_protect_ssh_and_system_services() {
         let settings = default_settings();
+        assert_eq!(settings.language, "fr");
         let mut record = sample_record();
         record.port = 22;
         assert!(!protection_reasons(&settings, &record).is_empty());
@@ -213,6 +218,15 @@ mod tests {
         assert!(protection_reasons(&settings, &record)
             .iter()
             .any(|reason| reason.contains("système")));
+    }
+
+    #[test]
+    fn old_settings_without_language_default_to_french() {
+        let settings: AppSettings = serde_json::from_str(
+            r#"{"theme":"dark","protectSystemProcesses":true,"rules":[]}"#,
+        )
+        .expect("legacy settings should deserialize");
+        assert_eq!(settings.language, "fr");
     }
 
     #[test]

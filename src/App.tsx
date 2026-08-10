@@ -35,7 +35,7 @@ interface ToastState {
 export function App() {
   const previewMode = !isTauriRuntime();
   const [scan, setScan] = useState<ScanResult | null>(null);
-  const [settings, setSettings] = useState<AppSettings>({ theme: "dark", protectSystemProcesses: true, rules: [] });
+  const [settings, setSettings] = useState<AppSettings>({ theme: "dark", language: "fr", protectSystemProcesses: true, rules: [] });
   const [filter, setFilter] = useState<NavFilter>("all");
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortMode>("evaluation");

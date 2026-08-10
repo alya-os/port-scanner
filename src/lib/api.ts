@@ -15,7 +15,7 @@ export async function scanPorts(): Promise<ScanResult> {
 }
 
 export async function getSettings(): Promise<AppSettings> {
-  if (isTauriRuntime()) return invoke<AppSettings>("get_settings");
+  if (isTauriRuntime()) return normalizeSettings(await invoke<AppSettings>("get_settings"));
   const stored = window.localStorage.getItem(SETTINGS_STORAGE_KEY);
   const legacy = stored ? null : window.localStorage.getItem(LEGACY_SETTINGS_STORAGE_KEY);
   if (legacy) {
@@ -23,13 +23,23 @@ export async function getSettings(): Promise<AppSettings> {
     window.localStorage.removeItem(LEGACY_SETTINGS_STORAGE_KEY);
   }
   const serialized = stored ?? legacy;
-  return serialized ? (JSON.parse(serialized) as AppSettings) : structuredClone(mockSettings);
+  return serialized ? normalizeSettings(JSON.parse(serialized) as Partial<AppSettings>) : structuredClone(mockSettings);
 }
 
 export async function saveSettings(settings: AppSettings): Promise<AppSettings> {
-  if (isTauriRuntime()) return invoke<AppSettings>("save_settings", { settings });
-  window.localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
-  return settings;
+  const normalized = normalizeSettings(settings);
+  if (isTauriRuntime()) return invoke<AppSettings>("save_settings", { settings: normalized });
+  window.localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(normalized));
+  return normalized;
+}
+
+function normalizeSettings(settings: Partial<AppSettings>): AppSettings {
+  return {
+    ...structuredClone(mockSettings),
+    ...settings,
+    language: settings.language === "en" ? "en" : "fr",
+    rules: settings.rules ?? structuredClone(mockSettings.rules),
+  };
 }
 
 export async function revealFolder(path: string): Promise<ActionResult> {

@@ -1,4 +1,5 @@
 export type ThemeMode = "dark" | "light" | "system";
+export type Language = "fr" | "en";
 export type Category = "application" | "system" | "other";
 export type Scope = "local" | "network";
 export type NavFilter = "all" | Category | "protected";
@@ -47,6 +48,7 @@ export interface ProtectionRule {
 
 export interface AppSettings {
   theme: ThemeMode;
+  language: Language;
   protectSystemProcesses: boolean;
   rules: ProtectionRule[];
 }

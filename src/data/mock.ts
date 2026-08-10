@@ -196,6 +196,7 @@ export const mockScan: ScanResult = {
 
 export const mockSettings: AppSettings = {
   theme: "dark",
+  language: "fr",
   protectSystemProcesses: true,
   rules: [
     { id: "port-22", label: "SSH", kind: "port", value: "22", enabled: true, builtin: true },

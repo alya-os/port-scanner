@@ -51,8 +51,14 @@ pub struct ProtectionRule {
 #[serde(rename_all = "camelCase")]
 pub struct AppSettings {
     pub theme: String,
+    #[serde(default = "default_language")]
+    pub language: String,
     pub protect_system_processes: bool,
     pub rules: Vec<ProtectionRule>,
+}
+
+fn default_language() -> String {
+    "fr".into()
 }
 
 #[derive(Debug, Clone, Serialize)]

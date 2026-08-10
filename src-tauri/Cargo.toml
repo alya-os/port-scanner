@@ -1,8 +1,8 @@
 [package]
-name = "app"
+name = "connexions-locales"
 version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+description = "Inspect and safely manage local listening ports and their processes."
+authors = ["Jean-Philippe Lefebvre"]
 license = ""
 repository = ""
 edition = "2021"
@@ -11,7 +11,7 @@ rust-version = "1.77.2"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
-name = "app_lib"
+name = "connexions_locales_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
@@ -23,3 +23,5 @@ serde = { version = "1.0", features = ["derive"] }
 log = "0.4"
 tauri = { version = "2.11.3" }
 tauri-plugin-log = "2"
+netstat2 = "0.11.2"
+sysinfo = "0.36.1"

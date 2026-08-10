@@ -2,7 +2,7 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Connexions locales",
   "version": "0.1.0",
-  "identifier": "com.tauri.dev",
+  "identifier": "ca.jplefebvre.connexions-locales",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
@@ -13,8 +13,12 @@
     "windows": [
       {
         "title": "Connexions locales",
-        "width": 800,
-        "height": 600,
+        "width": 1440,
+        "height": 960,
+        "minWidth": 1080,
+        "minHeight": 700,
+        "center": true,
+        "theme": "Dark",
         "resizable": true,
         "fullscreen": false
       }

@@ -8,8 +8,12 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     allowedHosts: ["terminal.local"],
+    strictPort: true,
     warmup: {
-      clientFiles: ["./src/main.jsx"],
+      clientFiles: ["./src/main.tsx"],
+    },
+    watch: {
+      ignored: ["**/src-tauri/**"],
     },
   },
   plugins: [react()],

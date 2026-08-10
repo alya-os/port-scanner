@@ -1,0 +1,64 @@
+# Design QA
+
+- Source visual truth: `design/reference-dark.png`
+- Implementation screenshot: `design/qa/implementation-dark-final.png`
+- Viewport: 1440 × 1024
+- State: dark theme, all categories, Brandtracker selected and expanded
+- Full-view comparison evidence: `design/qa/comparison-dark-final.png`
+- Focused sidebar evidence: `design/qa/comparison-sidebar-final.png`
+- Focused inspector evidence: `design/qa/comparison-inspector-final.png`
+- Additional states: `design/qa/implementation-light-v1.png`, `design/qa/implementation-compact-final.png`
+
+## Findings
+
+No actionable P0, P1, or P2 findings remain.
+
+- Fonts and typography: the implementation uses the native UI family for each operating system and a dedicated monospace stack only for commands, PIDs, ports, and addresses. Weight, scale, line height, truncation, and dense-table hierarchy preserve the source intent.
+- Spacing and layout rhythm: the sidebar, toolbar, relationship tree, inspector, and status bar retain the source composition. The 1440 × 1024 frame has no page overflow. At 1080 × 700 the compact grid has no horizontal or body overflow and keeps the persistent action area visible.
+- Colors and visual tokens: graphite surfaces, teal selection, green activity, amber review, red exposure/destruction, and lavender system protection match the source semantics in both themes. The light theme preserves the same information hierarchy.
+- Image and icon fidelity: the interface has no raster content requirement. All visible icons come from one Phosphor icon family; the requested grid, monitor, Apple, puzzle, and lock navigation semantics are present. Process icons adapt to Python, Node, Docker, database, and system types.
+- Copy and content: labels are French and actions name their consequence. Real runtime data replaces synthetic source values while preserving the selected layout.
+- States and interactions: search, category filters, sorting, expansion, selection, theme toggle, settings, protection rules, kill confirmation, loading, empty, disabled, success, and error states are implemented.
+- Accessibility: semantic buttons and regions, visible focus, keyboard search shortcut, Escape handling, reduced-motion support, and readable contrast are present.
+
+## Intentional Product Deviations
+
+- The working folder name replaces the generic “Développement” group when a real directory is known. This makes project origin and duplicate families faster to identify, matching the user’s explicit priority.
+- The left navigation owns category filtering, so the redundant top category segmented control from the generated image is omitted.
+- The inspector adds memory, active connections, multiple PIDs, copy actions, and protection reasons because these values are available from the real scanner.
+
+## Comparison History
+
+### Pass 1
+
+- P2: the working directory was truncated to one line in the inspector.
+- P2: the compact 1080 px layout produced a 13 px horizontal tree overflow.
+- P2: the selected-process icon did not reflect the detected runtime type.
+
+Fixes:
+
+- Expanded the origin path to a readable two-line field and widened the desktop inspector to 430 px.
+- Rebalanced compact grid tracks; measured tree `clientWidth` and `scrollWidth` now both equal 616 px.
+- Added type-aware inspector icons using the same icon family as the process tree.
+
+### Pass 2
+
+- Full-view and focused comparisons show the selected hierarchy, icon language, inspector actions, and destructive separation intact.
+- 1440 px layout: body `clientWidth` = `scrollWidth` = 1440 px.
+- 1080 px layout: body `clientWidth` = `scrollWidth` = 1080 px; tree `clientWidth` = `scrollWidth` = 616 px; inspector actions end at y = 652 within a 700 px viewport.
+- Browser console: zero warnings and zero errors.
+
+## Primary Interactions Tested
+
+- Filter to Applications and return to Tous.
+- Search for port 5432 and clear the search.
+- Toggle dark to light and back to dark.
+- Open and close Settings.
+- Open and cancel the multi-process stop confirmation.
+- Confirm that the dialog explains backend protection revalidation.
+
+## Follow-up Polish
+
+- P3: a signed release can replace the default Tauri bundle icon after the final public product name is chosen.
+
+final result: passed

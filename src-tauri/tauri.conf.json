@@ -5,8 +5,8 @@
   "identifier": "ca.jplefebvre.connexions-locales",
   "build": {
     "frontendDist": "../dist",
-    "devUrl": "http://localhost:5173",
-    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeDevCommand": "npm run dev -- --port 1420 --strictPort",
     "beforeBuildCommand": "npm run build"
   },
   "app": {

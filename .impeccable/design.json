@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-10T15:37:21Z",
+  "title": "Design System: Connexions locales",
+  "extensions": {
+    "colorMeta": {
+      "graphite-canvas": { "role": "neutral", "displayName": "Graphite Canvas", "canonical": "#071017", "tonalRamp": ["#061016", "#0a151c", "#11232c", "#1d2c34", "#2b4049", "#5b7079", "#a8b7bd", "#eaf0f2"] },
+      "graphite-sidebar": { "role": "neutral", "displayName": "Sidebar Graphite", "canonical": "#08131a", "tonalRamp": ["#061016", "#0a151c", "#11232c", "#1d2c34", "#2b4049", "#5b7079", "#a8b7bd", "#eaf0f2"] },
+      "graphite-surface": { "role": "neutral", "displayName": "Workbench Graphite", "canonical": "#0a151c", "tonalRamp": ["#061016", "#0a151c", "#11232c", "#1d2c34", "#2b4049", "#5b7079", "#a8b7bd", "#eaf0f2"] },
+      "graphite-raised": { "role": "neutral", "displayName": "Raised Graphite", "canonical": "#0d1a22", "tonalRamp": ["#061016", "#0a151c", "#11232c", "#1d2c34", "#2b4049", "#5b7079", "#a8b7bd", "#eaf0f2"] },
+      "graphite-hover": { "role": "neutral", "displayName": "Hover Graphite", "canonical": "#11232c", "tonalRamp": ["#061016", "#0a151c", "#11232c", "#1d2c34", "#2b4049", "#5b7079", "#a8b7bd", "#eaf0f2"] },
+      "graphite-selected": { "role": "primary", "displayName": "Selected Teal Graphite", "canonical": "#0c3037", "tonalRamp": ["#021516", "#0c3037", "#0d3a42", "#087f80", "#12a9a8", "#22c3bd", "#bceae8", "#effcfb"] },
+      "graphite-selected-strong": { "role": "primary", "displayName": "Strong Selected Teal", "canonical": "#0d3a42", "tonalRamp": ["#021516", "#0c3037", "#0d3a42", "#087f80", "#12a9a8", "#22c3bd", "#bceae8", "#effcfb"] },
+      "graphite-line": { "role": "neutral", "displayName": "Graphite Seam", "canonical": "#1d2c34", "tonalRamp": ["#061016", "#0a151c", "#11232c", "#1d2c34", "#2b4049", "#5b7079", "#a8b7bd", "#eaf0f2"] },
+      "graphite-line-strong": { "role": "neutral", "displayName": "Strong Graphite Seam", "canonical": "#2b4049", "tonalRamp": ["#061016", "#0a151c", "#11232c", "#1d2c34", "#2b4049", "#5b7079", "#a8b7bd", "#eaf0f2"] },
+      "text-primary": { "role": "neutral", "displayName": "Primary Frost", "canonical": "#eaf0f2", "tonalRamp": ["#071017", "#1d2c34", "#51656e", "#8799a2", "#8fa1aa", "#c3cdd1", "#eaf0f2", "#f8fbfc"] },
+      "text-soft": { "role": "neutral", "displayName": "Soft Frost", "canonical": "#c3cdd1", "tonalRamp": ["#071017", "#1d2c34", "#51656e", "#8799a2", "#8fa1aa", "#c3cdd1", "#eaf0f2", "#f8fbfc"] },
+      "text-muted": { "role": "neutral", "displayName": "Muted Steel", "canonical": "#8fa1aa", "tonalRamp": ["#071017", "#1d2c34", "#51656e", "#8799a2", "#8fa1aa", "#c3cdd1", "#eaf0f2", "#f8fbfc"] },
+      "text-faint": { "role": "neutral", "displayName": "Faint Steel", "canonical": "#8799a2", "tonalRamp": ["#071017", "#1d2c34", "#51656e", "#8799a2", "#8fa1aa", "#c3cdd1", "#eaf0f2", "#f8fbfc"] },
+      "teal-signal": { "role": "primary", "displayName": "Local Teal", "canonical": "#12a9a8", "tonalRamp": ["oklch(15% 0.04 195)", "oklch(26% 0.07 195)", "oklch(38% 0.10 195)", "oklch(50% 0.13 195)", "oklch(62% 0.13 195)", "oklch(74% 0.11 195)", "oklch(86% 0.07 195)", "oklch(95% 0.03 195)"] },
+      "teal-bright": { "role": "primary", "displayName": "Bright Teal", "canonical": "#22c3bd", "tonalRamp": ["oklch(15% 0.04 195)", "oklch(26% 0.07 195)", "oklch(38% 0.10 195)", "oklch(50% 0.13 195)", "oklch(62% 0.13 195)", "oklch(74% 0.11 195)", "oklch(86% 0.07 195)", "oklch(95% 0.03 195)"] },
+      "teal-ink": { "role": "primary", "displayName": "Teal Ink", "canonical": "#021516", "tonalRamp": ["#021516", "#0c3037", "#0d3a42", "#087f80", "#12a9a8", "#22c3bd", "#bceae8", "#effcfb"] },
+      "teal-soft": { "role": "primary", "displayName": "Teal Wash", "canonical": "rgba(18, 169, 168, 0.14)", "tonalRamp": ["oklch(15% 0.04 195)", "oklch(26% 0.07 195)", "oklch(38% 0.10 195)", "oklch(50% 0.13 195)", "oklch(62% 0.13 195)", "oklch(74% 0.11 195)", "oklch(86% 0.07 195)", "oklch(95% 0.03 195)"] },
+      "green-activity": { "role": "secondary", "displayName": "Live Green", "canonical": "#24c979", "tonalRamp": ["oklch(15% 0.04 155)", "oklch(26% 0.07 155)", "oklch(38% 0.11 155)", "oklch(50% 0.15 155)", "oklch(62% 0.16 155)", "oklch(74% 0.13 155)", "oklch(86% 0.08 155)", "oklch(95% 0.03 155)"] },
+      "amber-review": { "role": "secondary", "displayName": "Review Amber", "canonical": "#f3ad25", "tonalRamp": ["oklch(15% 0.04 75)", "oklch(26% 0.07 75)", "oklch(38% 0.11 75)", "oklch(50% 0.15 75)", "oklch(62% 0.17 75)", "oklch(74% 0.14 75)", "oklch(86% 0.08 75)", "oklch(95% 0.03 75)"] },
+      "red-danger": { "role": "secondary", "displayName": "Stop Red", "canonical": "#ff5258", "tonalRamp": ["oklch(15% 0.05 25)", "oklch(26% 0.09 25)", "oklch(38% 0.14 25)", "oklch(50% 0.19 25)", "oklch(62% 0.21 25)", "oklch(74% 0.16 25)", "oklch(86% 0.09 25)", "oklch(95% 0.03 25)"] },
+      "red-danger-soft": { "role": "secondary", "displayName": "Stop Red Wash", "canonical": "rgba(255, 82, 88, 0.08)", "tonalRamp": ["oklch(15% 0.05 25)", "oklch(26% 0.09 25)", "oklch(38% 0.14 25)", "oklch(50% 0.19 25)", "oklch(62% 0.21 25)", "oklch(74% 0.16 25)", "oklch(86% 0.09 25)", "oklch(95% 0.03 25)"] },
+      "lavender-protected": { "role": "tertiary", "displayName": "Protected Lavender", "canonical": "#b477ff", "tonalRamp": ["oklch(15% 0.05 305)", "oklch(26% 0.08 305)", "oklch(38% 0.12 305)", "oklch(50% 0.16 305)", "oklch(62% 0.17 305)", "oklch(74% 0.13 305)", "oklch(86% 0.08 305)", "oklch(95% 0.03 305)"] },
+      "lavender-protected-soft": { "role": "tertiary", "displayName": "Protection Wash", "canonical": "rgba(180, 119, 255, 0.1)", "tonalRamp": ["oklch(15% 0.05 305)", "oklch(26% 0.08 305)", "oklch(38% 0.12 305)", "oklch(50% 0.16 305)", "oklch(62% 0.17 305)", "oklch(74% 0.13 305)", "oklch(86% 0.08 305)", "oklch(95% 0.03 305)"] },
+      "overlay-scrim": { "role": "neutral", "displayName": "Overlay Scrim", "canonical": "rgba(1, 7, 10, 0.72)", "tonalRamp": ["#01070a", "#071017", "#11232c", "#2b4049", "#5b7079", "#8fa1aa", "#c3cdd1", "#eef5f7"] },
+      "runtime-folder": { "role": "tertiary", "displayName": "Folder Blue", "canonical": "#27a5ff", "tonalRamp": ["oklch(15% 0.05 250)", "oklch(26% 0.09 250)", "oklch(38% 0.14 250)", "oklch(50% 0.18 250)", "oklch(62% 0.19 250)", "oklch(74% 0.14 250)", "oklch(86% 0.08 250)", "oklch(95% 0.03 250)"] },
+      "runtime-python": { "role": "tertiary", "displayName": "Python Gold", "canonical": "#e3b52c", "tonalRamp": ["oklch(15% 0.04 85)", "oklch(26% 0.07 85)", "oklch(38% 0.11 85)", "oklch(50% 0.15 85)", "oklch(62% 0.16 85)", "oklch(74% 0.13 85)", "oklch(86% 0.08 85)", "oklch(95% 0.03 85)"] },
+      "runtime-node": { "role": "tertiary", "displayName": "Node Green", "canonical": "#55bd73", "tonalRamp": ["oklch(15% 0.04 150)", "oklch(26% 0.07 150)", "oklch(38% 0.10 150)", "oklch(50% 0.13 150)", "oklch(62% 0.14 150)", "oklch(74% 0.11 150)", "oklch(86% 0.07 150)", "oklch(95% 0.03 150)"] },
+      "runtime-docker": { "role": "tertiary", "displayName": "Docker Blue", "canonical": "#28a8ef", "tonalRamp": ["oklch(15% 0.05 240)", "oklch(26% 0.09 240)", "oklch(38% 0.13 240)", "oklch(50% 0.17 240)", "oklch(62% 0.18 240)", "oklch(74% 0.14 240)", "oklch(86% 0.08 240)", "oklch(95% 0.03 240)"] },
+      "runtime-database": { "role": "tertiary", "displayName": "Database Steel Blue", "canonical": "#7db3dc", "tonalRamp": ["oklch(15% 0.03 235)", "oklch(26% 0.05 235)", "oklch(38% 0.08 235)", "oklch(50% 0.11 235)", "oklch(62% 0.12 235)", "oklch(74% 0.10 235)", "oklch(86% 0.06 235)", "oklch(95% 0.02 235)"] },
+      "white": { "role": "neutral", "displayName": "Destructive White", "canonical": "#ffffff", "tonalRamp": ["#071017", "#2b4049", "#5b7079", "#8799a2", "#a8b7bd", "#c3cdd1", "#eaf0f2", "#ffffff"] }
+    },
+    "typographyMeta": {
+      "headline": { "displayName": "Inspector Headline", "purpose": "Inspector and dialog identity headings." },
+      "title": { "displayName": "Workbench Title", "purpose": "Application identity and empty-state titles." },
+      "body": { "displayName": "Interface Body", "purpose": "Primary interface copy and dense data rows." },
+      "action": { "displayName": "Action Label", "purpose": "High-confidence button labels." },
+      "label": { "displayName": "Technical Label", "purpose": "Column headers, section labels, and compact metadata." },
+      "code": { "displayName": "Machine Data", "purpose": "Commands, paths, PIDs, ports, addresses, and timestamps." }
+    },
+    "shadows": [
+      { "name": "ambient-modal-lift", "value": "0 18px 48px rgba(0, 0, 0, 0.36)", "purpose": "Dialogs and transient toasts only." },
+      { "name": "focused-field-halo", "value": "0 0 0 3px rgba(18, 169, 168, 0.14)", "purpose": "Search-field focus-within response." }
+    ],
+    "motion": [
+      { "name": "state-standard", "value": "180ms cubic-bezier(0.2, 0.75, 0.2, 1)", "purpose": "Control color, border, background, and one-pixel lift transitions." },
+      { "name": "scan-spinner", "value": "700ms linear infinite", "purpose": "Scan-in-progress icon rotation only." }
+    ],
+    "breakpoints": [
+      { "name": "compact-desktop", "value": "1240px" },
+      { "name": "minimum-usable-width", "value": "1080px" },
+      { "name": "minimum-usable-height", "value": "700px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Scan Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The high-confidence action for rescanning or saving.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Analyser</button>",
+      "css": ".ds-btn-primary { min-height: 40px; padding: 0 16px; border: 1px solid var(--accent, #12a9a8); border-radius: 7px; background: var(--accent, #12a9a8); color: var(--accent-ink, #021516); font: 700 14px/1 -apple-system, BlinkMacSystemFont, sans-serif; transition: transform 180ms cubic-bezier(0.2,0.75,0.2,1), background 180ms cubic-bezier(0.2,0.75,0.2,1); } .ds-btn-primary:hover { background: var(--accent-bright, #22c3bd); transform: translateY(-1px); } .ds-btn-primary:focus-visible { outline: 2px solid var(--accent-bright, #22c3bd); outline-offset: 2px; } .ds-btn-primary:active { transform: translateY(0); }"
+    },
+    {
+      "name": "Secondary Utility Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "A quiet bordered action for opening a folder, terminal, or cancelling.",
+      "html": "<button class=\"ds-btn-secondary\" type=\"button\">Ouvrir le dossier</button>",
+      "css": ".ds-btn-secondary { min-height: 40px; padding: 0 16px; border: 1px solid var(--line-strong, #2b4049); border-radius: 7px; background: var(--surface-raised, #0d1a22); color: var(--text-soft, #c3cdd1); font: 700 14px/1 -apple-system, BlinkMacSystemFont, sans-serif; transition: background 180ms cubic-bezier(0.2,0.75,0.2,1), border-color 180ms cubic-bezier(0.2,0.75,0.2,1); } .ds-btn-secondary:hover { background: var(--surface-hover, #11232c); border-color: var(--text-faint, #8799a2); } .ds-btn-secondary:focus-visible { outline: 2px solid var(--accent-bright, #22c3bd); outline-offset: 2px; } .ds-btn-secondary:active { background: var(--surface, #0a151c); }"
+    },
+    {
+      "name": "Destructive Stop Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "The isolated destructive action after process context has been explained.",
+      "html": "<button class=\"ds-btn-danger\" type=\"button\">Arrêter 5 processus</button>",
+      "css": ".ds-btn-danger { min-height: 40px; padding: 0 16px; border: 1px solid var(--danger, #ff5258); border-radius: 7px; background: var(--danger-soft, rgba(255,82,88,0.08)); color: var(--danger, #ff5258); font: 700 14px/1 -apple-system, BlinkMacSystemFont, sans-serif; transition: background 180ms cubic-bezier(0.2,0.75,0.2,1), color 180ms cubic-bezier(0.2,0.75,0.2,1); } .ds-btn-danger:hover { background: var(--danger, #ff5258); color: #fff; } .ds-btn-danger:focus-visible { outline: 2px solid var(--danger, #ff5258); outline-offset: 2px; } .ds-btn-danger:active { filter: brightness(0.9); }"
+    },
+    {
+      "name": "Search Field",
+      "kind": "input",
+      "refersTo": "input-search",
+      "description": "The dominant toolbar field for finding folders, processes, ports, and PIDs.",
+      "html": "<label class=\"ds-search\"><input aria-label=\"Rechercher\" placeholder=\"Rechercher un dossier, processus, port, PID…\"><kbd>⌘K</kbd></label>",
+      "css": ".ds-search { display: flex; align-items: center; gap: 9px; height: 40px; padding: 0 10px 0 12px; border: 1px solid var(--line-strong, #2b4049); border-radius: 7px; background: var(--surface-raised, #0d1a22); color: var(--text-muted, #8fa1aa); transition: border-color 180ms cubic-bezier(0.2,0.75,0.2,1), box-shadow 180ms cubic-bezier(0.2,0.75,0.2,1); } .ds-search:focus-within { border-color: var(--accent, #12a9a8); box-shadow: 0 0 0 3px var(--accent-soft, rgba(18,169,168,0.14)); } .ds-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--text, #eaf0f2); font: 400 14px/1.5 -apple-system, BlinkMacSystemFont, sans-serif; } .ds-search input::placeholder { color: var(--text-faint, #8799a2); } .ds-search kbd { padding: 2px 5px; border: 1px solid var(--line, #1d2c34); border-radius: 4px; color: var(--text-faint, #8799a2); font: 11px SFMono-Regular, Consolas, monospace; }"
+    },
+    {
+      "name": "Active Category Navigation",
+      "kind": "nav",
+      "refersTo": "navigation-active",
+      "description": "The icon-led active state in the persistent left rail.",
+      "html": "<button class=\"ds-nav-active\" type=\"button\" aria-pressed=\"true\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"7\" rx=\"1\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\" rx=\"1\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\" rx=\"1\"/><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\" rx=\"1\"/></svg><span>Tous</span><b>12</b></button>",
+      "css": ".ds-nav-active { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; width: 88px; min-height: 76px; border: 0; border-radius: 7px; background: var(--surface-selected-strong, #0d3a42); color: var(--text, #eaf0f2); font: 600 12px/1.2 -apple-system, BlinkMacSystemFont, sans-serif; } .ds-nav-active::before { content: ''; position: absolute; inset: 12px auto 12px 0; width: 2px; border-radius: 0 2px 2px 0; background: var(--accent-bright, #22c3bd); } .ds-nav-active svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.6; } .ds-nav-active b { position: absolute; top: 9px; right: 14px; min-width: 19px; height: 19px; border: 1px solid var(--line, #1d2c34); border-radius: 6px; background: var(--surface-raised, #0d1a22); color: var(--text-soft, #c3cdd1); font: 700 11px/17px -apple-system, BlinkMacSystemFont, sans-serif; } .ds-nav-active:hover { filter: brightness(1.08); } .ds-nav-active:focus-visible { outline: 2px solid var(--accent-bright, #22c3bd); outline-offset: 2px; } .ds-nav-active:active { filter: brightness(0.96); }"
+    },
+    {
+      "name": "Selected Process Row",
+      "kind": "custom",
+      "refersTo": "process-selected",
+      "description": "The signature relationship-tree selection band with identity, scope, activity, and evaluation.",
+      "html": "<button class=\"ds-process-row\" type=\"button\"><span class=\"ds-process-name\"><span><strong>python3.12 · brandtracker</strong><small>5 instances · 5 ports</small></span></span><code>—</code><span>Local</span><span class=\"ds-activity\"><i></i><i></i><i></i><i></i><i></i></span><span class=\"ds-eval\"><i></i>Doublons possibles</span></button>",
+      "css": ".ds-process-row { display: grid; grid-template-columns: minmax(270px,1fr) 60px 90px 90px minmax(145px,.55fr); align-items: center; gap: 10px; width: 100%; min-height: 54px; padding: 0 18px 0 28px; border: solid rgba(18,169,168,0.45); border-width: 1px 0; background: var(--surface-selected, #0c3037); color: var(--text, #eaf0f2); text-align: left; font: 400 13px/1.2 -apple-system, BlinkMacSystemFont, sans-serif; } .ds-process-name { display: flex; align-items: center; gap: 9px; min-width: 0; } .ds-process-name > b { color: var(--text-faint, #8799a2); } .ds-process-name > i { color: #55bd73; font: 700 15px SFMono-Regular, Consolas, monospace; } .ds-process-name strong, .ds-process-name small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ds-process-name small { margin-top: 3px; color: var(--text-faint, #8799a2); font-size: 11px; } .ds-process-row code { font: 12px SFMono-Regular, Consolas, monospace; } .ds-activity { display: inline-flex; align-items: end; gap: 2px; height: 15px; } .ds-activity i { width: 3px; background: var(--success, #24c979); } .ds-activity i:nth-child(1) { height: 4px; } .ds-activity i:nth-child(2) { height: 7px; } .ds-activity i:nth-child(3) { height: 10px; } .ds-activity i:nth-child(4) { height: 13px; } .ds-activity i:nth-child(5) { height: 15px; background: var(--line-strong, #2b4049); } .ds-eval { display: flex; align-items: center; gap: 6px; color: var(--text-soft, #c3cdd1); font-size: 12px; } .ds-eval i { width: 7px; height: 7px; border-radius: 50%; background: var(--warning, #f3ad25); } .ds-process-row:hover { background: var(--surface-selected-strong, #0d3a42); } .ds-process-row:focus-visible { outline: 2px solid var(--accent-bright, #22c3bd); outline-offset: -2px; } .ds-process-row:active { filter: brightness(0.95); }"
+    },
+    {
+      "name": "Process Origin Card",
+      "kind": "card",
+      "refersTo": "origin-card",
+      "description": "The inspector's key explanatory object connecting a process to its working folder.",
+      "html": "<div class=\"ds-origin\"><svg viewBox=\"0 0 256 256\" aria-hidden=\"true\"><path d=\"M245,110.64A16,16,0,0,0,232,104H216V88a16,16,0,0,0-16-16H130.67L102.94,51.2a16.14,16.14,0,0,0-9.6-3.2H40A16,16,0,0,0,24,64V208h0a8,8,0,0,0,8,8H211.1a8,8,0,0,0,7.59-5.47l28.49-85.47A16.05,16.05,0,0,0,245,110.64ZM93.34,64,123.2,86.4A8,8,0,0,0,128,88h72v16H69.77a16,16,0,0,0-15.18,10.94L40,158.7V64Zm112,136H43.1l26.67-80H232Z\"/></svg><div><strong>alya-genai-brandtracker</strong><code>/Users/jp/Documents/Dev/Projet/brandtracker</code></div><button type=\"button\" aria-label=\"Copier le chemin\"><svg viewBox=\"0 0 256 256\" aria-hidden=\"true\"><path d=\"M216,32H88a8,8,0,0,0-8,8V80H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H168a8,8,0,0,0,8-8V176h40a8,8,0,0,0,8-8V40A8,8,0,0,0,216,32ZM160,208H48V96H160Zm48-48H176V88a8,8,0,0,0-8-8H96V48H208Z\"/></svg></button></div>",
+      "css": ".ds-origin { display: grid; grid-template-columns: 24px minmax(0,1fr) 30px; align-items: center; gap: 10px; padding: 11px 10px; border-radius: 7px; background: var(--accent-soft, rgba(18,169,168,0.14)); color: var(--accent-bright, #22c3bd); } .ds-origin > svg { width: 20px; height: 20px; fill: currentColor; } .ds-origin div { min-width: 0; } .ds-origin strong, .ds-origin code { display: block; overflow: hidden; text-overflow: ellipsis; } .ds-origin strong { color: var(--text, #eaf0f2); font: 700 13px/1.2 -apple-system, BlinkMacSystemFont, sans-serif; white-space: nowrap; } .ds-origin code { margin-top: 3px; color: var(--text-muted, #8fa1aa); font: 10px/1.4 SFMono-Regular, Consolas, monospace; white-space: normal; } .ds-origin button { display: grid; place-items: center; width: 30px; height: 30px; border: 1px solid var(--line-strong, #2b4049); border-radius: 6px; background: var(--surface-raised, #0d1a22); color: var(--text-muted, #8fa1aa); } .ds-origin button svg { width: 17px; height: 17px; fill: currentColor; } .ds-origin button:hover { background: var(--surface-hover, #11232c); color: var(--text, #eaf0f2); } .ds-origin button:focus-visible { outline: 2px solid var(--accent-bright, #22c3bd); outline-offset: 2px; } .ds-origin button:active { filter: brightness(0.92); }"
+    },
+    {
+      "name": "Operational Status",
+      "kind": "chip",
+      "description": "A compact semantic dot-and-label status rather than a filled badge.",
+      "html": "<span class=\"ds-status\"><i></i>Analyse terminée</span>",
+      "css": ".ds-status { display: inline-flex; align-items: center; gap: 7px; color: var(--text-muted, #8fa1aa); font: 400 11px/1.2 -apple-system, BlinkMacSystemFont, sans-serif; white-space: nowrap; } .ds-status i { width: 7px; height: 7px; border-radius: 50%; background: var(--success, #24c979); box-shadow: 0 0 0 0 rgba(36,201,121,0); transition: box-shadow 180ms cubic-bezier(0.2,0.75,0.2,1); } .ds-status:hover i { box-shadow: 0 0 0 3px rgba(36,201,121,0.14); } .ds-status:focus-visible { outline: 2px solid var(--accent-bright, #22c3bd); outline-offset: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Local Systems Workbench",
+    "overview": "Connexions locales should feel like a purpose-built instrument on a developer's desk: quiet, exact, and ready for sustained daily use. Its density is deliberate. Graphite planes suppress visual noise so relationships, live state, risk, and origin can be read in one pass without turning the interface into a generic monitoring dashboard.\n\nThe visual world is relationship-first rather than widget-first. A persistent category rail, a structured process tree, a technical inspector, and a slim status strip form one continuous operating surface. Color is rare and semantic: teal marks current focus, green indicates healthy activity, amber requests review, red communicates exposure or destruction, and lavender marks protected system state.",
+    "keyCharacteristics": [
+      "Dense, relationship-first process and port hierarchy",
+      "Full-height desktop composition with persistent controls and inspector",
+      "Dark graphite default with an accessible semantic light remap",
+      "Teal focus, green activity, amber review, red danger, and lavender protection",
+      "Native UI typography paired with tabular monospace machine data",
+      "Thin seams and tonal planes instead of decorative card stacks"
+    ],
+    "rules": [
+      { "name": "The Semantic Rarity Rule", "body": "Teal, green, amber, red, and lavender must explain state; do not use them to decorate empty space.", "section": "colors" },
+      { "name": "The Risk Is Red Rule", "body": "Red belongs to network exposure, destructive affordances, destructive confirmation, and errors—never ordinary selection or benign emphasis.", "section": "colors" },
+      { "name": "The Protection Is Lavender Rule", "body": "Lavender always means protected system state or a safety barrier; this consistent meaning makes blocked actions legible at a glance.", "section": "colors" },
+      { "name": "The Machine Data Rule", "body": "Use monospace only when exact symbols or numeric alignment improve verification; process names and explanatory prose stay in the native sans family.", "section": "typography" },
+      { "name": "The Dense but Legible Rule", "body": "Rows may be compact, but primary identity stays at 13–14px and tertiary labels never replace the main text contrast level.", "section": "typography" },
+      { "name": "The One-Frame Rule", "body": "Search, filtering, process relationships, selected-process context, available actions, and scan status must remain accessible in the first viewport.", "section": "layout" },
+      { "name": "The Relationship Rail Rule", "body": "Preserve indentation guides and aligned columns; hierarchy must be understood spatially before users read every label.", "section": "layout" },
+      { "name": "The Flat Workbench Rule", "body": "Resting application planes use tone and seams; shadows are reserved for overlays and transient surfaces that truly sit above the workbench.", "section": "elevation" },
+      { "name": "The Rows Stay Rows Rule", "body": "Do not round each process or port into a card; selection is a continuous band inside the hierarchy.", "section": "shapes" },
+      { "name": "The Radius Tracks Elevation Rule", "body": "Flat controls are compact, signature icon tiles are slightly softer, and only true overlays receive the largest corners.", "section": "shapes" }
+    ],
+    "dos": [
+      "**Do** preserve the category rail → relationship tree → technical inspector hierarchy from `design/reference-dark.png`.",
+      "**Do** make working directory, duplicate instances, activity, network scope, and protection state scannable without opening a second screen.",
+      "**Do** keep dark mode as the default and maintain equivalent semantic roles, contrast, and hierarchy in light and system modes.",
+      "**Do** use native sans typography for interface language and tabular monospace for commands, paths, PIDs, ports, addresses, and timestamps.",
+      "**Do** enforce a visible 2px teal focus outline, keyboard access, independent interior scrolling, and reduced-motion behavior.",
+      "**Do** separate destructive controls visually and require the confirmation surface before a stop request."
+    ],
+    "donts": [
+      "**Don't** flatten the application → process family → port relationship into an anonymous socket table.",
+      "**Don't** introduce floating dashboard cards, gradients, glass effects, decorative shadows, or oversized hero typography.",
+      "**Don't** use semantic accents interchangeably; teal is focus, green is activity, amber is review, red is risk/destruction, and lavender is protection.",
+      "**Don't** round every row or replace the branch structure with disconnected tiles.",
+      "**Don't** hide the working-folder origin behind secondary interaction or place stop controls before explanatory context.",
+      "**Don't** treat the browser's demonstration data as live scan output; keep the demo status explicit wherever that preview state is shown."
+    ]
+  }
+}

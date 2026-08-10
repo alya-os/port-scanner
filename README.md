@@ -1,6 +1,6 @@
-# Connexions locales
+# PortRoot
 
-Une application desktop pour comprendre quels ports sont ouverts, retrouver les projets qui les ont lancés et arrêter les processus oubliés sans toucher aux services protégés.
+**Chaque port, jusqu’à sa racine.** PortRoot est une application desktop pour comprendre quels ports sont ouverts, retrouver les projets qui les ont lancés et arrêter les processus oubliés sans toucher aux services protégés.
 
 ![Interface sombre](design/qa/implementation-dark-final.png)
 
@@ -92,4 +92,4 @@ Le bundle macOS local utilise une signature ad hoc. Une diffusion publique sans 
 - UDP ne possède pas d’état `LISTEN` universel. Le scanner exclut les endpoints UDP réseau manifestement éphémères pour éviter de présenter le trafic sortant comme un service entrant.
 - Les chemins, commandes et PIDs peuvent être masqués par le système pour des processus appartenant à un autre utilisateur.
 - L’arrêt forcé est supporté par le moteur mais n’est volontairement pas exposé dans l’interface initiale.
-- Le nom public, l’icône finale, la licence et la signature de distribution restent à décider avant une publication GitHub.
+- L’icône finale, la licence et la signature de distribution restent à décider avant une publication GitHub.

@@ -1,5 +1,5 @@
 ---
-name: Connexions locales
+name: PortRoot
 description: A dense relationship-first desktop workbench for understanding and safely managing local ports and processes.
 colors:
   graphite-canvas: "#071017"
@@ -144,13 +144,13 @@ components:
     padding: "11px 10px"
 ---
 
-# Design System: Connexions locales
+# Design System: PortRoot
 
 ## Overview
 
 **Creative North Star: "The Local Systems Workbench"**
 
-Connexions locales should feel like a purpose-built instrument on a developer's desk: quiet, exact, and ready for sustained daily use. Its density is deliberate. Graphite planes suppress visual noise so relationships, live state, risk, and origin can be read in one pass without turning the interface into a generic monitoring dashboard.
+PortRoot should feel like a purpose-built instrument on a developer's desk: quiet, exact, and ready for sustained daily use. Its density is deliberate. Graphite planes suppress visual noise so relationships, live state, risk, and origin can be read in one pass without turning the interface into a generic monitoring dashboard.
 
 The visual world is relationship-first rather than widget-first. A persistent category rail, a structured process tree, a technical inspector, and a slim status strip form one continuous operating surface. Color is rare and semantic: teal marks current focus, green indicates healthy activity, amber requests review, red communicates exposure or destruction, and lavender marks protected system state.
 

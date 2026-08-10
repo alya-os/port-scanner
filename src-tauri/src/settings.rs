@@ -1,10 +1,14 @@
-use std::{fs, path::PathBuf};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 use tauri::{AppHandle, Manager};
 
 use crate::model::{AppSettings, PortRecord, ProtectionRule};
 
 const SETTINGS_FILE: &str = "settings.json";
+const LEGACY_APP_IDENTIFIER: &str = "ca.jplefebvre.connexions-locales";
 
 pub fn default_settings() -> AppSettings {
     let mut rules = vec![
@@ -87,10 +91,32 @@ pub fn load_settings(app: &AppHandle) -> AppSettings {
         return default_settings();
     };
 
+    if let Some(settings) = read_settings(&path) {
+        return settings;
+    }
+
+    if let Some(legacy_path) = legacy_settings_path(&path) {
+        if let Some(settings) = read_settings(&legacy_path) {
+            if let Some(parent) = path.parent() {
+                let _ = fs::create_dir_all(parent);
+                let _ = fs::copy(legacy_path, path);
+            }
+            return settings;
+        }
+    }
+
+    default_settings()
+}
+
+fn read_settings(path: &Path) -> Option<AppSettings> {
     fs::read_to_string(path)
         .ok()
         .and_then(|contents| serde_json::from_str(&contents).ok())
-        .unwrap_or_else(default_settings)
+}
+
+fn legacy_settings_path(current_path: &Path) -> Option<PathBuf> {
+    let config_root = current_path.parent()?.parent()?;
+    Some(config_root.join(LEGACY_APP_IDENTIFIER).join(SETTINGS_FILE))
 }
 
 #[tauri::command]
@@ -209,6 +235,17 @@ mod tests {
 
         protected.working_directory = Some("/Users/jp/Projects/client-b/api".into());
         assert!(protection_reasons(&settings, &protected).is_empty());
+    }
+
+    #[test]
+    fn resolves_the_legacy_settings_location_next_to_portroot() {
+        let current = Path::new("/config/ca.jplefebvre.portroot/settings.json");
+        assert_eq!(
+            legacy_settings_path(current),
+            Some(PathBuf::from(
+                "/config/ca.jplefebvre.connexions-locales/settings.json"
+            ))
+        );
     }
 
     fn sample_record() -> PortRecord {

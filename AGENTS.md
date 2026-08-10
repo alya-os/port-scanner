@@ -8,6 +8,8 @@ When implementing from a selected generated mock, treat that image as the source
 
 # Product decisions
 
+- The confirmed public product name is **PortRoot**. Use `portroot` for package/repository slugs and `ca.jplefebvre.portroot` for the desktop identifier.
+- The product promise is “Every port, traced to its root.” / “Chaque port, jusqu’à sa racine.”
 - The selected source is `design/reference-dark.png`.
 - Dark mode is the default daily-use theme; light and system themes must remain available.
 - Keep the relationship-first hierarchy: working folder/application -> process family -> ports.

@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Connexions locales",
+  "productName": "PortRoot",
   "version": "0.1.0",
-  "identifier": "ca.jplefebvre.connexions-locales",
+  "identifier": "ca.jplefebvre.portroot",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Connexions locales",
+        "title": "PortRoot",
         "width": 1440,
         "height": 960,
         "minWidth": 1080,

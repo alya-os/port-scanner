@@ -1,5 +1,5 @@
 [package]
-name = "connexions-locales"
+name = "portroot"
 version = "0.1.0"
 description = "Inspect and safely manage local listening ports and their processes."
 authors = ["Jean-Philippe Lefebvre"]
@@ -11,7 +11,7 @@ rust-version = "1.77.2"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
-name = "connexions_locales_lib"
+name = "portroot_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

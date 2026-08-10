@@ -5,6 +5,8 @@ import type { ActionResult, AppSettings, KillRequest, ScanResult } from "../type
 export const isTauriRuntime = () => "__TAURI_INTERNALS__" in window;
 
 const wait = (milliseconds: number) => new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+const SETTINGS_STORAGE_KEY = "portroot-settings";
+const LEGACY_SETTINGS_STORAGE_KEY = "connexions-locales-settings";
 
 export async function scanPorts(): Promise<ScanResult> {
   if (isTauriRuntime()) return invoke<ScanResult>("scan_ports");
@@ -14,13 +16,19 @@ export async function scanPorts(): Promise<ScanResult> {
 
 export async function getSettings(): Promise<AppSettings> {
   if (isTauriRuntime()) return invoke<AppSettings>("get_settings");
-  const stored = window.localStorage.getItem("connexions-locales-settings");
-  return stored ? (JSON.parse(stored) as AppSettings) : structuredClone(mockSettings);
+  const stored = window.localStorage.getItem(SETTINGS_STORAGE_KEY);
+  const legacy = stored ? null : window.localStorage.getItem(LEGACY_SETTINGS_STORAGE_KEY);
+  if (legacy) {
+    window.localStorage.setItem(SETTINGS_STORAGE_KEY, legacy);
+    window.localStorage.removeItem(LEGACY_SETTINGS_STORAGE_KEY);
+  }
+  const serialized = stored ?? legacy;
+  return serialized ? (JSON.parse(serialized) as AppSettings) : structuredClone(mockSettings);
 }
 
 export async function saveSettings(settings: AppSettings): Promise<AppSettings> {
   if (isTauriRuntime()) return invoke<AppSettings>("save_settings", { settings });
-  window.localStorage.setItem("connexions-locales-settings", JSON.stringify(settings));
+  window.localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
   return settings;
 }
 

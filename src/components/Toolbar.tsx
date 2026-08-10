@@ -36,8 +36,8 @@ export function Toolbar({
       <div className="toolbar-title">
         <span className="title-signal" aria-hidden="true" />
         <div>
-          <strong>Connexions locales</strong>
-          <span>Ports et processus en écoute</span>
+          <strong>PortRoot</strong>
+          <span>Chaque port, jusqu’à sa racine</span>
         </div>
       </div>
       <label className="search-field">

@@ -9,7 +9,9 @@
 - Focused inspector evidence: `design/qa/comparison-inspector-final.png`
 - Annotated feedback source: `design/annotations/sidebar-controls-and-scrollbars.png`
 - Annotated feedback comparison: `design/qa/comparison-annotation-sidebar-final.png`
-- Additional states: `design/qa/implementation-light-v1.png`, `design/qa/implementation-compact-final.png`, `design/qa/implementation-sidebar-collapsed-final.png`
+- Sort-menu feedback source: `design/annotations/sort-menu-native-dark-contrast.png`
+- Sort-menu comparison: `design/qa/comparison-sort-menu-final.png`
+- Additional states: `design/qa/implementation-light-v1.png`, `design/qa/implementation-compact-final.png`, `design/qa/implementation-sidebar-collapsed-final.png`, `design/qa/implementation-sort-menu-dark-final.png`, `design/qa/implementation-sort-menu-light-final.png`
 
 ## Findings
 
@@ -69,6 +71,16 @@ Fixes:
 - 1080 × 760 compact check: body `clientWidth` = `scrollWidth` = 1080 px; toolbar `clientWidth` = `scrollWidth` = 992 px; tree `clientWidth` = `scrollWidth` = 631 px.
 - Settings opens from the new sidebar position; theme changes dark → light → dark; collapse changes expanded → collapsed → expanded.
 
+### Pass 5
+
+- Replaced the operating-system `<select>` popup, whose white surface made dark-mode options unreadable, with a PortRoot-owned listbox menu.
+- The open menu now uses the raised graphite surface, strong graphite seam, teal selected state, checkmark, focus halo, and the same compact 7 px control radius as the toolbar.
+- Dark open-state colors: menu `rgb(13, 26, 34)`, unselected option text `rgb(195, 205, 209)`, selected text `rgb(34, 195, 189)`.
+- Light open-state colors: menu `rgb(255, 255, 255)`, unselected option text `rgb(52, 74, 83)`.
+- Pointer selection, Arrow Up/Down, Home/End, Enter/Space selection, Escape dismissal with focus restoration, Tab dismissal, and outside-click dismissal are implemented.
+- Browser checks confirm Arrow Down moves focus from Évaluation to Activité, Enter selects Activité, and Escape closes the menu and restores focus to the trigger.
+- At 1080 × 760 with the menu open, body and toolbar both have equal client/scroll widths, the picker contracts to 154 px, and the menu remains inside the viewport.
+
 ## Primary Interactions Tested
 
 - Filter to Applications and return to Tous.
@@ -76,6 +88,7 @@ Fixes:
 - Toggle dark to light and back to dark.
 - Open and close Settings.
 - Collapse and expand the sidebar, including checking label visibility and gained workspace width.
+- Open the sort menu in dark and light themes; select by pointer and keyboard; dismiss with Escape.
 - Open and cancel the multi-process stop confirmation.
 - Confirm that the dialog explains backend protection revalidation.
 - Confirm that protecting Brandtracker creates a rule scoped to its full project directory, then remove the test rule.

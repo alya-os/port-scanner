@@ -63,6 +63,7 @@ Le mode navigateur utilise des données de démonstration réalistes; le scan sy
 
 ```bash
 npm run build
+npm run test:web
 cargo test --manifest-path src-tauri/Cargo.toml
 cargo run --manifest-path src-tauri/Cargo.toml --example scan_summary
 ```
@@ -73,7 +74,7 @@ cargo run --manifest-path src-tauri/Cargo.toml --example scan_summary
 npm run tauri build
 ```
 
-La configuration contient les commandes adaptées à macOS, Windows et Linux. La version actuelle a été compilée et vérifiée sur macOS; les paquets Windows et Linux doivent être validés sur leurs plateformes respectives avant publication.
+La configuration contient les commandes adaptées à macOS, Windows et Linux. La matrice GitHub Actions compile et teste les trois plateformes, puis exécute leur scanner natif. La version actuelle a été compilée et vérifiée localement sur macOS; les contrôles manuels Windows et Linux décrits dans [`CROSS_PLATFORM_TEST_PLAN.md`](CROSS_PLATFORM_TEST_PLAN.md) restent requis avant publication.
 
 Le bundle macOS local utilise une signature ad hoc. Une diffusion publique sans avertissement Gatekeeper nécessitera un certificat Developer ID et une notarisation Apple.
 

@@ -1,16 +1,22 @@
-import type { Evaluation, Scope } from "../types";
+import { localeFor, translate, type TranslationKey } from "./i18n.ts";
+import type { Evaluation, Language, Scope } from "../types";
 
-export const evaluationCopy: Record<Evaluation, { label: string; tone: string }> = {
-  protected: { label: "Protégé", tone: "protected" },
-  duplicate: { label: "Doublons possibles", tone: "warning" },
-  exposed: { label: "Exposé au réseau", tone: "danger" },
-  review: { label: "À vérifier", tone: "warning" },
-  active: { label: "Actif maintenant", tone: "success" },
-  ok: { label: "OK", tone: "success" },
+const evaluationMeta: Record<Evaluation, { label: TranslationKey; tone: string }> = {
+  protected: { label: "evaluation.protected", tone: "protected" },
+  duplicate: { label: "evaluation.duplicate", tone: "warning" },
+  exposed: { label: "evaluation.exposed", tone: "danger" },
+  review: { label: "evaluation.review", tone: "warning" },
+  active: { label: "evaluation.active", tone: "success" },
+  ok: { label: "evaluation.ok", tone: "success" },
 };
 
-export function formatDuration(totalSeconds: number | null): string {
-  if (totalSeconds === null) return "Indisponible";
+export function evaluationCopy(evaluation: Evaluation, language: Language): { label: string; tone: string } {
+  const meta = evaluationMeta[evaluation];
+  return { label: translate(language, meta.label), tone: meta.tone };
+}
+
+export function formatDuration(totalSeconds: number | null, language: Language = "fr"): string {
+  if (totalSeconds === null) return translate(language, "common.unavailable");
   if (totalSeconds < 60) return `${totalSeconds} s`;
   if (totalSeconds < 3600) return `${Math.floor(totalSeconds / 60)} min`;
   if (totalSeconds < 86_400) {
@@ -20,20 +26,20 @@ export function formatDuration(totalSeconds: number | null): string {
   }
   const days = Math.floor(totalSeconds / 86_400);
   const hours = Math.floor((totalSeconds % 86_400) / 3600);
-  return `${days} j ${hours} h`;
+  return `${days} ${language === "fr" ? "j" : "d"} ${hours} h`;
 }
 
-export function formatStartedAt(seconds: number | null): string {
-  if (!seconds) return "Indisponible";
-  return new Intl.DateTimeFormat("fr-CA", {
+export function formatStartedAt(seconds: number | null, language: Language = "fr"): string {
+  if (!seconds) return translate(language, "common.unavailable");
+  return new Intl.DateTimeFormat(localeFor(language), {
     dateStyle: "medium",
     timeStyle: "medium",
   }).format(new Date(seconds * 1000));
 }
 
-export function formatScannedAt(seconds: number | null): string {
-  if (!seconds) return "Jamais";
-  return new Intl.DateTimeFormat("fr-CA", {
+export function formatScannedAt(seconds: number | null, language: Language = "fr"): string {
+  if (!seconds) return translate(language, "common.never");
+  return new Intl.DateTimeFormat(localeFor(language), {
     day: "numeric",
     month: "short",
     hour: "2-digit",
@@ -42,18 +48,19 @@ export function formatScannedAt(seconds: number | null): string {
   }).format(new Date(seconds * 1000));
 }
 
-export function formatMemory(bytes: number): string {
-  if (!bytes) return "Indisponible";
+export function formatMemory(bytes: number, language: Language = "fr"): string {
+  if (!bytes) return translate(language, "common.unavailable");
   const megabytes = bytes / 1_000_000;
+  if (language === "en") return megabytes >= 1000 ? `${(megabytes / 1000).toFixed(1)} GB` : `${Math.round(megabytes)} MB`;
   return megabytes >= 1000 ? `${(megabytes / 1000).toFixed(1)} Go` : `${Math.round(megabytes)} Mo`;
 }
 
-export function scopeLabel(scope: Scope): string {
-  return scope === "local" ? "Local uniquement" : "Réseau local";
+export function scopeLabel(scope: Scope, language: Language = "fr"): string {
+  return translate(language, scope === "local" ? "inspector.localOnly" : "inspector.localNetwork");
 }
 
-export function shortAddress(address: string): string {
-  if (address === "0.0.0.0" || address === "::") return "Toutes";
-  if (address === "127.0.0.1" || address === "::1") return "Boucle locale";
+export function shortAddress(address: string, language: Language = "fr"): string {
+  if (address === "0.0.0.0" || address === "::") return translate(language, "common.allAddresses");
+  if (address === "127.0.0.1" || address === "::1") return translate(language, "common.loopback");
   return address;
 }

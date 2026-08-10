@@ -17,6 +17,7 @@ import {
 } from "@phosphor-icons/react";
 import { ActivityBars } from "./ActivityBars";
 import { evaluationCopy, formatDuration, shortAddress } from "../lib/format";
+import { useI18n, type Translator } from "../lib/i18n";
 import type { ProcessGroup, ProcessNode } from "../types";
 
 interface ProcessTreeProps {
@@ -28,6 +29,7 @@ interface ProcessTreeProps {
 }
 
 export function ProcessTree({ groups, selectedId, onSelect, scanning, platform }: ProcessTreeProps) {
+  const { language, t } = useI18n();
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [expandedProcesses, setExpandedProcesses] = useState<Set<string>>(new Set());
 
@@ -64,20 +66,20 @@ export function ProcessTree({ groups, selectedId, onSelect, scanning, platform }
     return (
       <section className="process-tree empty-state" aria-live="polite">
         <Network size={38} weight="duotone" />
-        <h2>Aucune connexion ne correspond</h2>
-        <p>Modifiez les filtres ou relancez l’analyse pour actualiser les processus.</p>
+        <h2>{t("tree.emptyTitle")}</h2>
+        <p>{t("tree.emptyDescription")}</p>
       </section>
     );
   }
 
   return (
-    <section className="process-tree" aria-label={`${totalVisible} familles de processus`}>
+    <section className="process-tree" aria-label={t("tree.families", { count: totalVisible })}>
       <div className="tree-columns tree-header" role="row">
-        <span>Élément</span>
-        <span>Port</span>
-        <span>Portée</span>
-        <span>Activité</span>
-        <span>Évaluation</span>
+        <span>{t("tree.element")}</span>
+        <span>{t("tree.port")}</span>
+        <span>{t("tree.scope")}</span>
+        <span>{t("tree.activity")}</span>
+        <span>{t("tree.evaluation")}</span>
       </div>
       <div className="tree-scroll">
         {groups.map((group) => {
@@ -96,12 +98,12 @@ export function ProcessTree({ groups, selectedId, onSelect, scanning, platform }
                 ) : (
                   <Folder className="group-folder-icon" size={21} weight="duotone" />
                 )}
-                <strong>{group.label}</strong>
+                <strong>{group.category === "system" ? t("tree.systemServices", { platform: platformLabel(platform) }) : group.label}</strong>
                 <span className="group-summary">
-                  {group.processes.length} processus
+                  {t(group.processes.length === 1 ? "common.processOne" : "common.processMany", { count: group.processes.length })}
                   {group.protected && (
                     <span className="protected-summary">
-                      <LockSimple size={14} weight="fill" /> Protégé
+                      <LockSimple size={14} weight="fill" /> {t("tree.protected")}
                     </span>
                   )}
                 </span>
@@ -111,7 +113,7 @@ export function ProcessTree({ groups, selectedId, onSelect, scanning, platform }
                   {group.processes.map((process) => {
                     const processOpen = expandedProcesses.has(process.id);
                     const selected = selectedId === process.id;
-                    const evaluation = evaluationCopy[process.evaluation];
+                    const evaluation = evaluationCopy(process.evaluation, language);
                     return (
                       <div className="process-branch" key={process.id}>
                         <div className={`tree-columns process-row ${selected ? "is-selected" : ""}`}>
@@ -123,7 +125,7 @@ export function ProcessTree({ groups, selectedId, onSelect, scanning, platform }
                                 event.stopPropagation();
                                 toggle(expandedProcesses, process.id, setExpandedProcesses);
                               }}
-                              aria-label={processOpen ? "Replier les ports" : "Afficher les ports"}
+                              aria-label={processOpen ? t("tree.collapsePorts") : t("tree.showPorts")}
                               aria-expanded={processOpen}
                             >
                               {processOpen ? <CaretDown size={13} /> : <CaretRight size={13} />}
@@ -134,17 +136,17 @@ export function ProcessTree({ groups, selectedId, onSelect, scanning, platform }
                                 <strong>{friendlyProcessName(process)}</strong>
                                 <small>
                                   {process.pids.length > 1
-                                    ? `${process.pids.length} instances · ${process.records.length} ports`
-                                    : `PID ${process.pids[0] ?? "masqué"}`}
+                                    ? t("tree.instancesPorts", { instances: process.pids.length, ports: process.records.length })
+                                    : `PID ${process.pids[0] ?? t("tree.hiddenPid")}`}
                                 </small>
                               </span>
                             </button>
                           </div>
                           <span className="mono">{process.records.length === 1 ? process.records[0].port : "—"}</span>
-                          <span>{scopeSummary(process)}</span>
+                          <span>{scopeSummary(process, t)}</span>
                           <span className="activity-cell">
                             <ActivityBars score={process.activityScore} />
-                            <small>{activityCopy(process)}</small>
+                            <small>{activityCopy(process, t)}</small>
                           </span>
                           <span className={`evaluation evaluation-${evaluation.tone}`}>
                             {process.protected && <LockSimple size={14} weight="fill" />}
@@ -166,14 +168,14 @@ export function ProcessTree({ groups, selectedId, onSelect, scanning, platform }
                                   {record.pid && <small>PID {record.pid}</small>}
                                 </span>
                                 <span className="mono">{record.port}</span>
-                                <span title={record.localAddress}>{shortAddress(record.localAddress)}</span>
+                                <span title={record.localAddress}>{shortAddress(record.localAddress, language)}</span>
                                 <span className="activity-cell">
                                   <ActivityBars score={Math.max(1, Math.min(5, Math.ceil(record.cpuUsage + record.activeConnections)))} />
-                                  <small>{formatDuration(record.uptimeSeconds)}</small>
+                                  <small>{formatDuration(record.uptimeSeconds, language)}</small>
                                 </span>
                                 <span className={`port-scope scope-${record.scope}`}>
                                   <i aria-hidden="true" />
-                                  {record.scope === "local" ? "Local" : "Exposé"}
+                                  {record.scope === "local" ? t("common.local") : t("common.exposed")}
                                 </span>
                               </button>
                             ))}
@@ -213,27 +215,35 @@ function friendlyProcessName(process: ProcessNode): string {
   return `${process.name} · ${process.identification}`;
 }
 
-function scopeSummary(process: ProcessNode): string {
+function scopeSummary(process: ProcessNode, t: Translator): string {
   const scopes = new Set(process.records.map((record) => record.scope));
-  if (scopes.size > 1) return "Mixte";
-  return scopes.has("network") ? "Réseau" : "Local";
+  if (scopes.size > 1) return t("common.mixed");
+  return scopes.has("network") ? t("common.network") : t("common.local");
 }
 
-function activityCopy(process: ProcessNode): string {
-  if (process.activeConnections > 0) return `${process.activeConnections} connexion${process.activeConnections > 1 ? "s" : ""}`;
-  if (process.uptimeSeconds && process.uptimeSeconds < 3600) return "Récent";
+function activityCopy(process: ProcessNode, t: Translator): string {
+  if (process.activeConnections > 0) return t(process.activeConnections === 1 ? "common.connectionOne" : "common.connectionMany", { count: process.activeConnections });
+  if (process.uptimeSeconds && process.uptimeSeconds < 3600) return t("common.recent");
   return `${process.cpuUsage.toFixed(1)} % CPU`;
 }
 
 function TreeSkeleton() {
+  const { t } = useI18n();
   return (
-    <section className="process-tree" aria-label="Analyse en cours" aria-busy="true">
+    <section className="process-tree" aria-label={t("tree.scanning")} aria-busy="true">
       <div className="tree-columns tree-header">
-        <span>Élément</span><span>Port</span><span>Portée</span><span>Activité</span><span>Évaluation</span>
+        <span>{t("tree.element")}</span><span>{t("tree.port")}</span><span>{t("tree.scope")}</span><span>{t("tree.activity")}</span><span>{t("tree.evaluation")}</span>
       </div>
       <div className="skeleton-list">
         {[0, 1, 2, 3, 4, 5, 6].map((item) => <span key={item} />)}
       </div>
     </section>
   );
+}
+
+function platformLabel(platform: string): string {
+  if (platform === "macos") return "macOS";
+  if (platform === "windows") return "Windows";
+  if (platform === "linux") return "Linux";
+  return platform || "System";
 }

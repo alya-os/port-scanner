@@ -11,7 +11,8 @@
 - Annotated feedback comparison: `design/qa/comparison-annotation-sidebar-final.png`
 - Sort-menu feedback source: `design/annotations/sort-menu-native-dark-contrast.png`
 - Sort-menu comparison: `design/qa/comparison-sort-menu-final.png`
-- Additional states: `design/qa/implementation-light-v1.png`, `design/qa/implementation-compact-final.png`, `design/qa/implementation-sidebar-collapsed-final.png`, `design/qa/implementation-sort-menu-dark-final.png`, `design/qa/implementation-sort-menu-light-final.png`
+- Language comparison: `design/qa/comparison-settings-language-final.png`
+- Additional states: `design/qa/implementation-light-v1.png`, `design/qa/implementation-compact-final.png`, `design/qa/implementation-sidebar-collapsed-final.png`, `design/qa/implementation-sort-menu-dark-final.png`, `design/qa/implementation-sort-menu-light-final.png`, `design/qa/implementation-french-final.png`, `design/qa/implementation-english-final.png`
 
 ## Findings
 
@@ -81,6 +82,15 @@ Fixes:
 - Browser checks confirm Arrow Down moves focus from Évaluation to Activité, Enter selects Activité, and Escape closes the menu and restores focus to the trigger.
 - At 1080 × 760 with the menu open, body and toolbar both have equal client/scroll widths, the picker contracts to 154 px, and the menu remains inside the viewport.
 
+### Pass 6
+
+- Added a persistent Français / English interface-language setting. French remains the migration-safe default for existing installations.
+- Changing the draft language updates the Settings dialog immediately; saving applies the selected language to navigation, toolbar, process tree, inspector, status bar, confirmations, notifications, dates, durations, memory units, accessibility labels, and built-in protection-rule labels.
+- Browser flow passed: Réglages → English → Save switches the full app and sets `<html lang="en">`; reloading preserves English. Settings → Français → Enregistrer restores the full app and `<html lang="fr">`; reloading preserves French.
+- English singular grammar is verified (`1 process`), while technical names, project paths, commands, PIDs, and custom rule labels remain unchanged.
+- At the measured 1094 × 998 viewport, body and toolbar client/scroll widths remain equal in English. The Settings dialog keeps its footer actions visible and scrolls only its content region.
+- Browser console: zero warnings and zero errors.
+
 ## Primary Interactions Tested
 
 - Filter to Applications and return to Tous.
@@ -89,6 +99,7 @@ Fixes:
 - Open and close Settings.
 - Collapse and expand the sidebar, including checking label visibility and gained workspace width.
 - Open the sort menu in dark and light themes; select by pointer and keyboard; dismiss with Escape.
+- Switch Settings from French to English and back, save each language, reload, and verify full-interface persistence.
 - Open and cancel the multi-process stop confirmation.
 - Confirm that the dialog explains backend protection revalidation.
 - Confirm that protecting Brandtracker creates a rule scoped to its full project directory, then remove the test rule.

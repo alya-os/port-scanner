@@ -17,6 +17,7 @@ import {
   scanPorts,
 } from "./lib/api";
 import { buildProcessTree } from "./lib/processTree";
+import { createTranslator, I18nProvider, localizeRuleLabel, translate } from "./lib/i18n";
 import type {
   AppSettings,
   NavFilter,
@@ -46,6 +47,7 @@ export function App() {
   const [stopTarget, setStopTarget] = useState<ProcessNode | null>(null);
   const [stopping, setStopping] = useState(false);
   const [toast, setToast] = useState<ToastState | null>(null);
+  const t = createTranslator(settings.language);
 
   const notify = useCallback((type: ToastState["type"], message: string) => {
     setToast({ type, message });
@@ -75,13 +77,14 @@ export function App() {
   useEffect(() => {
     document.documentElement.dataset.theme = resolvedTheme;
     document.documentElement.style.colorScheme = resolvedTheme;
-  }, [resolvedTheme]);
+    document.documentElement.lang = settings.language;
+  }, [resolvedTheme, settings.language]);
 
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        document.querySelector<HTMLInputElement>("[aria-label='Rechercher']")?.focus();
+        document.querySelector<HTMLInputElement>(".search-field input")?.focus();
       }
       if (event.key === "Escape") {
         if (stopTarget && !stopping) setStopTarget(null);
@@ -97,8 +100,8 @@ export function App() {
     [scan?.records, settings],
   );
   const groups = useMemo(
-    () => buildProcessTree(records, filter, query, sort),
-    [filter, query, records, sort],
+    () => buildProcessTree(records, filter, query, sort, settings.language),
+    [filter, query, records, settings.language, sort],
   );
   const processes = useMemo(() => groups.flatMap((group) => group.processes), [groups]);
   const selected = processes.find((process) => process.id === selectedId) ?? processes[0] ?? null;
@@ -111,7 +114,7 @@ export function App() {
     try {
       const saved = await saveSettings(nextSettings);
       setSettings(saved);
-      notify("success", "Réglages enregistrés.");
+      notify("success", translate(saved.language, "toast.settingsSaved"));
     } catch (error) {
       notify("error", String(error));
       throw error;
@@ -125,8 +128,8 @@ export function App() {
 
   const handleReveal = async (path: string) => {
     try {
-      const result = await revealFolder(path);
-      notify("success", result.message);
+      await revealFolder(path);
+      notify("success", t("toast.folderOpened", { path }));
     } catch (error) {
       notify("error", String(error));
     }
@@ -134,8 +137,8 @@ export function App() {
 
   const handleTerminal = async (path: string) => {
     try {
-      const result = await openTerminal(path);
-      notify("success", result.message);
+      await openTerminal(path);
+      notify("success", t("toast.terminalOpened", { path }));
     } catch (error) {
       notify("error", String(error));
     }
@@ -146,7 +149,7 @@ export function App() {
     const path = process.workingDirectory ?? process.processPath;
     const rule = {
       id: `custom-${path ? "path" : "process"}-${Date.now()}`,
-      label: path ? `Projet · ${process.identification}` : process.identification,
+      label: path ? t("toast.projectRule", { name: process.identification }) : process.identification,
       kind: path ? ("path" as const) : ("process" as const),
       value: path ?? process.name,
       enabled: true,
@@ -174,7 +177,7 @@ export function App() {
     setStopping(false);
     setStopTarget(null);
     if (failures.length) notify("error", failures.join(" · "));
-    else notify("success", `${stoppedPids.length} processus arrêté(s).`);
+    else notify("success", t(stoppedPids.length === 1 ? "toast.processStoppedOne" : "toast.processStoppedMany", { count: stoppedPids.length }));
 
     if (isTauriRuntime()) {
       window.setTimeout(() => void runScan(), 500);
@@ -191,7 +194,8 @@ export function App() {
   const protectedCount = records.filter((record) => record.protected).length;
 
   return (
-    <main className={`app-shell ${sidebarCollapsed ? "is-sidebar-collapsed" : ""}`}>
+    <I18nProvider language={settings.language}>
+      <main className={`app-shell ${sidebarCollapsed ? "is-sidebar-collapsed" : ""}`}>
       <Sidebar
         active={filter}
         onChange={setFilter}
@@ -235,10 +239,11 @@ export function App() {
         <div className={`toast toast-${toast.type}`} role="status">
           {toast.type === "success" ? <Check size={18} weight="bold" /> : <Warning size={18} weight="fill" />}
           <span>{toast.message}</span>
-          <button type="button" onClick={() => setToast(null)} aria-label="Fermer la notification"><X size={16} /></button>
+          <button type="button" onClick={() => setToast(null)} aria-label={t("toast.close")}><X size={16} /></button>
         </div>
       )}
-    </main>
+      </main>
+    </I18nProvider>
   );
 }
 
@@ -248,10 +253,11 @@ function resolveTheme(theme: ThemeMode): "dark" | "light" {
 }
 
 function applyProtectionSettings(records: PortRecord[], settings: AppSettings): PortRecord[] {
+  const t = createTranslator(settings.language);
   return records.map((record) => {
     const reasons: string[] = [];
-    if (settings.protectSystemProcesses && record.category === "system") reasons.push("Service du système protégé par défaut");
-    if (record.pid === 1) reasons.push("Processus principal du système");
+    if (settings.protectSystemProcesses && record.category === "system") reasons.push(t("protection.systemDefault"));
+    if (record.pid === 1) reasons.push(t("protection.systemMain"));
     for (const rule of settings.rules.filter((candidate) => candidate.enabled)) {
       const matches =
         (rule.kind === "port" && Number(rule.value) === record.port) ||
@@ -259,7 +265,7 @@ function applyProtectionSettings(records: PortRecord[], settings: AppSettings): 
         (rule.kind === "path" && [record.processPath, record.workingDirectory]
           .filter((path): path is string => Boolean(path))
           .some((path) => path.toLocaleLowerCase().startsWith(rule.value.toLocaleLowerCase())));
-      if (matches) reasons.push(rule.label);
+      if (matches) reasons.push(localizeRuleLabel(rule, settings.language));
     }
     return { ...record, protected: reasons.length > 0, protectionReasons: [...new Set(reasons)] };
   });

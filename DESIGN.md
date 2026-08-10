@@ -233,6 +233,8 @@ Light mode is a semantic remap, not a separate visual identity. Preserve the sam
 
 **The Dense but Legible Rule.** Rows may be compact, but primary identity stays at 13–14px and tertiary labels never replace the main text contrast level.
 
+PortRoot supports French and English as complete interface languages. French is the default, while translated layouts must preserve the same hierarchy, density, truncation behavior, technical formatting, and semantic color roles. Project names, commands, paths, PIDs, ports, and user-authored protection labels are never translated.
+
 ## Layout
 
 The desktop shell is a fixed, full-height grid: a 102px category rail, a flexible center work area, and a 430px inspector; a 78px toolbar spans the two work columns and a 48px status strip anchors the bottom. The rail can collapse to 64px from its top control, keeping category icons and counts visible while returning space to the relationship tree. Theme and settings utilities stay anchored at the bottom of the rail in both states. The tree is the flexible center of gravity. It uses five aligned columns for element, port, scope, activity, and evaluation, with indentation lines making group → process → port ancestry visible.

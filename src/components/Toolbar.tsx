@@ -6,13 +6,14 @@ import {
   MagnifyingGlass,
   SlidersHorizontal,
 } from "@phosphor-icons/react";
+import { useI18n, type TranslationKey } from "../lib/i18n";
 import type { SortMode } from "../types";
 
-const sortOptions: Array<{ value: SortMode; label: string }> = [
-  { value: "evaluation", label: "Évaluation" },
-  { value: "activity", label: "Activité" },
-  { value: "age", label: "Ancienneté" },
-  { value: "port", label: "Port" },
+const sortOptions: Array<{ value: SortMode; label: TranslationKey }> = [
+  { value: "evaluation", label: "sort.evaluation" },
+  { value: "activity", label: "sort.activity" },
+  { value: "age", label: "sort.age" },
+  { value: "port", label: "sort.port" },
 ];
 
 interface ToolbarProps {
@@ -32,6 +33,7 @@ export function Toolbar({
   onScan,
   scanning,
 }: ToolbarProps) {
+  const { t } = useI18n();
   const [sortOpen, setSortOpen] = useState(false);
   const sortRootRef = useRef<HTMLDivElement>(null);
   const sortButtonRef = useRef<HTMLButtonElement>(null);
@@ -105,7 +107,7 @@ export function Toolbar({
         <span className="title-signal" aria-hidden="true" />
         <div>
           <strong>PortRoot</strong>
-          <span>Chaque port, jusqu’à sa racine</span>
+          <span>{t("app.tagline")}</span>
         </div>
       </div>
       <label className="search-field">
@@ -113,8 +115,8 @@ export function Toolbar({
         <input
           value={query}
           onChange={(event) => onQueryChange(event.target.value)}
-          placeholder="Rechercher un dossier, processus, port, PID…"
-          aria-label="Rechercher"
+          placeholder={t("toolbar.searchPlaceholder")}
+          aria-label={t("toolbar.search")}
         />
         <kbd>⌘K</kbd>
       </label>
@@ -129,12 +131,12 @@ export function Toolbar({
           aria-controls="sort-options"
         >
           <SlidersHorizontal size={18} />
-          <span className="sort-prefix">Trier</span>
-          <span className="sort-value">{selectedSort.label}</span>
+          <span className="sort-prefix">{t("toolbar.sort")}</span>
+          <span className="sort-value">{t(selectedSort.label)}</span>
           <CaretDown className="sort-caret" size={15} weight="bold" />
         </button>
         {sortOpen && (
-          <div className="sort-menu" id="sort-options" role="listbox" aria-label="Trier les processus">
+          <div className="sort-menu" id="sort-options" role="listbox" aria-label={t("toolbar.sortAria")}>
             {sortOptions.map((option, index) => {
               const selected = option.value === sort;
               return (
@@ -147,7 +149,7 @@ export function Toolbar({
                   aria-selected={selected}
                   onClick={() => selectSort(option.value)}
                 >
-                  <span>{option.label}</span>
+                  <span>{t(option.label)}</span>
                   {selected && <Check size={16} weight="bold" />}
                 </button>
               );
@@ -158,7 +160,7 @@ export function Toolbar({
       <div className="toolbar-actions">
         <button className="primary-button" type="button" onClick={onScan} disabled={scanning}>
           <ArrowClockwise className={scanning ? "is-spinning" : ""} size={19} weight="bold" />
-          {scanning ? "Analyse…" : "Analyser"}
+          {scanning ? t("toolbar.scanning") : t("toolbar.analyze")}
         </button>
       </div>
     </header>

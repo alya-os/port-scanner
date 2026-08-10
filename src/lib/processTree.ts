@@ -1,12 +1,15 @@
-import type { Evaluation, NavFilter, PortRecord, ProcessGroup, ProcessNode, SortMode } from "../types";
+import { localeFor, translate } from "./i18n.ts";
+import type { Evaluation, Language, NavFilter, PortRecord, ProcessGroup, ProcessNode, SortMode } from "../types";
 
 export function buildProcessTree(
   records: PortRecord[],
   filter: NavFilter,
   query: string,
   sort: SortMode,
+  language: Language = "fr",
 ): ProcessGroup[] {
-  const normalizedQuery = query.trim().toLocaleLowerCase("fr");
+  const locale = localeFor(language);
+  const normalizedQuery = query.trim().toLocaleLowerCase(locale);
   const visibleRecords = records.filter((record) => {
     const matchesFilter =
       filter === "all" ||
@@ -26,7 +29,7 @@ export function buildProcessTree(
       record.localAddress,
     ]
       .filter(Boolean)
-      .some((value) => String(value).toLocaleLowerCase("fr").includes(normalizedQuery));
+      .some((value) => String(value).toLocaleLowerCase(locale).includes(normalizedQuery));
   });
 
   const processMap = new Map<string, PortRecord[]>();
@@ -39,7 +42,7 @@ export function buildProcessTree(
 
   const groupMap = new Map<string, ProcessNode[]>();
   for (const [id, processRecords] of processMap) {
-    const process = toProcessNode(id, processRecords);
+    const process = toProcessNode(id, processRecords, language);
     const groupId = `${process.category}::${process.groupName}`;
     const processes = groupMap.get(groupId) ?? [];
     processes.push(process);
@@ -48,7 +51,7 @@ export function buildProcessTree(
 
   const groups = [...groupMap.entries()].map(([id, processes]) => ({
     id,
-    label: processes[0]?.groupName ?? "Sans dossier",
+    label: processes[0]?.groupName ?? translate(language, "tree.noFolder"),
     category: processes[0]?.category ?? "other",
     processes: sortProcesses(processes, sort),
     protected: processes.every((process) => process.protected),
@@ -57,7 +60,7 @@ export function buildProcessTree(
   return groups.sort((left, right) => {
     if (left.category === "system" && right.category !== "system") return 1;
     if (right.category === "system" && left.category !== "system") return -1;
-    return left.label.localeCompare(right.label, "fr", { sensitivity: "base" });
+    return left.label.localeCompare(right.label, locale, { sensitivity: "base" });
   });
 }
 
@@ -72,7 +75,7 @@ export function processIdentityKey(record: PortRecord): string {
   ].join("::");
 }
 
-function toProcessNode(id: string, records: PortRecord[]): ProcessNode {
+function toProcessNode(id: string, records: PortRecord[], language: Language): ProcessNode {
   const pids = [...new Set(records.flatMap((record) => (record.pid ? [record.pid] : [])))];
   const duplicate = pids.length > 1;
   const protectedProcess = records.every((record) => record.protected);
@@ -83,9 +86,9 @@ function toProcessNode(id: string, records: PortRecord[]): ProcessNode {
 
   return {
     id,
-    name: records[0]?.processName ?? "Processus inconnu",
-    identification: records[0]?.identification ?? "Inconnu",
-    groupName: records[0]?.groupName ?? "Sans dossier",
+    name: records[0]?.processName ?? translate(language, "tree.unknownProcess"),
+    identification: records[0]?.identification ?? translate(language, "tree.unknown"),
+    groupName: records[0]?.groupName ?? translate(language, "tree.noFolder"),
     category: records[0]?.category ?? "other",
     records: [...records].sort((left, right) => left.port - right.port),
     pids,

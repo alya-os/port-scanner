@@ -12,6 +12,7 @@ import {
   WindowsLogo,
   type Icon,
 } from "@phosphor-icons/react";
+import { useI18n, type TranslationKey, type Translator } from "../lib/i18n";
 import type { NavFilter, PortRecord } from "../types";
 
 interface SidebarProps {
@@ -26,12 +27,12 @@ interface SidebarProps {
   onOpenSettings: () => void;
 }
 
-const navItems: Array<{ id: NavFilter; label: string; icon: Icon }> = [
-  { id: "all", label: "Tous", icon: SquaresFour },
-  { id: "application", label: "Applications", icon: Desktop },
-  { id: "system", label: "macOS", icon: AppleLogo },
-  { id: "other", label: "Autres", icon: PuzzlePiece },
-  { id: "protected", label: "Protégés", icon: LockSimple },
+const navItems: Array<{ id: NavFilter; label: TranslationKey; icon: Icon }> = [
+  { id: "all", label: "sidebar.all", icon: SquaresFour },
+  { id: "application", label: "sidebar.applications", icon: Desktop },
+  { id: "system", label: "sidebar.system", icon: AppleLogo },
+  { id: "other", label: "sidebar.other", icon: PuzzlePiece },
+  { id: "protected", label: "sidebar.protected", icon: LockSimple },
 ];
 
 export function Sidebar({
@@ -45,6 +46,7 @@ export function Sidebar({
   onToggleTheme,
   onOpenSettings,
 }: SidebarProps) {
+  const { t } = useI18n();
   const SystemIcon = platform === "macos" ? AppleLogo : platform === "windows" ? WindowsLogo : LinuxLogo;
   const processCount = (filter: NavFilter) => {
     const selected = records.filter((record) => {
@@ -56,22 +58,22 @@ export function Sidebar({
   };
 
   return (
-    <aside className="sidebar" aria-label="Navigation principale">
+    <aside className="sidebar" aria-label={t("sidebar.navigation")}>
       <button
         className="sidebar-collapse-button"
         type="button"
         onClick={onToggleCollapsed}
-        aria-label={collapsed ? "Déployer la barre latérale" : "Réduire la barre latérale"}
+        aria-label={collapsed ? t("sidebar.expand") : t("sidebar.collapse")}
         aria-expanded={!collapsed}
         aria-controls="primary-navigation"
-        title={collapsed ? "Déployer la barre latérale" : "Réduire la barre latérale"}
+        title={collapsed ? t("sidebar.expand") : t("sidebar.collapse")}
       >
         <SidebarSimple size={22} weight="regular" />
       </button>
       <nav className="sidebar-nav" id="primary-navigation">
         {navItems.map((item) => {
           const IconComponent = item.id === "system" ? SystemIcon : item.icon;
-          const label = item.id === "system" ? systemLabel(platform) : item.label;
+          const label = item.id === "system" ? systemLabel(platform, t) : t(item.label);
           return (
             <button
               key={item.id}
@@ -91,13 +93,13 @@ export function Sidebar({
         })}
       </nav>
       <div className="sidebar-footer">
-        <div className="sidebar-utilities" aria-label="Affichage et réglages">
+        <div className="sidebar-utilities" aria-label={t("sidebar.utilities")}>
           <button
             className="sidebar-utility-button"
             type="button"
             onClick={onToggleTheme}
-            aria-label={theme === "dark" ? "Passer au thème clair" : "Passer au thème sombre"}
-            title={theme === "dark" ? "Thème clair" : "Thème sombre"}
+            aria-label={theme === "dark" ? t("sidebar.switchLight") : t("sidebar.switchDark")}
+            title={theme === "dark" ? t("sidebar.lightTheme") : t("sidebar.darkTheme")}
           >
             {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
           </button>
@@ -105,8 +107,8 @@ export function Sidebar({
             className="sidebar-utility-button"
             type="button"
             onClick={onOpenSettings}
-            aria-label="Ouvrir les réglages"
-            title="Réglages"
+            aria-label={t("sidebar.openSettings")}
+            title={t("sidebar.settings")}
           >
             <GearSix size={21} />
           </button>
@@ -117,9 +119,9 @@ export function Sidebar({
   );
 }
 
-function systemLabel(platform: string): string {
+function systemLabel(platform: string, t: Translator): string {
   if (platform === "macos") return "macOS";
   if (platform === "windows") return "Windows";
   if (platform === "linux") return "Linux";
-  return "Système";
+  return t("sidebar.system");
 }

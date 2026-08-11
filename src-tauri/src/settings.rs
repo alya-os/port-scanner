@@ -222,10 +222,9 @@ mod tests {
 
     #[test]
     fn old_settings_without_language_default_to_french() {
-        let settings: AppSettings = serde_json::from_str(
-            r#"{"theme":"dark","protectSystemProcesses":true,"rules":[]}"#,
-        )
-        .expect("legacy settings should deserialize");
+        let settings: AppSettings =
+            serde_json::from_str(r#"{"theme":"dark","protectSystemProcesses":true,"rules":[]}"#)
+                .expect("legacy settings should deserialize");
         assert_eq!(settings.language, "fr");
     }
 
@@ -277,6 +276,7 @@ mod tests {
             working_directory: Some("/tmp".into()),
             group_name: "tmp".into(),
             identification: "example".into(),
+            docker_container_id: None,
             category: "other".into(),
             started_at: None,
             uptime_seconds: None,

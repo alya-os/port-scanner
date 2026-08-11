@@ -4,8 +4,9 @@ use sysinfo::{Pid, Signal, System};
 use tauri::AppHandle;
 
 use crate::{
-    model::{ActionResult, KillRequest, PortRecord},
-    scanner::{current_ports_for_pid, detect_category},
+    docker,
+    model::{ActionResult, AppSettings, DockerStopRequest, KillRequest, PortRecord},
+    scanner::{current_ports_for_pid, detect_category, scan_with_settings},
     settings::{load_settings, protection_reasons},
 };
 
@@ -133,6 +134,53 @@ pub fn kill_process(app: AppHandle, request: KillRequest) -> Result<ActionResult
     }
 }
 
+#[tauri::command]
+pub fn stop_docker_container(
+    app: AppHandle,
+    request: DockerStopRequest,
+) -> Result<ActionResult, String> {
+    let settings = load_settings(&app);
+    stop_docker_container_with_settings(&settings, request)
+}
+
+fn stop_docker_container_with_settings(
+    settings: &AppSettings,
+    request: DockerStopRequest,
+) -> Result<ActionResult, String> {
+    let scan = scan_with_settings(settings)?;
+    let matching_records = scan
+        .records
+        .iter()
+        .filter(|record| record.docker_container_id.as_deref() == Some(&request.container_id))
+        .collect::<Vec<_>>();
+
+    if matching_records.is_empty() {
+        return Err(
+            "Ce conteneur Docker n’expose plus les ports analysés. Relancez l’analyse.".into(),
+        );
+    }
+
+    let mut reasons = matching_records
+        .iter()
+        .flat_map(|record| record.protection_reasons.iter().cloned())
+        .collect::<Vec<_>>();
+    reasons.sort();
+    reasons.dedup();
+    if !reasons.is_empty() {
+        return Err(format!("Conteneur protégé : {}", reasons.join(" · ")));
+    }
+
+    let stopped = docker::stop_container(&request.container_id, request.force)?;
+    Ok(ActionResult {
+        success: true,
+        message: format!(
+            "Conteneur Docker {} arrêté ({}).",
+            stopped.name,
+            &stopped.container_id[..12]
+        ),
+    })
+}
+
 fn guard_record(
     pid: u32,
     name: &str,
@@ -154,6 +202,7 @@ fn guard_record(
         working_directory: working_directory.map(str::to_string),
         group_name: name.into(),
         identification: name.into(),
+        docker_container_id: None,
         category: detect_category(name, path),
         started_at: None,
         uptime_seconds: None,
@@ -243,5 +292,23 @@ mod tests {
         };
 
         assert_eq!(protection_reasons(&settings, &record), vec!["Projet A"]);
+    }
+
+    #[test]
+    #[ignore = "requires PORTROOT_DOCKER_TEST_CONTAINER_ID and a live Docker daemon"]
+    fn stops_the_exact_configured_docker_container() {
+        let container_id = std::env::var("PORTROOT_DOCKER_TEST_CONTAINER_ID")
+            .expect("PORTROOT_DOCKER_TEST_CONTAINER_ID must be set");
+        let result = stop_docker_container_with_settings(
+            &crate::settings::default_settings(),
+            DockerStopRequest {
+                container_id,
+                force: false,
+            },
+        )
+        .expect("the selected Docker container should stop");
+
+        assert!(result.success);
+        assert!(result.message.contains("arrêté"));
     }
 }

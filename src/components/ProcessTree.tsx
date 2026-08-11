@@ -135,7 +135,9 @@ export function ProcessTree({ groups, selectedId, onSelect, scanning, platform }
                               <span>
                                 <strong>{friendlyProcessName(process)}</strong>
                                 <small>
-                                  {process.pids.length > 1
+                                  {process.dockerContainerId
+                                    ? t("tree.containerShort", { id: process.dockerContainerId.slice(0, 12) })
+                                    : process.pids.length > 1
                                     ? t("tree.instancesPorts", { instances: process.pids.length, ports: process.records.length })
                                     : `PID ${process.pids[0] ?? t("tree.hiddenPid")}`}
                                 </small>
@@ -165,7 +167,9 @@ export function ProcessTree({ groups, selectedId, onSelect, scanning, platform }
                                 <span className="port-name-cell">
                                   <GlobeHemisphereWest size={17} />
                                   <span>{record.protocol}</span>
-                                  {record.pid && <small>PID {record.pid}</small>}
+                                  {record.dockerContainerId
+                                    ? <small>{t("tree.containerShort", { id: record.dockerContainerId.slice(0, 12) })}</small>
+                                    : record.pid && <small>PID {record.pid}</small>}
                                 </span>
                                 <span className="mono">{record.port}</span>
                                 <span title={record.localAddress}>{shortAddress(record.localAddress, language)}</span>
@@ -211,6 +215,7 @@ function SystemIcon({ platform, className, size }: { platform: string; className
 }
 
 function friendlyProcessName(process: ProcessNode): string {
+  if (process.dockerContainerId) return process.identification;
   if (process.identification === process.name) return process.name;
   return `${process.name} · ${process.identification}`;
 }

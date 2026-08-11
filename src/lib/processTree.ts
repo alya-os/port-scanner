@@ -70,6 +70,7 @@ export function processIdentityKey(record: PortRecord): string {
     record.groupName,
     record.processName,
     record.identification,
+    record.dockerContainerId ?? "<conteneur-inconnu>",
     record.processPath ?? "<executable-inconnu>",
     record.workingDirectory ?? "<dossier-inconnu>",
   ].join("::");
@@ -95,6 +96,7 @@ function toProcessNode(id: string, records: PortRecord[], language: Language): P
     workingDirectory: firstValue(records.map((record) => record.workingDirectory)),
     processPath: firstValue(records.map((record) => record.processPath)),
     command: firstValue(records.map((record) => record.command)),
+    dockerContainerId: firstValue(records.map((record) => record.dockerContainerId)),
     evaluation: evaluate(records, duplicate, protectedProcess, exposed),
     protected: protectedProcess,
     duplicate,

@@ -2,7 +2,6 @@ use std::{
     collections::{HashMap, HashSet},
     net::IpAddr,
     path::Path,
-    process::Command,
     time::{SystemTime, UNIX_EPOCH},
 };
 
@@ -11,15 +10,10 @@ use sysinfo::{ProcessesToUpdate, System, MINIMUM_CPU_UPDATE_INTERVAL};
 use tauri::AppHandle;
 
 use crate::{
+    docker::{published_port_map, DockerPort},
     model::{AppSettings, PortRecord, ScanResult},
     settings::{load_settings, protection_reasons},
 };
-
-#[derive(Debug, Clone)]
-struct DockerPort {
-    name: String,
-    image: String,
-}
 
 pub fn scan(app: &AppHandle) -> Result<ScanResult, String> {
     let settings = load_settings(app);
@@ -36,7 +30,7 @@ pub fn scan_with_settings(settings: &AppSettings) -> Result<ScanResult, String> 
     std::thread::sleep(MINIMUM_CPU_UPDATE_INTERVAL);
     system.refresh_processes(ProcessesToUpdate::All, true);
 
-    let docker_ports = docker_port_map();
+    let docker_ports = published_port_map();
     let mut active_connections: HashMap<u32, u32> = HashMap::new();
 
     for socket in &sockets {
@@ -141,6 +135,7 @@ pub fn scan_with_settings(settings: &AppSettings) -> Result<ScanResult, String> 
                 working_directory,
                 group_name,
                 identification,
+                docker_container_id: docker.map(|container| container.container_id.clone()),
                 category,
                 started_at: process.map(|value| value.start_time()),
                 uptime_seconds: process.map(|value| value.run_time()),
@@ -265,45 +260,6 @@ fn derive_group_name(
         .and_then(last_component)
         .or_else(|| process_path.and_then(app_name))
         .unwrap_or_else(|| process_name.into())
-}
-
-fn docker_port_map() -> HashMap<u16, DockerPort> {
-    let Ok(output) = Command::new("docker")
-        .args(["ps", "--format", "{{.Names}}\t{{.Image}}\t{{.Ports}}"])
-        .output()
-    else {
-        return HashMap::new();
-    };
-    if !output.status.success() {
-        return HashMap::new();
-    }
-
-    let mut map = HashMap::new();
-    for line in String::from_utf8_lossy(&output.stdout).lines() {
-        let mut fields = line.splitn(3, '\t');
-        let Some(name) = fields.next() else { continue };
-        let image = fields.next().unwrap_or_default();
-        let ports = fields.next().unwrap_or_default();
-
-        for mapping in ports.split(',').map(str::trim) {
-            let Some((host, _container)) = mapping.split_once("->") else {
-                continue;
-            };
-            let Some(port_text) = host.rsplit(':').next() else {
-                continue;
-            };
-            if let Ok(port) = port_text.parse::<u16>() {
-                map.insert(
-                    port,
-                    DockerPort {
-                        name: name.into(),
-                        image: image.into(),
-                    },
-                );
-            }
-        }
-    }
-    map
 }
 
 fn path_string(path: &Path) -> String {

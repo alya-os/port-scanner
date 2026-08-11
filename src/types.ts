@@ -19,6 +19,7 @@ export interface PortRecord {
   workingDirectory: string | null;
   groupName: string;
   identification: string;
+  dockerContainerId: string | null;
   category: Category;
   startedAt: number | null;
   uptimeSeconds: number | null;
@@ -64,6 +65,11 @@ export interface KillRequest {
   force: boolean;
 }
 
+export interface DockerStopRequest {
+  containerId: string;
+  force: boolean;
+}
+
 export type Evaluation = "protected" | "duplicate" | "exposed" | "review" | "active" | "ok";
 
 export interface ProcessNode {
@@ -77,6 +83,7 @@ export interface ProcessNode {
   workingDirectory: string | null;
   processPath: string | null;
   command: string | null;
+  dockerContainerId: string | null;
   evaluation: Evaluation;
   protected: boolean;
   duplicate: boolean;

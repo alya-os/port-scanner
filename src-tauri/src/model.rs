@@ -16,6 +16,7 @@ pub struct PortRecord {
     pub working_directory: Option<String>,
     pub group_name: String,
     pub identification: String,
+    pub docker_container_id: Option<String>,
     pub category: String,
     pub started_at: Option<u64>,
     pub uptime_seconds: Option<u64>,
@@ -73,5 +74,12 @@ pub struct ActionResult {
 pub struct KillRequest {
     pub pid: u32,
     pub expected_start_time: Option<u64>,
+    pub force: bool,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DockerStopRequest {
+    pub container_id: String,
     pub force: bool,
 }

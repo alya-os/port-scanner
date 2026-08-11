@@ -27,9 +27,10 @@ interface InspectorProps {
   onTerminal: (path: string) => void;
   onProtect: (process: ProcessNode) => void;
   onRequestStop: (process: ProcessNode) => void;
+  canStop: boolean;
 }
 
-export function Inspector({ process, platform, onReveal, onTerminal, onProtect, onRequestStop }: InspectorProps) {
+export function Inspector({ process, platform, onReveal, onTerminal, onProtect, onRequestStop, canStop }: InspectorProps) {
   const [copied, setCopied] = useState<string | null>(null);
   const { language, t } = useI18n();
 
@@ -46,6 +47,7 @@ export function Inspector({ process, platform, onReveal, onTerminal, onProtect, 
   const evaluation = evaluationCopy(process.evaluation, language);
   const path = process.workingDirectory;
   const primary = process.records[0];
+  const isDocker = Boolean(process.dockerContainerId);
   const startedAt = Math.min(...process.records.flatMap((record) => (record.startedAt ? [record.startedAt] : [])));
   const protectionReasons = [...new Set(process.records.flatMap((record) => record.protectionReasons))];
 
@@ -87,7 +89,12 @@ export function Inspector({ process, platform, onReveal, onTerminal, onProtect, 
         </section>
 
         <section className="detail-list" aria-label={t("inspector.metadata")}>
-          <Detail label="PID" value={process.pids.length ? process.pids.join(", ") : t("common.hiddenBySystem")} mono />
+          {isDocker && process.dockerContainerId ? (
+            <Detail label={t("inspector.containerId")} value={process.dockerContainerId.slice(0, 12)} mono />
+          ) : (
+            <Detail label="PID" value={process.pids.length ? process.pids.join(", ") : t("common.hiddenBySystem")} mono />
+          )}
+          {isDocker && <Detail label={t("inspector.hostProcessPid")} value={process.pids.length ? process.pids.join(", ") : t("common.hiddenBySystem")} mono />}
           <Detail label={t("inspector.parentPid")} value={primary?.parentPid?.toString() ?? t("common.unavailable")} mono />
           <Detail label={t("inspector.startedAt")} value={Number.isFinite(startedAt) ? formatStartedAt(startedAt, language) : t("common.unavailable")} />
           <Detail label={t("inspector.uptime")} value={formatDuration(process.uptimeSeconds, language)} />
@@ -146,17 +153,32 @@ export function Inspector({ process, platform, onReveal, onTerminal, onProtect, 
           {process.protected ? <ShieldCheck size={19} /> : <ShieldPlus size={19} />}
           {process.protected ? t("inspector.alreadyProtected") : t("inspector.addProtection")}
         </button>
-        <div className={`stop-zone ${process.protected ? "is-disabled" : ""}`}>
+        <div className={`stop-zone ${process.protected || !canStop ? "is-disabled" : ""}`}>
           <div>
             <Warning size={19} />
             <span>
-              <strong>{t("inspector.stopTitle")}</strong>
-              <small>{t(process.records.length === 1 ? "inspector.stopDescriptionOne" : "inspector.stopDescriptionMany", { count: process.records.length })}</small>
+              <strong>{t(isDocker ? "inspector.stopContainerTitle" : "inspector.stopTitle")}</strong>
+              <small>
+                {!canStop
+                  ? t("inspector.desktopRequired")
+                  : t(
+                    isDocker
+                      ? process.records.length === 1 ? "inspector.stopContainerDescriptionOne" : "inspector.stopContainerDescriptionMany"
+                      : process.records.length === 1 ? "inspector.stopDescriptionOne" : "inspector.stopDescriptionMany",
+                    { count: process.records.length },
+                  )}
+              </small>
             </span>
           </div>
-          <button type="button" onClick={() => onRequestStop(process)} disabled={process.protected || process.pids.length === 0}>
+          <button type="button" onClick={() => onRequestStop(process)} disabled={!canStop || process.protected || (!isDocker && process.pids.length === 0)}>
             {process.protected ? <LockSimple size={18} /> : <Stop size={18} weight="fill" />}
-            {process.protected ? t("inspector.stopBlocked") : process.pids.length > 1 ? t("inspector.stopProcesses", { count: process.pids.length }) : t("inspector.stop")}
+            {!canStop
+              ? t("inspector.desktopApp")
+              : process.protected
+                ? t("inspector.stopBlocked")
+                : isDocker
+                  ? t("inspector.stopContainer")
+                  : process.pids.length > 1 ? t("inspector.stopProcesses", { count: process.pids.length }) : t("inspector.stop")}
           </button>
         </div>
       </div>

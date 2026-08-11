@@ -7,6 +7,7 @@ La matrice GitHub Actions compile l’interface et le moteur natif, exécute les
 - regroupement de processus distinguant les projets homonymes par chemin complet;
 - règles de protection par port, processus, exécutable et dossier de travail;
 - compilation des commandes natives d’ouverture, terminal et arrêt;
+- séparation des conteneurs Docker qui partagent le même PID de moteur;
 - scan système réel via `scan_summary`;
 - compilation Tauri complète sans création d’installateur.
 
@@ -17,8 +18,9 @@ La matrice GitHub Actions compile l’interface et le moteur natif, exécute les
 3. Ouvrir un terminal et vérifier son répertoire de départ.
 4. Ajouter la protection du projet, vérifier que l’arrêt est bloqué, puis retirer la règle.
 5. Arrêter un processus de test non protégé et vérifier que son port disparaît au scan suivant.
-6. Vérifier que les ports 22 et 53, le PID 1 et les services système restent non arrêtables.
-7. Tester les modes sombre, clair et système, ainsi que la navigation complète au clavier.
+6. Arrêter un conteneur Docker de test et vérifier que seul son ID est arrêté, sans affecter les autres conteneurs ni le moteur Docker.
+7. Vérifier que les ports 22 et 53, le PID 1 et les services système restent non arrêtables.
+8. Tester les modes sombre, clair et système, ainsi que la navigation complète au clavier.
 
 ## État actuel
 

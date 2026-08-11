@@ -15,6 +15,7 @@ import {
   revealFolder,
   saveSettings,
   scanPorts,
+  stopDockerContainer,
 } from "./lib/api";
 import { buildProcessTree } from "./lib/processTree";
 import { createTranslator, I18nProvider, localizeRuleLabel, translate } from "./lib/i18n";
@@ -163,30 +164,35 @@ export function App() {
     setStopping(true);
     const failures: string[] = [];
     const stoppedPids: number[] = [];
+    let stoppedContainer: string | null = null;
 
-    for (const pid of stopTarget.pids) {
-      const matchingRecord = stopTarget.records.find((record) => record.pid === pid);
+    if (stopTarget.dockerContainerId) {
       try {
-        await killProcess({ pid, expectedStartTime: matchingRecord?.startedAt ?? null, force: false });
-        stoppedPids.push(pid);
+        await stopDockerContainer({ containerId: stopTarget.dockerContainerId, force: false });
+        stoppedContainer = stopTarget.identification;
       } catch (error) {
-        failures.push(`PID ${pid} : ${String(error)}`);
+        failures.push(String(error));
+      }
+    } else {
+      for (const pid of stopTarget.pids) {
+        const matchingRecord = stopTarget.records.find((record) => record.pid === pid);
+        try {
+          await killProcess({ pid, expectedStartTime: matchingRecord?.startedAt ?? null, force: false });
+          stoppedPids.push(pid);
+        } catch (error) {
+          failures.push(`PID ${pid} : ${String(error)}`);
+        }
       }
     }
 
     setStopping(false);
     setStopTarget(null);
     if (failures.length) notify("error", failures.join(" · "));
+    else if (stoppedContainer) notify("success", t("toast.containerStopped", { name: stoppedContainer }));
     else notify("success", t(stoppedPids.length === 1 ? "toast.processStoppedOne" : "toast.processStoppedMany", { count: stoppedPids.length }));
 
     if (isTauriRuntime()) {
       window.setTimeout(() => void runScan(), 500);
-    } else if (stoppedPids.length) {
-      setScan((current) =>
-        current
-          ? { ...current, records: current.records.filter((record) => !record.pid || !stoppedPids.includes(record.pid)) }
-          : current,
-      );
     }
   };
 
@@ -223,6 +229,7 @@ export function App() {
         onTerminal={(path) => void handleTerminal(path)}
         onProtect={(process) => void handleProtect(process)}
         onRequestStop={setStopTarget}
+        canStop={!previewMode}
       />
       <StatusBar
         scannedAt={scan?.scannedAt ?? null}

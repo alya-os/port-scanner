@@ -39,6 +39,7 @@ The product explains open ports through the developer's actual project hierarchy
 - Detect likely duplicate process families that share an executable and working directory.
 - Open the working folder and start a terminal in that folder.
 - Stop one or several selected process instances only after confirmation.
+- Stop the exact selected Docker container by container ID instead of treating Docker Desktop's shared backend PID as the target.
 - Enforce protection rules in the Rust backend as well as the interface.
 - Ship editable protection rules for processes, paths, and ports, with system services protected by default.
 - Default to dark mode, with light and system modes available.

@@ -14,6 +14,7 @@ export function KillDialog({ process, stopping, onCancel, onConfirm }: KillDialo
   const { t } = useI18n();
   const dialogRef = useDialogFocus<HTMLElement>(Boolean(process));
   if (!process) return null;
+  const isDocker = Boolean(process.dockerContainerId);
   return (
     <div className="dialog-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && !stopping && onCancel()}>
       <section ref={dialogRef} className="kill-dialog" role="alertdialog" aria-modal="true" aria-labelledby="kill-title" aria-describedby="kill-description" tabIndex={-1}>
@@ -21,23 +22,38 @@ export function KillDialog({ process, stopping, onCancel, onConfirm }: KillDialo
         <div className="kill-icon"><Warning size={26} weight="duotone" /></div>
         <h2 id="kill-title">{t("kill.title", { name: process.identification })}</h2>
         <p id="kill-description">
-          {t("kill.description", {
-            processes: process.pids.length,
-            processLabel: t(process.pids.length === 1 ? "unit.process" : "unit.processes"),
-            ports: process.records.length,
-            portLabel: t(process.records.length === 1 ? "unit.port" : "unit.ports"),
-          })}
+          {isDocker
+            ? t("kill.containerDescription", {
+              name: process.identification,
+              ports: process.records.length,
+              portLabel: t(process.records.length === 1 ? "unit.port" : "unit.ports"),
+            })
+            : t("kill.description", {
+              processes: process.pids.length,
+              processLabel: t(process.pids.length === 1 ? "unit.process" : "unit.processes"),
+              ports: process.records.length,
+              portLabel: t(process.records.length === 1 ? "unit.port" : "unit.ports"),
+            })}
         </p>
         <div className="kill-summary">
-          <span><strong>PID</strong><code>{process.pids.join(", ")}</code></span>
+          {isDocker ? (
+            <>
+              <span><strong>{t("kill.container")}</strong><code>{process.identification}</code></span>
+              <span><strong>{t("kill.containerId")}</strong><code>{process.dockerContainerId?.slice(0, 12)}</code></span>
+            </>
+          ) : (
+            <span><strong>PID</strong><code>{process.pids.join(", ")}</code></span>
+          )}
           <span><strong>Ports</strong><code>{process.records.map((record) => record.port).join(", ")}</code></span>
-          <span><strong>{t("kill.folder")}</strong><code>{process.workingDirectory ?? t("common.unavailable")}</code></span>
+          {!isDocker && <span><strong>{t("kill.folder")}</strong><code>{process.workingDirectory ?? t("common.unavailable")}</code></span>}
         </div>
         <div className="kill-safety"><LockSimple size={17} /> {t("kill.safety")}</div>
         <footer>
           <button className="secondary-button" type="button" onClick={onCancel} disabled={stopping} data-initial-focus>{t("kill.cancel")}</button>
           <button className="danger-button" type="button" onClick={onConfirm} disabled={stopping}>
-            <Stop size={18} weight="fill" /> {stopping ? t("kill.stopping") : t("kill.confirm")}
+            <Stop size={18} weight="fill" /> {stopping
+              ? t("kill.stopping")
+              : t(isDocker ? "kill.confirmContainer" : process.pids.length === 1 ? "kill.confirmProcess" : "kill.confirmProcesses")}
           </button>
         </footer>
       </section>

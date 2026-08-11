@@ -1,6 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { mockScan, mockSettings } from "../data/mock";
-import type { ActionResult, AppSettings, KillRequest, ScanResult } from "../types";
+import type { ActionResult, AppSettings, DockerStopRequest, KillRequest, ScanResult } from "../types";
 
 export const isTauriRuntime = () => "__TAURI_INTERNALS__" in window;
 
@@ -57,5 +57,11 @@ export async function openTerminal(path: string): Promise<ActionResult> {
 export async function killProcess(request: KillRequest): Promise<ActionResult> {
   if (isTauriRuntime()) return invoke<ActionResult>("kill_process", { request });
   await wait(260);
-  return { success: true, message: `Demande d’arrêt simulée pour le PID ${request.pid}.` };
+  throw new Error("L’arrêt réel nécessite l’application de bureau PortRoot.");
+}
+
+export async function stopDockerContainer(request: DockerStopRequest): Promise<ActionResult> {
+  if (isTauriRuntime()) return invoke<ActionResult>("stop_docker_container", { request });
+  await wait(260);
+  throw new Error("L’arrêt réel nécessite l’application de bureau PortRoot.");
 }

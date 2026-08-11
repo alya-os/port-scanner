@@ -11,22 +11,25 @@
 - Portée claire : boucle locale ou toutes les interfaces réseau.
 - Métadonnées : exécutable, commande, dossier de travail, parent, démarrage, durée, CPU, mémoire et connexions actives.
 - Détection des familles de processus dupliquées dans un même projet.
-- Identification des ports publiés par les conteneurs Docker actifs.
+- Identification des ports publiés par les conteneurs Docker actifs, avec leur nom et leur ID exact.
 - Recherche, catégories, tri, arborescence repliable et inspecteur détaillé.
 - Ouverture du dossier dans le gestionnaire de fichiers ou dans un terminal natif.
 - Arrêt gracieux d’un ou plusieurs processus avec confirmation et vérification anti-réutilisation de PID.
+- Arrêt ciblé d’un conteneur Docker avec `docker stop`, sans envoyer de signal au moteur partagé de Docker Desktop.
 - Protections persistantes par système, port, nom de processus ou préfixe de chemin.
 - Thèmes sombre, clair et système.
 
 ## Sécurité
 
-L’interface n’est pas la barrière de sécurité. Avant chaque arrêt, le moteur Rust :
+L’interface n’est pas la barrière de sécurité. Avant chaque arrêt de processus, le moteur Rust :
 
 1. vérifie que le PID existe encore;
 2. compare son heure de démarrage pour détecter une réutilisation du PID;
 3. relit les ports actuellement détenus;
 4. applique de nouveau toutes les règles de protection;
 5. bloque toujours le PID 1 et les services système protégés.
+
+Pour un conteneur Docker, PortRoot transporte l’ID Docker exact depuis l’analyse, relit les ports et protections associés, vérifie à nouveau l’identité avec Docker, exécute `docker stop`, puis confirme que le conteneur n’est plus actif. Le PID commun de `com.docker.backend` n’est jamais utilisé comme cible du conteneur.
 
 L’application n’exige pas `sudo`. Selon les permissions de la plateforme, certains propriétaires de sockets peuvent rester masqués; ce cas est signalé dans l’interface.
 
@@ -57,7 +60,7 @@ Pour vérifier séparément l’interface :
 npm run dev -- --port 4173 --strictPort
 ```
 
-Le mode navigateur utilise des données de démonstration réalistes; le scan système réel est activé dans la fenêtre Tauri.
+Le mode navigateur utilise des données de démonstration réalistes et désactive les actions d’arrêt réelles. Le scan système et les arrêts sont activés uniquement dans la fenêtre Tauri.
 
 ## Vérification
 

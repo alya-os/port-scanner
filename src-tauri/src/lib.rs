@@ -1,4 +1,5 @@
 mod actions;
+mod docker;
 pub mod model;
 pub mod scanner;
 pub mod settings;
@@ -33,6 +34,7 @@ pub fn run() {
             actions::reveal_folder,
             actions::open_terminal,
             actions::kill_process,
+            actions::stop_docker_container,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

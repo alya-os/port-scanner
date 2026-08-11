@@ -113,7 +113,6 @@ export function Sidebar({
             <GearSix size={21} />
           </button>
         </div>
-        <div className="sidebar-platform">{platform === "macos" ? "macOS" : platform || "Local"}</div>
       </div>
     </aside>
   );

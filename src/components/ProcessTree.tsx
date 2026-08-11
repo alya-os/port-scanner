@@ -74,14 +74,14 @@ export function ProcessTree({ groups, selectedId, onSelect, scanning, platform }
 
   return (
     <section className="process-tree" aria-label={t("tree.families", { count: totalVisible })}>
-      <div className="tree-columns tree-header" role="row">
-        <span>{t("tree.element")}</span>
-        <span>{t("tree.port")}</span>
-        <span>{t("tree.scope")}</span>
-        <span>{t("tree.activity")}</span>
-        <span>{t("tree.evaluation")}</span>
-      </div>
       <div className="tree-scroll">
+        <div className="tree-columns tree-header" role="row">
+          <span>{t("tree.element")}</span>
+          <span>{t("tree.port")}</span>
+          <span>{t("tree.scope")}</span>
+          <span>{t("tree.activity")}</span>
+          <span>{t("tree.evaluation")}</span>
+        </div>
         {groups.map((group) => {
           const groupOpen = expandedGroups.has(group.id);
           return (
@@ -236,11 +236,13 @@ function TreeSkeleton() {
   const { t } = useI18n();
   return (
     <section className="process-tree" aria-label={t("tree.scanning")} aria-busy="true">
-      <div className="tree-columns tree-header">
-        <span>{t("tree.element")}</span><span>{t("tree.port")}</span><span>{t("tree.scope")}</span><span>{t("tree.activity")}</span><span>{t("tree.evaluation")}</span>
-      </div>
-      <div className="skeleton-list">
-        {[0, 1, 2, 3, 4, 5, 6].map((item) => <span key={item} />)}
+      <div className="tree-scroll">
+        <div className="tree-columns tree-header">
+          <span>{t("tree.element")}</span><span>{t("tree.port")}</span><span>{t("tree.scope")}</span><span>{t("tree.activity")}</span><span>{t("tree.evaluation")}</span>
+        </div>
+        <div className="skeleton-list">
+          {[0, 1, 2, 3, 4, 5, 6].map((item) => <span key={item} />)}
+        </div>
       </div>
     </section>
   );

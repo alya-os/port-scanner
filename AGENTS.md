@@ -15,6 +15,7 @@ When implementing from a selected generated mock, treat that image as the source
 - Keep the relationship-first hierarchy: working folder/application -> process family -> ports.
 - The left navigation must use the selected icon language for Tous, Applications, macOS/System, Autres, and Proteges.
 - Keep the sidebar collapsible from its top control, with theme and settings utilities anchored at the bottom.
+- Do not repeat the platform name below the sidebar utilities; platform identity belongs to the system navigation item only.
 - Scrollbars should use PortRoot's quiet graphite track/thumb treatment with teal interaction states.
 - Avoid native select popovers for themed controls; use PortRoot-styled menus so every option remains legible in dark and light modes.
 - French is the default interface language; users can persistently switch the full application between French and English from Settings.

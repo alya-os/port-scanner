@@ -157,6 +157,28 @@ test("sorts process columns in both directions", () => {
   assert.deepEqual(identities("evaluation", "descending"), ["Bravo", "Alpha", "Charlie"]);
 });
 
+test("sorts top-level project groups from the Item column", () => {
+  const records = [
+    record({ id: "charlie", groupName: "Charlie", identification: "Charlie worker", workingDirectory: "/projects/charlie" }),
+    record({ id: "alpha", groupName: "Alpha", identification: "Alpha worker", workingDirectory: "/projects/alpha" }),
+    record({ id: "bravo", groupName: "Bravo", identification: "Bravo worker", workingDirectory: "/projects/bravo" }),
+    record({
+      id: "system",
+      groupName: "System services",
+      identification: "System worker",
+      workingDirectory: "/System/Library",
+      category: "system",
+      protected: true,
+    }),
+  ];
+  const groupLabels = (sort, direction) => buildProcessTree(records, "all", "", sort, "en", direction)
+    .map((group) => group.label);
+
+  assert.deepEqual(groupLabels("name", "ascending"), ["Alpha", "Bravo", "Charlie", "System services"]);
+  assert.deepEqual(groupLabels("name", "descending"), ["Charlie", "Bravo", "Alpha", "System services"]);
+  assert.deepEqual(groupLabels("port", "descending"), ["Alpha", "Bravo", "Charlie", "System services"]);
+});
+
 test("uses natural default directions for every sortable column", () => {
   assert.equal(defaultSortDirection("name"), "ascending");
   assert.equal(defaultSortDirection("port"), "ascending");

@@ -72,7 +72,8 @@ export function buildProcessTree(
   return groups.sort((left, right) => {
     if (left.category === "system" && right.category !== "system") return 1;
     if (right.category === "system" && left.category !== "system") return -1;
-    return left.label.localeCompare(right.label, locale, { sensitivity: "base" });
+    const comparison = left.label.localeCompare(right.label, locale, { sensitivity: "base" });
+    return sort === "name" ? applyDirection(comparison, direction) : comparison;
   });
 }
 

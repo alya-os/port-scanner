@@ -19,6 +19,7 @@ When implementing from a selected generated mock, treat that image as the source
 - Scrollbars should use PortRoot's quiet graphite track/thumb treatment with teal interaction states.
 - Avoid native select popovers for themed controls; use PortRoot-styled menus so every option remains legible in dark and light modes.
 - Sorting belongs directly to the five process-tree column headers; do not add a separate toolbar sort control.
+- Sorting the Item column must reorder the top-level project/folder groups in the chosen direction, while system-service groups remain pinned at the bottom.
 - Refreshing preserves the workbench geometry: the scan button keeps a fixed footprint and current results stay in place beneath a localized loading state until replacement data is ready.
 - English is the default interface language; a user's explicit French or English choice from Settings must persist across launches.
 - Make the working directory, duplicate processes, process activity, scope, and protection state easy to scan.

@@ -13,6 +13,7 @@ import {
   LockSimple,
   LinuxLogo,
   Network,
+  SpinnerGap,
   TerminalWindow,
   WindowsLogo,
 } from "@phosphor-icons/react";
@@ -86,8 +87,12 @@ export function ProcessTree({
   }
 
   return (
-    <section className="process-tree" aria-label={t("tree.families", { count: totalVisible })}>
-      <div className="tree-scroll">
+    <section
+      className="process-tree"
+      aria-label={t("tree.families", { count: totalVisible })}
+      aria-busy={scanning}
+    >
+      <div className="tree-scroll" inert={scanning ? true : undefined}>
         <div className="tree-columns tree-header" role="row">
           <SortableHeader label={t("tree.element")} mode="name" activeSort={sort} direction={sortDirection} onSort={onSortChange} />
           <SortableHeader label={t("tree.port")} mode="port" activeSort={sort} direction={sortDirection} onSort={onSortChange} />
@@ -207,6 +212,14 @@ export function ProcessTree({
           );
         })}
       </div>
+      {scanning && (
+        <div className="tree-refresh-overlay">
+          <div className="tree-refresh-status" role="status" aria-live="polite">
+            <SpinnerGap className="is-spinning" size={20} weight="bold" aria-hidden="true" />
+            <span>{t("tree.refreshing")}</span>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

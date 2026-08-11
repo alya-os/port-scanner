@@ -39,6 +39,7 @@
   --protected: #b477ff;
   --protected-soft: rgba(180, 119, 255, 0.1);
   --overlay: rgba(1, 7, 10, 0.72);
+  --scan-scrim: rgba(7, 16, 23, 0.78);
   --shadow: 0 18px 48px rgba(0, 0, 0, 0.36);
   --scrollbar-thumb: #35505a;
   --scrollbar-thumb-hover: #12a9a8;
@@ -70,6 +71,7 @@
   --protected: #7c3fc1;
   --protected-soft: rgba(124, 63, 193, 0.08);
   --overlay: rgba(17, 29, 34, 0.38);
+  --scan-scrim: rgba(251, 252, 252, 0.82);
   --shadow: 0 18px 48px rgba(34, 49, 55, 0.18);
   --scrollbar-thumb: #a9babc;
   --scrollbar-thumb-hover: #087f80;
@@ -454,6 +456,19 @@ code {
   color: var(--accent-ink);
 }
 
+.scan-button {
+  flex: 0 0 144px;
+  width: 144px;
+  padding-inline: 14px;
+}
+
+.scan-button span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .primary-button:hover:not(:disabled) {
   background: var(--accent-bright);
   transform: translateY(-1px);
@@ -492,6 +507,7 @@ code {
 /* Process tree */
 
 .process-tree {
+  position: relative;
   grid-column: 2;
   grid-row: 2;
   display: flex;
@@ -570,6 +586,38 @@ code {
   overflow: auto;
   overscroll-behavior: contain;
   --local-scrollbar-track: var(--surface);
+}
+
+.tree-refresh-overlay {
+  position: absolute;
+  z-index: 6;
+  top: 48px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  background: var(--scan-scrim);
+  cursor: wait;
+}
+
+.tree-refresh-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow);
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.tree-refresh-status svg {
+  color: var(--accent-bright);
 }
 
 .tree-group {

@@ -36,9 +36,15 @@ export function Toolbar({
         <kbd>⌘K</kbd>
       </label>
       <div className="toolbar-actions">
-        <button className="primary-button" type="button" onClick={onScan} disabled={scanning}>
+        <button
+          className="primary-button scan-button"
+          type="button"
+          onClick={onScan}
+          disabled={scanning}
+          aria-busy={scanning}
+        >
           <ArrowClockwise className={scanning ? "is-spinning" : ""} size={19} weight="bold" />
-          {scanning ? t("toolbar.scanning") : t("toolbar.analyze")}
+          <span>{scanning ? t("toolbar.scanning") : t("toolbar.analyze")}</span>
         </button>
       </div>
     </header>

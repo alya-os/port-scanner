@@ -35,6 +35,8 @@ interface ToastState {
   message: string;
 }
 
+const MINIMUM_SCAN_FEEDBACK_MS = 450;
+
 export function App() {
   const previewMode = !isTauriRuntime();
   const [scan, setScan] = useState<ScanResult | null>(null);
@@ -58,9 +60,14 @@ export function App() {
   }, []);
 
   const runScan = useCallback(async () => {
+    const startedAt = performance.now();
     setScanning(true);
     try {
       const result = await scanPorts();
+      const remainingFeedbackTime = MINIMUM_SCAN_FEEDBACK_MS - (performance.now() - startedAt);
+      if (remainingFeedbackTime > 0) {
+        await new Promise((resolve) => window.setTimeout(resolve, remainingFeedbackTime));
+      }
       setScan(result);
     } catch (error) {
       notify("error", String(error));

@@ -5,6 +5,7 @@ export type Scope = "local" | "network";
 export type NavFilter = "all" | Category | "protected";
 export type SortMode = "name" | "port" | "scope" | "activity" | "evaluation";
 export type SortDirection = "ascending" | "descending";
+export type StopMode = "all" | "duplicates";
 
 export interface PortRecord {
   id: string;

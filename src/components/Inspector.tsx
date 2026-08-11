@@ -21,7 +21,8 @@ import {
 import { useState } from "react";
 import { evaluationCopy, formatDuration, formatMemory, formatStartedAt, scopeLabel } from "../lib/format";
 import { useI18n, type TranslationKey, type Translator } from "../lib/i18n";
-import type { DuplicateConfidence, DuplicateEvidence, ProcessNode } from "../types";
+import { getProcessInstances } from "../lib/processActions";
+import type { DuplicateConfidence, DuplicateEvidence, ProcessNode, StopMode } from "../types";
 
 interface InspectorProps {
   process: ProcessNode | null;
@@ -29,7 +30,7 @@ interface InspectorProps {
   onReveal: (path: string) => void;
   onTerminal: (path: string) => void;
   onProtect: (process: ProcessNode) => void;
-  onRequestStop: (process: ProcessNode) => void;
+  onRequestStop: (process: ProcessNode, mode: StopMode) => void;
   canStop: boolean;
 }
 
@@ -53,6 +54,12 @@ export function Inspector({ process, platform, onReveal, onTerminal, onProtect, 
   const path = process.workingDirectory;
   const primary = process.records[0];
   const isDocker = Boolean(process.dockerContainerId);
+  const instances = getProcessInstances(process);
+  const protectedInstanceCount = instances.filter((instance) => instance.protected).length;
+  const confirmedDuplicates = !isDocker
+    && process.duplicateAssessment.confidence === "confirmed"
+    && process.pids.length > 1;
+  const canCleanDuplicates = protectedInstanceCount <= 1;
   const startedAt = Math.min(...process.records.flatMap((record) => (record.startedAt ? [record.startedAt] : [])));
   const protectionReasons = [...new Set(process.records.flatMap((record) => record.protectionReasons))];
 
@@ -162,13 +169,17 @@ export function Inspector({ process, platform, onReveal, onTerminal, onProtect, 
           {process.protected ? t("inspector.alreadyProtected") : t("inspector.addProtection")}
         </button>
         <div className={`stop-zone ${process.protected || !canStop ? "is-disabled" : ""}`}>
-          <div>
+          <div className="stop-zone-heading">
             <Warning size={19} />
             <span>
-              <strong>{t(isDocker ? "inspector.stopContainerTitle" : "inspector.stopTitle")}</strong>
+              <strong>{t(confirmedDuplicates ? "inspector.stopDuplicatesTitle" : isDocker ? "inspector.stopContainerTitle" : "inspector.stopTitle")}</strong>
               <small>
                 {!canStop
                   ? t("inspector.desktopRequired")
+                  : confirmedDuplicates
+                    ? protectedInstanceCount > 1
+                      ? t("inspector.duplicateProtectionConflict")
+                      : t("inspector.stopDuplicatesDescription", { count: process.pids.length })
                   : t(
                     isDocker
                       ? process.records.length === 1 ? "inspector.stopContainerDescriptionOne" : "inspector.stopContainerDescriptionMany"
@@ -178,16 +189,40 @@ export function Inspector({ process, platform, onReveal, onTerminal, onProtect, 
               </small>
             </span>
           </div>
-          <button type="button" onClick={() => onRequestStop(process)} disabled={!canStop || process.protected || (!isDocker && process.pids.length === 0)}>
-            {process.protected ? <LockSimple size={18} /> : <Stop size={18} weight="fill" />}
-            {!canStop
-              ? t("inspector.desktopApp")
-              : process.protected
-                ? t("inspector.stopBlocked")
-                : isDocker
-                  ? t("inspector.stopContainer")
-                  : process.pids.length > 1 ? t("inspector.stopProcesses", { count: process.pids.length }) : t("inspector.stop")}
-          </button>
+          <div className={`stop-action-buttons ${confirmedDuplicates ? "has-duplicates" : ""}`}>
+            {confirmedDuplicates && (
+              <button
+                className="stop-duplicates-button"
+                type="button"
+                onClick={() => onRequestStop(process, "duplicates")}
+                disabled={!canStop || process.protected || !canCleanDuplicates}
+              >
+                {process.protected || !canCleanDuplicates ? <LockSimple size={18} /> : <StackSimple size={18} weight="duotone" />}
+                {process.protected || !canCleanDuplicates
+                  ? t("inspector.stopBlocked")
+                  : t("inspector.stopDuplicates", { count: process.pids.length - 1 })}
+              </button>
+            )}
+            <button
+              className={confirmedDuplicates ? "stop-all-button" : ""}
+              type="button"
+              onClick={() => onRequestStop(process, "all")}
+              disabled={!canStop || process.protected || protectedInstanceCount > 0 || (!isDocker && process.pids.length === 0)}
+            >
+              {process.protected || protectedInstanceCount > 0 ? <LockSimple size={18} /> : <Stop size={18} weight="fill" />}
+              {confirmedDuplicates
+                ? process.protected || protectedInstanceCount > 0
+                  ? t("inspector.stopBlocked")
+                  : t("inspector.stopAll", { count: process.pids.length })
+                : !canStop
+                  ? t("inspector.desktopApp")
+                  : process.protected || protectedInstanceCount > 0
+                    ? t("inspector.stopBlocked")
+                    : isDocker
+                      ? t("inspector.stopContainer")
+                      : process.pids.length > 1 ? t("inspector.stopProcesses", { count: process.pids.length }) : t("inspector.stop")}
+            </button>
+          </div>
         </div>
       </div>
     </aside>

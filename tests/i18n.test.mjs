@@ -10,6 +10,8 @@ test("translates interface copy and interpolated values", () => {
   assert.equal(translate("en", "common.processOne", { count: 1 }), "1 process");
   assert.equal(translate("en", "evaluation.duplicateConfirmed", { count: 4 }), "4 duplicates");
   assert.equal(translate("fr", "evaluation.duplicatePossible", { count: 2 }), "2 similaires");
+  assert.equal(translate("en", "inspector.stopDuplicates", { count: 3 }), "Stop 3 duplicates");
+  assert.equal(translate("fr", "kill.confirmDuplicates", { count: 3 }), "Arrêter 3 doublons");
 });
 
 test("localizes built-in protection labels without changing custom labels", () => {

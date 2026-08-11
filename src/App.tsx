@@ -27,12 +27,18 @@ import type {
   ScanResult,
   SortDirection,
   SortMode,
+  StopMode,
   ThemeMode,
 } from "./types";
 
 interface ToastState {
   type: "success" | "error";
   message: string;
+}
+
+interface StopTarget {
+  process: ProcessNode;
+  mode: StopMode;
 }
 
 const MINIMUM_SCAN_FEEDBACK_MS = 450;
@@ -49,7 +55,7 @@ export function App() {
   const [scanning, setScanning] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [stopTarget, setStopTarget] = useState<ProcessNode | null>(null);
+  const [stopTarget, setStopTarget] = useState<StopTarget | null>(null);
   const [stopping, setStopping] = useState(false);
   const [toast, setToast] = useState<ToastState | null>(null);
   const t = createTranslator(settings.language);
@@ -177,23 +183,33 @@ export function App() {
     await persistSettings({ ...settings, rules: [...settings.rules, rule] });
   };
 
-  const confirmStop = async () => {
+  const confirmStop = async (keepPid: number | null) => {
     if (!stopTarget) return;
+    const targetProcess = stopTarget.process;
+    const pidsToStop = stopTarget.mode === "duplicates"
+      ? targetProcess.pids.filter((pid) => pid !== keepPid)
+      : targetProcess.pids;
+
+    if (stopTarget.mode === "duplicates" && (!keepPid || !targetProcess.pids.includes(keepPid))) {
+      notify("error", t("kill.keepSelectionRequired"));
+      return;
+    }
+
     setStopping(true);
     const failures: string[] = [];
     const stoppedPids: number[] = [];
     let stoppedContainer: string | null = null;
 
-    if (stopTarget.dockerContainerId) {
+    if (targetProcess.dockerContainerId) {
       try {
-        await stopDockerContainer({ containerId: stopTarget.dockerContainerId, force: false });
-        stoppedContainer = stopTarget.identification;
+        await stopDockerContainer({ containerId: targetProcess.dockerContainerId, force: false });
+        stoppedContainer = targetProcess.identification;
       } catch (error) {
         failures.push(String(error));
       }
     } else {
-      for (const pid of stopTarget.pids) {
-        const matchingRecord = stopTarget.records.find((record) => record.pid === pid);
+      for (const pid of pidsToStop) {
+        const matchingRecord = targetProcess.records.find((record) => record.pid === pid);
         try {
           await killProcess({ pid, expectedStartTime: matchingRecord?.startedAt ?? null, force: false });
           stoppedPids.push(pid);
@@ -207,6 +223,7 @@ export function App() {
     setStopTarget(null);
     if (failures.length) notify("error", failures.join(" · "));
     else if (stoppedContainer) notify("success", t("toast.containerStopped", { name: stoppedContainer }));
+    else if (stopTarget.mode === "duplicates") notify("success", t("toast.duplicatesStopped", { count: stoppedPids.length, pid: keepPid ?? "—" }));
     else notify("success", t(stoppedPids.length === 1 ? "toast.processStoppedOne" : "toast.processStoppedMany", { count: stoppedPids.length }));
 
     if (isTauriRuntime()) {
@@ -253,7 +270,7 @@ export function App() {
         onReveal={(path) => void handleReveal(path)}
         onTerminal={(path) => void handleTerminal(path)}
         onProtect={(process) => void handleProtect(process)}
-        onRequestStop={setStopTarget}
+        onRequestStop={(process, mode) => setStopTarget({ process, mode })}
         canStop={!previewMode}
       />
       <StatusBar
@@ -266,7 +283,13 @@ export function App() {
         demoMode={previewMode}
       />
       <SettingsDialog open={settingsOpen} settings={settings} onClose={() => setSettingsOpen(false)} onSave={persistSettings} />
-      <KillDialog process={stopTarget} stopping={stopping} onCancel={() => setStopTarget(null)} onConfirm={() => void confirmStop()} />
+      <KillDialog
+        process={stopTarget?.process ?? null}
+        mode={stopTarget?.mode ?? "all"}
+        stopping={stopping}
+        onCancel={() => setStopTarget(null)}
+        onConfirm={(keepPid) => void confirmStop(keepPid)}
+      />
       {toast && (
         <div className={`toast toast-${toast.type}`} role="status">
           {toast.type === "success" ? <Check size={18} weight="bold" /> : <Warning size={18} weight="fill" />}

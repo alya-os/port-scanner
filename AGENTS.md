@@ -23,5 +23,6 @@ When implementing from a selected generated mock, treat that image as the source
 - English is the default interface language; a user's explicit French or English choice from Settings must persist across launches.
 - Make the working directory, duplicate processes, process activity, scope, and protection state easy to scan.
 - Duplicate analysis must distinguish confirmed identical independent instances from possible similarities and managed workers, and expose the supporting evidence in the inspector.
+- Confirmed duplicate groups must offer both actions: stop the entire group, or stop only the duplicates while keeping one explicitly selected instance open.
 - Destructive process actions require confirmation and backend protection checks.
 - The production target is Tauri 2 + React/TypeScript + Rust for macOS, Windows, and Linux.

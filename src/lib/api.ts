@@ -37,7 +37,7 @@ function normalizeSettings(settings: Partial<AppSettings>): AppSettings {
   return {
     ...structuredClone(mockSettings),
     ...settings,
-    language: settings.language === "en" ? "en" : "fr",
+    language: settings.language === "fr" ? "fr" : "en",
     rules: settings.rules ?? structuredClone(mockSettings.rules),
   };
 }

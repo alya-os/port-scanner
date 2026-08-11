@@ -233,7 +233,7 @@ Light mode is a semantic remap, not a separate visual identity. Preserve the sam
 
 **The Dense but Legible Rule.** Rows may be compact, but primary identity stays at 13–14px and tertiary labels never replace the main text contrast level.
 
-PortRoot supports French and English as complete interface languages. French is the default, while translated layouts must preserve the same hierarchy, density, truncation behavior, technical formatting, and semantic color roles. Project names, commands, paths, PIDs, ports, and user-authored protection labels are never translated.
+PortRoot supports English and French as complete interface languages. English is the first-launch default, while a user's explicit choice persists across launches. Translated layouts must preserve the same hierarchy, density, truncation behavior, technical formatting, and semantic color roles. Project names, commands, paths, PIDs, ports, and user-authored protection labels are never translated.
 
 ## Layout
 

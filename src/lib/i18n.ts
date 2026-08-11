@@ -405,9 +405,9 @@ interface I18nValue {
 }
 
 const I18nContext = createContext<I18nValue>({
-  language: "fr",
-  locale: localeFor("fr"),
-  t: createTranslator("fr"),
+  language: "en",
+  locale: localeFor("en"),
+  t: createTranslator("en"),
 });
 
 export function I18nProvider({ language, children }: { language: Language; children: ReactNode }) {

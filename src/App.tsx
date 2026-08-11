@@ -40,7 +40,7 @@ const MINIMUM_SCAN_FEEDBACK_MS = 450;
 export function App() {
   const previewMode = !isTauriRuntime();
   const [scan, setScan] = useState<ScanResult | null>(null);
-  const [settings, setSettings] = useState<AppSettings>({ theme: "dark", language: "fr", protectSystemProcesses: true, rules: [] });
+  const [settings, setSettings] = useState<AppSettings>({ theme: "dark", language: "en", protectSystemProcesses: true, rules: [] });
   const [filter, setFilter] = useState<NavFilter>("all");
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortMode>("evaluation");

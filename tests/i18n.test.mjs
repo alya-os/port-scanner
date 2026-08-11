@@ -19,6 +19,8 @@ test("localizes built-in protection labels without changing custom labels", () =
 });
 
 test("uses language-specific technical formatting", () => {
+  assert.equal(formatDuration(90_000), "1 d 1 h");
+  assert.equal(formatMemory(320_000_000), "320 MB");
   assert.equal(formatDuration(90_000, "fr"), "1 j 1 h");
   assert.equal(formatDuration(90_000, "en"), "1 d 1 h");
   assert.equal(formatMemory(320_000_000, "fr"), "320 Mo");

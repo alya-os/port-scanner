@@ -59,7 +59,7 @@ pub struct AppSettings {
 }
 
 fn default_language() -> String {
-    "fr".into()
+    "en".into()
 }
 
 #[derive(Debug, Clone, Serialize)]

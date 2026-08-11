@@ -6,7 +6,7 @@ export function buildProcessTree(
   filter: NavFilter,
   query: string,
   sort: SortMode,
-  language: Language = "fr",
+  language: Language = "en",
   direction: SortDirection = defaultSortDirection(sort),
 ): ProcessGroup[] {
   const locale = localeFor(language);

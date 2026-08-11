@@ -15,7 +15,7 @@ export function evaluationCopy(evaluation: Evaluation, language: Language): { la
   return { label: translate(language, meta.label), tone: meta.tone };
 }
 
-export function formatDuration(totalSeconds: number | null, language: Language = "fr"): string {
+export function formatDuration(totalSeconds: number | null, language: Language = "en"): string {
   if (totalSeconds === null) return translate(language, "common.unavailable");
   if (totalSeconds < 60) return `${totalSeconds} s`;
   if (totalSeconds < 3600) return `${Math.floor(totalSeconds / 60)} min`;
@@ -29,7 +29,7 @@ export function formatDuration(totalSeconds: number | null, language: Language =
   return `${days} ${language === "fr" ? "j" : "d"} ${hours} h`;
 }
 
-export function formatStartedAt(seconds: number | null, language: Language = "fr"): string {
+export function formatStartedAt(seconds: number | null, language: Language = "en"): string {
   if (!seconds) return translate(language, "common.unavailable");
   return new Intl.DateTimeFormat(localeFor(language), {
     dateStyle: "medium",
@@ -37,7 +37,7 @@ export function formatStartedAt(seconds: number | null, language: Language = "fr
   }).format(new Date(seconds * 1000));
 }
 
-export function formatScannedAt(seconds: number | null, language: Language = "fr"): string {
+export function formatScannedAt(seconds: number | null, language: Language = "en"): string {
   if (!seconds) return translate(language, "common.never");
   return new Intl.DateTimeFormat(localeFor(language), {
     day: "numeric",
@@ -48,18 +48,18 @@ export function formatScannedAt(seconds: number | null, language: Language = "fr
   }).format(new Date(seconds * 1000));
 }
 
-export function formatMemory(bytes: number, language: Language = "fr"): string {
+export function formatMemory(bytes: number, language: Language = "en"): string {
   if (!bytes) return translate(language, "common.unavailable");
   const megabytes = bytes / 1_000_000;
   if (language === "en") return megabytes >= 1000 ? `${(megabytes / 1000).toFixed(1)} GB` : `${Math.round(megabytes)} MB`;
   return megabytes >= 1000 ? `${(megabytes / 1000).toFixed(1)} Go` : `${Math.round(megabytes)} Mo`;
 }
 
-export function scopeLabel(scope: Scope, language: Language = "fr"): string {
+export function scopeLabel(scope: Scope, language: Language = "en"): string {
   return translate(language, scope === "local" ? "inspector.localOnly" : "inspector.localNetwork");
 }
 
-export function shortAddress(address: string, language: Language = "fr"): string {
+export function shortAddress(address: string, language: Language = "en"): string {
   if (address === "0.0.0.0" || address === "::") return translate(language, "common.allAddresses");
   if (address === "127.0.0.1" || address === "::1") return translate(language, "common.loopback");
   return address;

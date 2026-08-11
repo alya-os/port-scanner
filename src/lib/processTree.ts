@@ -77,6 +77,14 @@ export function buildProcessTree(
   });
 }
 
+export function hideProtectedProcesses(groups: ProcessGroup[]): ProcessGroup[] {
+  return groups.flatMap((group) => {
+    const processes = group.processes.filter((process) => !process.protected);
+    if (processes.length === 0) return [];
+    return [{ ...group, processes, protected: false }];
+  });
+}
+
 export function processIdentityKey(record: PortRecord): string {
   return [
     record.category,

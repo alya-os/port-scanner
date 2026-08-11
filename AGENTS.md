@@ -27,4 +27,5 @@ When implementing from a selected generated mock, treat that image as the source
 - Confirmed duplicate groups must offer both actions: stop the entire group, or stop only the duplicates while keeping one explicitly selected instance open.
 - Destructive process actions require confirmation and backend protection checks.
 - The inspector must allow custom protections to be removed. Shared rules must disclose their full process/port impact before removal, and new Docker protections must target the exact container name instead of Docker Desktop's shared data path.
+- The All view must offer a session-level toolbar filter for hiding protected processes without changing or deleting their protection rules.
 - The production target is Tauri 2 + React/TypeScript + Rust for macOS, Windows, and Linux.

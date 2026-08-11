@@ -1,9 +1,13 @@
-import { ArrowClockwise, MagnifyingGlass } from "@phosphor-icons/react";
+import { ArrowClockwise, MagnifyingGlass, ShieldCheck, ShieldSlash } from "@phosphor-icons/react";
 import { useI18n } from "../lib/i18n";
 
 interface ToolbarProps {
   query: string;
   onQueryChange: (value: string) => void;
+  protectedFilterAvailable: boolean;
+  hideProtected: boolean;
+  protectedProcessCount: number;
+  onToggleProtected: () => void;
   onScan: () => void;
   scanning: boolean;
 }
@@ -11,6 +15,10 @@ interface ToolbarProps {
 export function Toolbar({
   query,
   onQueryChange,
+  protectedFilterAvailable,
+  hideProtected,
+  protectedProcessCount,
+  onToggleProtected,
   onScan,
   scanning,
 }: ToolbarProps) {
@@ -36,6 +44,20 @@ export function Toolbar({
         <kbd>⌘K</kbd>
       </label>
       <div className="toolbar-actions">
+        <button
+          className={`protected-filter-button ${hideProtected ? "is-active" : ""} ${protectedFilterAvailable ? "" : "is-unavailable"}`}
+          type="button"
+          onClick={onToggleProtected}
+          disabled={!protectedFilterAvailable || (!hideProtected && protectedProcessCount === 0)}
+          aria-pressed={hideProtected}
+          aria-hidden={!protectedFilterAvailable}
+          tabIndex={protectedFilterAvailable ? 0 : -1}
+          title={t(hideProtected ? "toolbar.showProtected" : "toolbar.hideProtected")}
+        >
+          {hideProtected ? <ShieldCheck size={18} weight="duotone" /> : <ShieldSlash size={18} weight="duotone" />}
+          <span className="protected-filter-label">{t(hideProtected ? "toolbar.showProtected" : "toolbar.hideProtected")}</span>
+          {protectedProcessCount > 0 && <span className="protected-filter-count">{protectedProcessCount}</span>}
+        </button>
         <button
           className="primary-button scan-button"
           type="button"

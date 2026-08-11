@@ -4,6 +4,7 @@ import {
   assessDuplicateProcesses,
   buildProcessTree,
   defaultSortDirection,
+  hideProtectedProcesses,
   normalizeDuplicateCommand,
   processIdentityKey,
 } from "../src/lib/processTree.ts";
@@ -185,4 +186,25 @@ test("uses natural default directions for every sortable column", () => {
   assert.equal(defaultSortDirection("scope"), "descending");
   assert.equal(defaultSortDirection("activity"), "descending");
   assert.equal(defaultSortDirection("evaluation"), "descending");
+});
+
+test("hides protected processes without removing their unprotected siblings or groups", () => {
+  const records = [
+    record({ id: "protected", identification: "Protected API", protected: true }),
+    record({ id: "visible", identification: "Visible API", pid: 43, port: 3001 }),
+    record({
+      id: "protected-group",
+      identification: "Protected database",
+      groupName: "database",
+      workingDirectory: "/Users/jp/Projects/client-a/database",
+      protected: true,
+    }),
+  ];
+  const groups = buildProcessTree(records, "all", "", "name", "en", "ascending");
+
+  const visibleGroups = hideProtectedProcesses(groups);
+
+  assert.deepEqual(visibleGroups.map((group) => group.label), ["api"]);
+  assert.deepEqual(visibleGroups.flatMap((group) => group.processes).map((process) => process.identification), ["Visible API"]);
+  assert.equal(visibleGroups[0].protected, false);
 });

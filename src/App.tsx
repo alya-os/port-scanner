@@ -18,7 +18,7 @@ import {
   scanPorts,
   stopDockerContainer,
 } from "./lib/api";
-import { buildProcessTree, defaultSortDirection } from "./lib/processTree";
+import { buildProcessTree, defaultSortDirection, hideProtectedProcesses } from "./lib/processTree";
 import { createTranslator, I18nProvider, localizeRuleLabel, translate } from "./lib/i18n";
 import { getProtectionControl, ruleMatchesRecord } from "./lib/protectionRules";
 import type { TranslationKey } from "./lib/i18n";
@@ -58,6 +58,7 @@ export function App() {
   const [scan, setScan] = useState<ScanResult | null>(null);
   const [settings, setSettings] = useState<AppSettings>({ theme: "dark", language: "en", protectSystemProcesses: true, rules: [] });
   const [filter, setFilter] = useState<NavFilter>("all");
+  const [hideProtected, setHideProtected] = useState(false);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortMode>("evaluation");
   const [sortDirection, setSortDirection] = useState<SortDirection>(defaultSortDirection("evaluation"));
@@ -128,9 +129,17 @@ export function App() {
     () => applyProtectionSettings(scan?.records ?? [], settings),
     [scan?.records, settings],
   );
-  const groups = useMemo(
+  const matchingGroups = useMemo(
     () => buildProcessTree(records, filter, query, sort, settings.language, sortDirection),
     [filter, query, records, settings.language, sort, sortDirection],
+  );
+  const protectedProcessCount = useMemo(
+    () => matchingGroups.flatMap((group) => group.processes).filter((process) => process.protected).length,
+    [matchingGroups],
+  );
+  const groups = useMemo(
+    () => filter === "all" && hideProtected ? hideProtectedProcesses(matchingGroups) : matchingGroups,
+    [filter, hideProtected, matchingGroups],
   );
   const processes = useMemo(() => groups.flatMap((group) => group.processes), [groups]);
   const selected = processes.find((process) => process.id === selectedId) ?? processes[0] ?? null;
@@ -310,6 +319,10 @@ export function App() {
       <Toolbar
         query={query}
         onQueryChange={setQuery}
+        protectedFilterAvailable={filter === "all"}
+        hideProtected={hideProtected}
+        protectedProcessCount={protectedProcessCount}
+        onToggleProtected={() => setHideProtected((current) => !current)}
         onScan={runScan}
         scanning={scanning}
       />

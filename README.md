@@ -1,98 +1,201 @@
-# PortRoot
+<div align="center">
+  <img src="docs/images/portroot-logo.png" alt="PortRoot logo" width="112" height="112">
+  <h1>PortRoot</h1>
+  <p><strong>Every port, traced to its root.</strong></p>
+  <p>
+    A local-first desktop utility that turns open ports into an understandable map of<br>
+    projects, processes, containers, and system services.
+  </p>
+  <p>
+    macOS · Windows · Linux &nbsp;|&nbsp; English · Français &nbsp;|&nbsp; Dark · Light · System
+  </p>
+</div>
 
-**Chaque port, jusqu’à sa racine.** PortRoot est une application desktop pour comprendre quels ports sont ouverts, retrouver les projets qui les ont lancés et arrêter les processus oubliés sans toucher aux services protégés.
+<p align="center">
+  <img src="docs/images/portroot-interface-dark.png" alt="PortRoot displaying local processes, Docker containers, listening ports, network exposure, protection filters, and the process inspector in dark mode">
+</p>
 
-![Interface sombre](design/qa/implementation-dark-final.png)
+PortRoot helps developers understand what is still running on their machine. Instead of showing an anonymous socket table, it traces each discoverable listener back through its process, application, Docker container, and working directory.
 
-## Fonctionnalités
+Use it to find forgotten development servers, review network exposure, confirm duplicate processes, protect critical services, and safely stop work that no longer belongs in the background.
 
-- Inventaire des ports TCP en écoute et des sockets UDP pertinentes.
-- Relation dossier ou application → famille de processus → PID → ports.
-- Portée claire : boucle locale ou toutes les interfaces réseau.
-- Métadonnées : exécutable, commande, dossier de travail, parent, démarrage, durée, CPU, mémoire et connexions actives.
-- Détection des familles de processus dupliquées dans un même projet.
-- Identification des ports publiés par les conteneurs Docker actifs, avec leur nom et leur ID exact.
-- Recherche, catégories, tri, arborescence repliable et inspecteur détaillé.
-- Ouverture du dossier dans le gestionnaire de fichiers ou dans un terminal natif.
-- Arrêt gracieux d’un ou plusieurs processus avec confirmation et vérification anti-réutilisation de PID.
-- Arrêt ciblé d’un conteneur Docker avec `docker stop`, sans envoyer de signal au moteur partagé de Docker Desktop.
-- Protections persistantes par système, port, nom de processus ou préfixe de chemin.
-- Thèmes sombre, clair et système.
+## Why PortRoot?
 
-## Sécurité
+Modern development environments accumulate state quickly: local APIs, Vite servers, Python workers, databases, browser helpers, Docker containers, and tools launched from terminals that were closed hours ago.
 
-L’interface n’est pas la barrière de sécurité. Avant chaque arrêt de processus, le moteur Rust :
+PortRoot turns that state into a relationship-first tree:
 
-1. vérifie que le PID existe encore;
-2. compare son heure de démarrage pour détecter une réutilisation du PID;
-3. relit les ports actuellement détenus;
-4. applique de nouveau toutes les règles de protection;
-5. bloque toujours le PID 1 et les services système protégés.
+```text
+Project or application
+└── Process family
+    ├── Process instance / Docker container
+    └── Listening TCP and bound UDP ports
+```
 
-Pour un conteneur Docker, PortRoot transporte l’ID Docker exact depuis l’analyse, relit les ports et protections associés, vérifie à nouveau l’identité avec Docker, exécute `docker stop`, puis confirme que le conteneur n’est plus actif. Le PID commun de `com.docker.backend` n’est jamais utilisé comme cible du conteneur.
+The result answers the questions that raw tools such as `lsof`, `netstat`, or `ss` leave to you:
 
-L’application n’exige pas `sudo`. Selon les permissions de la plateforme, certains propriétaires de sockets peuvent rester masqués; ce cas est signalé dans l’interface.
+- Which project opened this port?
+- Is it local-only or exposed to the network?
+- Is this another instance of the same server or a managed worker?
+- Can it be stopped safely?
+- Which process or container should be targeted?
 
-## Stack
+## Highlights
 
-- Tauri 2
-- Rust
-- React 19 + TypeScript
-- Vite
-- Phosphor Icons
-- `netstat2` pour l’inventaire cross-platform
-- `sysinfo` pour les métadonnées et actions de processus
+### Trace ports back to their origin
 
-## Développement
+- Discover listening TCP sockets and relevant bound UDP sockets.
+- Group ports by application, working folder, process family, and Docker container.
+- Inspect the PID, parent PID, executable, command, working directory, start time, uptime, CPU, memory, and active connections when the operating system exposes them.
+- Distinguish loopback-only listeners from ports bound to network interfaces.
 
-Prérequis : Node.js, npm, Rust et les dépendances système de Tauri pour la plateforme cible.
+### Find the signal in a busy workstation
+
+- Search by folder, process, port, PID, command, or address.
+- Filter Applications, System services, Other processes, and Protected processes.
+- Hide protected processes from the **All** view without changing their protection rules.
+- Sort directly from the Item, Port, Scope, Activity, and Evaluation columns.
+- Collapse projects, process families, and child ports without losing context.
+
+### Understand duplicates before stopping them
+
+PortRoot compares the executable, working directory, normalized command, listener ports, process relationships, and runtime ownership before assigning a duplicate status.
+
+- **Confirmed duplicates** are independent processes launching the same normalized command from the same folder.
+- **Possible duplicates** share an origin but do not provide enough matching metadata for certainty.
+- **Managed processes** belong to a worker family or intentionally share a listener.
+
+Confirmed groups can be stopped entirely, or cleaned up while keeping one explicitly selected instance running.
+
+### Manage Docker containers precisely
+
+Published Docker ports are associated with the exact container name and ID. Stopping a container calls `docker stop` for that container rather than sending a signal to Docker Desktop's shared backend process.
+
+### Work from the process context
+
+- Reveal the working directory in the native file manager.
+- Open a terminal directly in that directory.
+- Copy paths and commands from the inspector.
+- Switch between English and French.
+- Use dark, light, or system appearance modes.
+
+## Safety by design
+
+The interface is not the security boundary. Before every stop request, the Rust engine:
+
+1. verifies that the target PID or Docker container still exists;
+2. compares the process start time to detect PID reuse;
+3. reads the ports currently owned by the target;
+4. reapplies every protection rule;
+5. blocks PID 1 and protected system services;
+6. stops only the confirmed target.
+
+Protection rules can target:
+
+- operating-system services;
+- ports;
+- process names;
+- executable or working-directory paths;
+- exact Docker container names.
+
+Custom protections are reversible. If a protection rule covers several processes, PortRoot shows the full process and port impact before removing it. Removing a protection never stops a process.
+
+> PortRoot does not require `sudo`. Some process owners, paths, or commands may remain hidden by the operating system; partial visibility is reported instead of being treated as a complete scan.
+
+## Project status
+
+PortRoot is currently a pre-release `0.1.0` project.
+
+| Platform | Status |
+| --- | --- |
+| macOS Apple Silicon | Built, scanned, tested, ad-hoc signed, and packaged as a DMG locally |
+| Windows | Automated build and scanner checks configured; manual validation pending |
+| Ubuntu 22.04 | Automated build and scanner checks configured; manual validation pending |
+
+The application is local-first and requires no account or cloud backend. Publicly signed installers and GitHub Releases are not available yet.
+
+## Tech stack
+
+- [Tauri 2](https://tauri.app/) for the desktop shell and native bridge
+- Rust for scanning, process metadata, protection enforcement, and stop actions
+- React 19 and TypeScript for the interface
+- Vite for the frontend toolchain
+- Phosphor Icons for the icon system
+- `netstat2` for cross-platform socket discovery
+- `sysinfo` for process metadata and lifecycle actions
+
+## Run from source
+
+### Prerequisites
+
+- Node.js and npm
+- Rust stable — the native package declares Rust `1.77.2` as its minimum version
+- The Tauri 2 system dependencies for your operating system
+- Docker CLI, only if you want PortRoot to identify and stop Docker containers
+
+### Install and launch
 
 ```bash
-npm install
+npm ci
 npm run tauri dev
 ```
 
-Le serveur Tauri de développement utilise le port `1420` afin d’éviter les collisions avec les serveurs Vite habituels sur `5173`.
+The Tauri development window uses port `1420` to avoid colliding with the Vite servers commonly running on `5173`.
 
-Pour vérifier séparément l’interface :
+### Interface-only preview
 
 ```bash
 npm run dev -- --port 4173 --strictPort
 ```
 
-Le mode navigateur utilise des données de démonstration réalistes et désactive les actions d’arrêt réelles. Le scan système et les arrêts sont activés uniquement dans la fenêtre Tauri.
+The browser preview uses realistic sample data and disables native stop actions. Real socket scanning and process management are available only inside the Tauri application.
 
-## Vérification
-
-```bash
-npm run build
-npm run test:web
-cargo test --manifest-path src-tauri/Cargo.toml
-cargo run --manifest-path src-tauri/Cargo.toml --example scan_summary
-```
-
-## Compilation de l’application
+## Build
 
 ```bash
 npm run tauri build
 ```
 
-La configuration contient les commandes adaptées à macOS, Windows et Linux. La matrice GitHub Actions compile et teste les trois plateformes, puis exécute leur scanner natif. La version actuelle a été compilée et vérifiée localement sur macOS; les contrôles manuels Windows et Linux décrits dans [`CROSS_PLATFORM_TEST_PLAN.md`](CROSS_PLATFORM_TEST_PLAN.md) restent requis avant publication.
+On macOS, the local build produces an application bundle and a DMG under:
 
-Le bundle macOS local utilise une signature ad hoc. Une diffusion publique sans avertissement Gatekeeper nécessitera un certificat Developer ID et une notarisation Apple.
+```text
+src-tauri/target/release/bundle/
+```
 
-## Structure
+The current macOS build uses an ad-hoc signature. Public distribution without a Gatekeeper warning will require an Apple Developer ID certificate and notarization.
 
-- `src/` — interface, thèmes, filtres, arborescence et dialogues.
-- `src-tauri/src/scanner.rs` — sockets, processus, Docker, portée et activité.
-- `src-tauri/src/actions.rs` — ouverture dossier/terminal et arrêt sécurisé.
-- `src-tauri/src/settings.rs` — persistance et évaluation des protections.
-- `design/reference-dark.png` — direction visuelle retenue.
-- `design-qa.md` — comparaison et vérification visuelle.
+## Test and validate
 
-## Limites connues
+```bash
+npm run typecheck
+npm run test:web
+npm run build
+cargo test --manifest-path src-tauri/Cargo.toml
+cargo run --manifest-path src-tauri/Cargo.toml --example scan_summary
+```
 
-- UDP ne possède pas d’état `LISTEN` universel. Le scanner exclut les endpoints UDP réseau manifestement éphémères pour éviter de présenter le trafic sortant comme un service entrant.
-- Les chemins, commandes et PIDs peuvent être masqués par le système pour des processus appartenant à un autre utilisateur.
-- L’arrêt forcé est supporté par le moteur mais n’est volontairement pas exposé dans l’interface initiale.
-- L’icône finale, la licence et la signature de distribution restent à décider avant une publication GitHub.
+The GitHub Actions workflow targets macOS, Windows, and Ubuntu. The full manual release checklist lives in [`CROSS_PLATFORM_TEST_PLAN.md`](CROSS_PLATFORM_TEST_PLAN.md).
+
+## Repository structure
+
+| Path | Responsibility |
+| --- | --- |
+| `src/` | React interface, themes, filters, process tree, inspector, and confirmation dialogs |
+| `src/lib/processTree.ts` | Project/process grouping, evaluation, sorting, and duplicate analysis |
+| `src-tauri/src/scanner.rs` | Socket inventory, process enrichment, scope detection, and activity |
+| `src-tauri/src/docker.rs` | Docker container discovery and published-port association |
+| `src-tauri/src/actions.rs` | Native folder/terminal actions and protected process/container shutdown |
+| `src-tauri/src/settings.rs` | Persistent settings and backend protection evaluation |
+| `tests/` | TypeScript unit tests for grouping, duplicates, protections, actions, and localization |
+| `design/` | Visual direction and implementation QA references |
+
+## Known limitations
+
+- UDP does not provide a universal `LISTEN` state. PortRoot excludes clearly ephemeral connected UDP endpoints to avoid presenting outbound traffic as an inbound service.
+- Process paths, commands, and PIDs can be hidden for processes owned by another user or restricted by the operating system.
+- Forced termination is supported by the native engine but is intentionally not exposed in the current interface.
+- Windows and Linux still require the manual validation documented in the cross-platform test plan before a public release.
+
+## License
+
+No open-source license has been published yet. Until one is added, the source code remains all rights reserved.

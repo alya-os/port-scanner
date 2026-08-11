@@ -49,6 +49,7 @@ The product explains open ports through the developer's actual project hierarchy
 ## Brand Commitments
 
 - The selected source of visual truth is `design/reference-dark.png`.
+- The confirmed application logo is `src-tauri/icons/icon.png`.
 - Preserve its relationship-first tree, compact data density, technical inspector, teal selection, amber review states, red destructive states, and lavender protected-system state.
 - Reuse the sidebar labels and icon semantics: Tous, Applications, macOS or System, Autres, and Proteges.
 
@@ -56,7 +57,7 @@ The product explains open ports through the developer's actual project hierarchy
 
 - Dark implementation target: `design/reference-dark.png`.
 - A real macOS scan in the originating conversation identified 34 listening TCP ports, 10 fixed UDP ports, Docker mappings, Local services, orphaned Python/Node servers, and system services.
-- No final logo, repository URL, analytics, or distribution policy has been confirmed.
+- No repository URL, analytics, or public distribution policy has been confirmed.
 
 ## Product Principles
 

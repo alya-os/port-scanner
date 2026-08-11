@@ -43,11 +43,13 @@ export interface ScanResult {
 export interface ProtectionRule {
   id: string;
   label: string;
-  kind: "port" | "process" | "path";
+  kind: "port" | "process" | "path" | "container";
   value: string;
   enabled: boolean;
   builtin: boolean;
 }
+
+export type ProtectionAction = "add" | "remove" | "manage";
 
 export interface AppSettings {
   theme: ThemeMode;

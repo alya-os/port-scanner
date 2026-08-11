@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Check, Warning, X } from "@phosphor-icons/react";
 import { Inspector } from "./components/Inspector";
 import { KillDialog } from "./components/KillDialog";
+import { ProtectionDialog } from "./components/ProtectionDialog";
 import { ProcessTree } from "./components/ProcessTree";
 import { SettingsDialog } from "./components/SettingsDialog";
 import { Sidebar } from "./components/Sidebar";
@@ -19,6 +20,8 @@ import {
 } from "./lib/api";
 import { buildProcessTree, defaultSortDirection } from "./lib/processTree";
 import { createTranslator, I18nProvider, localizeRuleLabel, translate } from "./lib/i18n";
+import { getProtectionControl, ruleMatchesRecord } from "./lib/protectionRules";
+import type { TranslationKey } from "./lib/i18n";
 import type {
   AppSettings,
   NavFilter,
@@ -41,6 +44,13 @@ interface StopTarget {
   mode: StopMode;
 }
 
+interface ProtectionTarget {
+  process: ProcessNode;
+  ruleIds: string[];
+  affectedProcessCount: number;
+  affectedPortCount: number;
+}
+
 const MINIMUM_SCAN_FEEDBACK_MS = 450;
 
 export function App() {
@@ -57,6 +67,8 @@ export function App() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [stopTarget, setStopTarget] = useState<StopTarget | null>(null);
   const [stopping, setStopping] = useState(false);
+  const [protectionTarget, setProtectionTarget] = useState<ProtectionTarget | null>(null);
+  const [protectionSaving, setProtectionSaving] = useState(false);
   const [toast, setToast] = useState<ToastState | null>(null);
   const t = createTranslator(settings.language);
 
@@ -103,13 +115,14 @@ export function App() {
         document.querySelector<HTMLInputElement>(".search-field input")?.focus();
       }
       if (event.key === "Escape") {
-        if (stopTarget && !stopping) setStopTarget(null);
+        if (protectionTarget && !protectionSaving) setProtectionTarget(null);
+        else if (stopTarget && !stopping) setStopTarget(null);
         else if (settingsOpen) setSettingsOpen(false);
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [settingsOpen, stopTarget, stopping]);
+  }, [protectionSaving, protectionTarget, settingsOpen, stopTarget, stopping]);
 
   const records = useMemo(
     () => applyProtectionSettings(scan?.records ?? [], settings),
@@ -121,16 +134,24 @@ export function App() {
   );
   const processes = useMemo(() => groups.flatMap((group) => group.processes), [groups]);
   const selected = processes.find((process) => process.id === selectedId) ?? processes[0] ?? null;
+  const selectedProtectionControl = useMemo(
+    () => selected ? getProtectionControl(selected, settings, records) : null,
+    [records, selected, settings],
+  );
 
   useEffect(() => {
     if (selected && selected.id !== selectedId) setSelectedId(selected.id);
   }, [selected, selectedId]);
 
-  const persistSettings = async (nextSettings: AppSettings) => {
+  const persistSettings = async (
+    nextSettings: AppSettings,
+    successKey: TranslationKey = "toast.settingsSaved",
+    values: Record<string, string | number> = {},
+  ) => {
     try {
       const saved = await saveSettings(nextSettings);
       setSettings(saved);
-      notify("success", translate(saved.language, "toast.settingsSaved"));
+      notify("success", translate(saved.language, successKey, values));
     } catch (error) {
       notify("error", String(error));
       throw error;
@@ -169,18 +190,56 @@ export function App() {
     }
   };
 
-  const handleProtect = async (process: ProcessNode) => {
-    if (process.protected) return;
+  const handleProtectionAction = (process: ProcessNode) => {
+    const control = getProtectionControl(process, settings, records);
+    if (control.action === "manage") {
+      setSettingsOpen(true);
+      return;
+    }
+    if (control.action === "remove") {
+      setProtectionTarget({
+        process,
+        ruleIds: control.removableRules.map((rule) => rule.id),
+        affectedProcessCount: control.affectedProcessCount,
+        affectedPortCount: control.affectedPortCount,
+      });
+      return;
+    }
+
+    const isDocker = Boolean(process.dockerContainerId);
     const path = process.workingDirectory ?? process.processPath;
+    const kind = isDocker ? "container" as const : path ? "path" as const : "process" as const;
     const rule = {
-      id: `custom-${path ? "path" : "process"}-${Date.now()}`,
-      label: path ? t("toast.projectRule", { name: process.identification }) : process.identification,
-      kind: path ? ("path" as const) : ("process" as const),
-      value: path ?? process.name,
+      id: `custom-${kind}-${Date.now()}`,
+      label: t("toast.projectRule", { name: process.identification }),
+      kind,
+      value: isDocker ? process.identification : path ?? process.name,
       enabled: true,
       builtin: false,
     };
-    await persistSettings({ ...settings, rules: [...settings.rules, rule] });
+    void persistSettings(
+      { ...settings, rules: [...settings.rules, rule] },
+      "toast.protectionAdded",
+      { name: process.identification },
+    ).catch(() => undefined);
+  };
+
+  const confirmProtectionRemoval = async () => {
+    if (!protectionTarget) return;
+    setProtectionSaving(true);
+    try {
+      const removedIds = new Set(protectionTarget.ruleIds);
+      await persistSettings(
+        { ...settings, rules: settings.rules.filter((rule) => !removedIds.has(rule.id)) },
+        "toast.protectionRemoved",
+        { name: protectionTarget.process.identification },
+      );
+      setProtectionTarget(null);
+    } catch {
+      // persistSettings already surfaces the error in the app.
+    } finally {
+      setProtectionSaving(false);
+    }
   };
 
   const confirmStop = async (keepPid: number | null) => {
@@ -269,7 +328,8 @@ export function App() {
         platform={scan?.platform ?? "macos"}
         onReveal={(path) => void handleReveal(path)}
         onTerminal={(path) => void handleTerminal(path)}
-        onProtect={(process) => void handleProtect(process)}
+        protectionAction={selectedProtectionControl?.action ?? "add"}
+        onProtectionAction={handleProtectionAction}
         onRequestStop={(process, mode) => setStopTarget({ process, mode })}
         canStop={!previewMode}
       />
@@ -283,6 +343,15 @@ export function App() {
         demoMode={previewMode}
       />
       <SettingsDialog open={settingsOpen} settings={settings} onClose={() => setSettingsOpen(false)} onSave={persistSettings} />
+      <ProtectionDialog
+        process={protectionTarget?.process ?? null}
+        rules={settings.rules.filter((rule) => protectionTarget?.ruleIds.includes(rule.id))}
+        affectedProcessCount={protectionTarget?.affectedProcessCount ?? 0}
+        affectedPortCount={protectionTarget?.affectedPortCount ?? 0}
+        saving={protectionSaving}
+        onCancel={() => setProtectionTarget(null)}
+        onConfirm={() => void confirmProtectionRemoval()}
+      />
       <KillDialog
         process={stopTarget?.process ?? null}
         mode={stopTarget?.mode ?? "all"}
@@ -314,13 +383,7 @@ function applyProtectionSettings(records: PortRecord[], settings: AppSettings): 
     if (settings.protectSystemProcesses && record.category === "system") reasons.push(t("protection.systemDefault"));
     if (record.pid === 1) reasons.push(t("protection.systemMain"));
     for (const rule of settings.rules.filter((candidate) => candidate.enabled)) {
-      const matches =
-        (rule.kind === "port" && Number(rule.value) === record.port) ||
-        (rule.kind === "process" && rule.value.toLocaleLowerCase() === record.processName.toLocaleLowerCase()) ||
-        (rule.kind === "path" && [record.processPath, record.workingDirectory]
-          .filter((path): path is string => Boolean(path))
-          .some((path) => path.toLocaleLowerCase().startsWith(rule.value.toLocaleLowerCase())));
-      if (matches) reasons.push(localizeRuleLabel(rule, settings.language));
+      if (ruleMatchesRecord(rule, record)) reasons.push(localizeRuleLabel(rule, settings.language));
     }
     return { ...record, protected: reasons.length > 0, protectionReasons: [...new Set(reasons)] };
   });

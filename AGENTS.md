@@ -26,4 +26,5 @@ When implementing from a selected generated mock, treat that image as the source
 - Duplicate analysis must distinguish confirmed identical independent instances from possible similarities and managed workers, and expose the supporting evidence in the inspector.
 - Confirmed duplicate groups must offer both actions: stop the entire group, or stop only the duplicates while keeping one explicitly selected instance open.
 - Destructive process actions require confirmation and backend protection checks.
+- The inspector must allow custom protections to be removed. Shared rules must disclose their full process/port impact before removal, and new Docker protections must target the exact container name instead of Docker Desktop's shared data path.
 - The production target is Tauri 2 + React/TypeScript + Rust for macOS, Windows, and Linux.

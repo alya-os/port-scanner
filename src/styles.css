@@ -39,6 +39,8 @@
   --danger-soft: rgba(255, 82, 88, 0.08);
   --protected: #b477ff;
   --protected-soft: rgba(180, 119, 255, 0.1);
+  --protected-soft-strong: rgba(180, 119, 255, 0.16);
+  --protected-border: rgba(180, 119, 255, 0.42);
   --overlay: rgba(1, 7, 10, 0.72);
   --scan-scrim: rgba(7, 16, 23, 0.78);
   --shadow: 0 18px 48px rgba(0, 0, 0, 0.36);
@@ -72,6 +74,8 @@
   --danger-soft: rgba(204, 49, 57, 0.06);
   --protected: #7c3fc1;
   --protected-soft: rgba(124, 63, 193, 0.08);
+  --protected-soft-strong: rgba(124, 63, 193, 0.14);
+  --protected-border: rgba(124, 63, 193, 0.36);
   --overlay: rgba(17, 29, 34, 0.38);
   --scan-scrim: rgba(251, 252, 252, 0.82);
   --shadow: 0 18px 48px rgba(34, 49, 55, 0.18);
@@ -1386,6 +1390,19 @@ code {
   margin-top: 8px;
 }
 
+.protect-button.is-remove,
+.protect-button.is-manage {
+  border-color: var(--protected-border);
+  background: var(--protected-soft);
+  color: var(--protected);
+}
+
+.protect-button.is-remove:hover:not(:disabled),
+.protect-button.is-manage:hover:not(:disabled) {
+  border-color: var(--protected);
+  background: var(--protected-soft-strong);
+}
+
 .stop-zone {
   margin-top: 12px;
   padding-top: 12px;
@@ -1525,7 +1542,8 @@ code {
 }
 
 .settings-dialog,
-.kill-dialog {
+.kill-dialog,
+.protection-dialog {
   border: 1px solid var(--line-strong);
   background: var(--surface-raised);
   box-shadow: var(--shadow);
@@ -1868,6 +1886,100 @@ code {
   overflow: auto;
   border-radius: 14px;
   padding: 26px;
+}
+
+.protection-dialog {
+  position: relative;
+  width: min(500px, calc(100vw - 48px));
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  padding: 26px;
+  border-radius: 14px;
+}
+
+.protection-dialog-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 13px;
+  background: var(--protected-soft);
+  color: var(--protected);
+}
+
+.protection-dialog h2 {
+  margin: 18px 42px 8px 0;
+  font-size: 20px;
+  letter-spacing: -0.025em;
+}
+
+.protection-dialog > p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.protection-summary {
+  margin: 18px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.protection-summary span {
+  display: grid;
+  grid-template-columns: 118px minmax(0, 1fr);
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.protection-summary span:last-child {
+  border-bottom: 0;
+}
+
+.protection-summary strong {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.protection-summary code {
+  overflow-wrap: anywhere;
+  color: var(--text-soft);
+  font-size: 10px;
+}
+
+.protection-safety {
+  display: flex;
+  gap: 8px;
+  color: var(--protected);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.protection-dialog footer {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.protection-remove-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  border: 1px solid var(--protected);
+  border-radius: var(--radius-sm);
+  background: var(--protected-soft);
+  color: var(--protected);
+  font-weight: 750;
+}
+
+.protection-remove-button:hover:not(:disabled) {
+  background: var(--protected);
+  color: #fff;
 }
 
 .kill-dialog.has-instance-picker {

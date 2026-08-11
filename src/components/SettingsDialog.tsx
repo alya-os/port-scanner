@@ -173,8 +173,9 @@ export function SettingsDialog({ open, settings, onClose, onSave }: SettingsDial
                 <option value="process">{t("settings.kindProcess")}</option>
                 <option value="port">{t("settings.kindPort")}</option>
                 <option value="path">{t("settings.kindPath")}</option>
+                <option value="container">{t("settings.kindContainer")}</option>
               </select>
-              <input value={newValue} onChange={(event) => setNewValue(event.target.value)} placeholder={newKind === "port" ? "ex. 3000" : newKind === "path" ? "ex. /System/Library/" : "ex. launchd"} aria-label={t("settings.ruleValue")} />
+              <input value={newValue} onChange={(event) => setNewValue(event.target.value)} placeholder={newKind === "port" ? "ex. 3000" : newKind === "path" ? "ex. /System/Library/" : newKind === "container" ? "ex. llm_api" : "ex. launchd"} aria-label={t("settings.ruleValue")} />
               <input value={newLabel} onChange={(event) => setNewLabel(event.target.value)} placeholder={t("settings.optionalLabel")} aria-label={t("settings.ruleLabel")} />
               <button type="button" onClick={addRule} disabled={!newValue.trim()}><Plus size={17} /> {t("settings.add")}</button>
             </div>
@@ -195,5 +196,6 @@ export function SettingsDialog({ open, settings, onClose, onSave }: SettingsDial
 function ruleKindLabel(kind: ProtectionRule["kind"], t: Translator): string {
   if (kind === "port") return t("settings.kindPort");
   if (kind === "path") return t("settings.kindPath");
+  if (kind === "container") return t("settings.kindContainer");
   return t("settings.kindProcess");
 }

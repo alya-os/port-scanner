@@ -135,7 +135,10 @@ pub fn save_settings(app: AppHandle, mut settings: AppSettings) -> Result<AppSet
     }
 
     settings.rules.retain(|rule| {
-        matches!(rule.kind.as_str(), "port" | "process" | "path") && !rule.value.trim().is_empty()
+        matches!(
+            rule.kind.as_str(),
+            "port" | "process" | "path" | "container"
+        ) && !rule.value.trim().is_empty()
     });
 
     let path = settings_path(&app)?;
@@ -182,6 +185,12 @@ pub fn protection_reasons(settings: &AppSettings, record: &PortRecord) -> Vec<St
             .into_iter()
             .flatten()
             .any(|path| starts_with_case_insensitive(path, rule.value.trim())),
+            "container" => {
+                record.docker_container_id.is_some()
+                    && record
+                        .identification
+                        .eq_ignore_ascii_case(rule.value.trim())
+            }
             _ => false,
         };
 
@@ -247,6 +256,29 @@ mod tests {
         assert_eq!(protection_reasons(&settings, &protected), vec!["Projet A"]);
 
         protected.working_directory = Some("/Users/jp/Projects/client-b/api".into());
+        assert!(protection_reasons(&settings, &protected).is_empty());
+    }
+
+    #[test]
+    fn container_rules_protect_only_the_named_docker_container() {
+        let mut settings = default_settings();
+        settings.protect_system_processes = false;
+        settings.rules = vec![ProtectionRule {
+            id: "container-llm-api".into(),
+            label: "LLM API".into(),
+            kind: "container".into(),
+            value: "llm_api".into(),
+            enabled: true,
+            builtin: false,
+        }];
+
+        let mut protected = sample_record();
+        protected.identification = "llm_api".into();
+        protected.docker_container_id = Some("532041d742d5".into());
+        assert_eq!(protection_reasons(&settings, &protected), vec!["LLM API"]);
+
+        protected.identification = "llm_postgres".into();
+        protected.docker_container_id = Some("7fcb8e20e3db".into());
         assert!(protection_reasons(&settings, &protected).is_empty());
     }
 

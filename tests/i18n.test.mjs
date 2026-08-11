@@ -12,6 +12,8 @@ test("translates interface copy and interpolated values", () => {
   assert.equal(translate("fr", "evaluation.duplicatePossible", { count: 2 }), "2 similaires");
   assert.equal(translate("en", "inspector.stopDuplicates", { count: 3 }), "Stop 3 duplicates");
   assert.equal(translate("fr", "kill.confirmDuplicates", { count: 3 }), "Arrêter 3 doublons");
+  assert.equal(translate("en", "inspector.removeProtection"), "Remove protection");
+  assert.equal(translate("fr", "settings.kindContainer"), "Conteneur Docker");
 });
 
 test("localizes built-in protection labels without changing custom labels", () => {

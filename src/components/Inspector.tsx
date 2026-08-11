@@ -12,6 +12,7 @@ import {
   Info,
   ShieldCheck,
   ShieldPlus,
+  ShieldSlash,
   StackSimple,
   Stop,
   TerminalWindow,
@@ -22,19 +23,20 @@ import { useState } from "react";
 import { evaluationCopy, formatDuration, formatMemory, formatStartedAt, scopeLabel } from "../lib/format";
 import { useI18n, type TranslationKey, type Translator } from "../lib/i18n";
 import { getProcessInstances } from "../lib/processActions";
-import type { DuplicateConfidence, DuplicateEvidence, ProcessNode, StopMode } from "../types";
+import type { DuplicateConfidence, DuplicateEvidence, ProcessNode, ProtectionAction, StopMode } from "../types";
 
 interface InspectorProps {
   process: ProcessNode | null;
   platform: string;
   onReveal: (path: string) => void;
   onTerminal: (path: string) => void;
-  onProtect: (process: ProcessNode) => void;
+  protectionAction: ProtectionAction;
+  onProtectionAction: (process: ProcessNode) => void;
   onRequestStop: (process: ProcessNode, mode: StopMode) => void;
   canStop: boolean;
 }
 
-export function Inspector({ process, platform, onReveal, onTerminal, onProtect, onRequestStop, canStop }: InspectorProps) {
+export function Inspector({ process, platform, onReveal, onTerminal, protectionAction, onProtectionAction, onRequestStop, canStop }: InspectorProps) {
   const [copied, setCopied] = useState<string | null>(null);
   const { language, t } = useI18n();
 
@@ -164,9 +166,19 @@ export function Inspector({ process, platform, onReveal, onTerminal, onProtect, 
             <TerminalWindow size={18} /> {t("inspector.terminal")}
           </button>
         </div>
-        <button className="protect-button" type="button" onClick={() => onProtect(process)} disabled={process.category === "system"}>
-          {process.protected ? <ShieldCheck size={19} /> : <ShieldPlus size={19} />}
-          {process.protected ? t("inspector.alreadyProtected") : t("inspector.addProtection")}
+        <button className={`protect-button is-${protectionAction}`} type="button" onClick={() => onProtectionAction(process)}>
+          {protectionAction === "add"
+            ? <ShieldPlus size={19} />
+            : protectionAction === "remove"
+              ? <ShieldSlash size={19} />
+              : <ShieldCheck size={19} />}
+          {t(
+            protectionAction === "add"
+              ? "inspector.addProtection"
+              : protectionAction === "remove"
+                ? "inspector.removeProtection"
+                : "inspector.manageProtection",
+          )}
         </button>
         <div className={`stop-zone ${process.protected || !canStop ? "is-disabled" : ""}`}>
           <div className="stop-zone-heading">

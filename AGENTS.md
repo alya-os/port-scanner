@@ -18,6 +18,7 @@ When implementing from a selected generated mock, treat that image as the source
 - Do not repeat the platform name below the sidebar utilities; platform identity belongs to the system navigation item only.
 - Scrollbars should use PortRoot's quiet graphite track/thumb treatment with teal interaction states.
 - Avoid native select popovers for themed controls; use PortRoot-styled menus so every option remains legible in dark and light modes.
+- Sorting belongs directly to the five process-tree column headers; do not add a separate toolbar sort control.
 - French is the default interface language; users can persistently switch the full application between French and English from Settings.
 - Make the working directory, duplicate processes, process activity, scope, and protection state easy to scan.
 - Destructive process actions require confirmation and backend protection checks.

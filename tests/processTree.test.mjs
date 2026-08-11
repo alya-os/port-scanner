@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildProcessTree, processIdentityKey } from "../src/lib/processTree.ts";
+import { buildProcessTree, defaultSortDirection, processIdentityKey } from "../src/lib/processTree.ts";
 
 function record(overrides = {}) {
   return {
@@ -77,4 +77,30 @@ test("groups ports that belong to the same executable and working folder", () =>
     .flatMap((group) => group.processes);
   assert.equal(processes.length, 1);
   assert.deepEqual(processes[0].records.map((item) => item.port), [3000, 3001]);
+});
+
+test("sorts process columns in both directions", () => {
+  const records = [
+    record({ id: "alpha", identification: "Alpha", port: 3000, uptimeSeconds: 4000, cpuUsage: 1 }),
+    record({ id: "bravo", identification: "Bravo", port: 1000, scope: "network", localAddress: "0.0.0.0", activeConnections: 3, uptimeSeconds: 4000 }),
+    record({ id: "charlie", identification: "Charlie", port: 2000, uptimeSeconds: 4000, cpuUsage: 0 }),
+  ];
+  const identities = (sort, direction) => buildProcessTree(records, "all", "", sort, "fr", direction)
+    .flatMap((group) => group.processes)
+    .map((process) => process.identification);
+
+  assert.deepEqual(identities("name", "ascending"), ["Alpha", "Bravo", "Charlie"]);
+  assert.deepEqual(identities("name", "descending"), ["Charlie", "Bravo", "Alpha"]);
+  assert.deepEqual(identities("port", "ascending"), ["Bravo", "Charlie", "Alpha"]);
+  assert.deepEqual(identities("scope", "descending"), ["Bravo", "Alpha", "Charlie"]);
+  assert.deepEqual(identities("activity", "descending"), ["Bravo", "Alpha", "Charlie"]);
+  assert.deepEqual(identities("evaluation", "descending"), ["Bravo", "Alpha", "Charlie"]);
+});
+
+test("uses natural default directions for every sortable column", () => {
+  assert.equal(defaultSortDirection("name"), "ascending");
+  assert.equal(defaultSortDirection("port"), "ascending");
+  assert.equal(defaultSortDirection("scope"), "descending");
+  assert.equal(defaultSortDirection("activity"), "descending");
+  assert.equal(defaultSortDirection("evaluation"), "descending");
 });

@@ -3,7 +3,8 @@ export type Language = "fr" | "en";
 export type Category = "application" | "system" | "other";
 export type Scope = "local" | "network";
 export type NavFilter = "all" | Category | "protected";
-export type SortMode = "evaluation" | "port" | "activity" | "age";
+export type SortMode = "name" | "port" | "scope" | "activity" | "evaluation";
+export type SortDirection = "ascending" | "descending";
 
 export interface PortRecord {
   id: string;

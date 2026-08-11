@@ -1,5 +1,5 @@
 import { localeFor, translate } from "./i18n.ts";
-import type { Evaluation, Language, NavFilter, PortRecord, ProcessGroup, ProcessNode, SortMode } from "../types";
+import type { Evaluation, Language, NavFilter, PortRecord, ProcessGroup, ProcessNode, SortDirection, SortMode } from "../types";
 
 export function buildProcessTree(
   records: PortRecord[],
@@ -7,6 +7,7 @@ export function buildProcessTree(
   query: string,
   sort: SortMode,
   language: Language = "fr",
+  direction: SortDirection = defaultSortDirection(sort),
 ): ProcessGroup[] {
   const locale = localeFor(language);
   const normalizedQuery = query.trim().toLocaleLowerCase(locale);
@@ -42,7 +43,7 @@ export function buildProcessTree(
 
   const groupMap = new Map<string, ProcessNode[]>();
   for (const [id, processRecords] of processMap) {
-    const process = toProcessNode(id, processRecords, language);
+    const process = toProcessNode(id, processRecords, language, sort, direction);
     const groupId = `${process.category}::${process.groupName}`;
     const processes = groupMap.get(groupId) ?? [];
     processes.push(process);
@@ -53,7 +54,7 @@ export function buildProcessTree(
     id,
     label: processes[0]?.groupName ?? translate(language, "tree.noFolder"),
     category: processes[0]?.category ?? "other",
-    processes: sortProcesses(processes, sort),
+    processes: sortProcesses(processes, sort, direction, locale),
     protected: processes.every((process) => process.protected),
   }));
 
@@ -76,7 +77,13 @@ export function processIdentityKey(record: PortRecord): string {
   ].join("::");
 }
 
-function toProcessNode(id: string, records: PortRecord[], language: Language): ProcessNode {
+function toProcessNode(
+  id: string,
+  records: PortRecord[],
+  language: Language,
+  sort: SortMode,
+  direction: SortDirection,
+): ProcessNode {
   const pids = [...new Set(records.flatMap((record) => (record.pid ? [record.pid] : [])))];
   const duplicate = pids.length > 1;
   const protectedProcess = records.every((record) => record.protected);
@@ -91,7 +98,7 @@ function toProcessNode(id: string, records: PortRecord[], language: Language): P
     identification: records[0]?.identification ?? translate(language, "tree.unknown"),
     groupName: records[0]?.groupName ?? translate(language, "tree.noFolder"),
     category: records[0]?.category ?? "other",
-    records: [...records].sort((left, right) => left.port - right.port),
+    records: sortRecords(records, sort, direction),
     pids,
     workingDirectory: firstValue(records.map((record) => record.workingDirectory)),
     processPath: firstValue(records.map((record) => record.processPath)),
@@ -123,22 +130,81 @@ function evaluate(
   return "ok";
 }
 
-function sortProcesses(processes: ProcessNode[], sort: SortMode): ProcessNode[] {
+export function defaultSortDirection(sort: SortMode): SortDirection {
+  return sort === "name" || sort === "port" ? "ascending" : "descending";
+}
+
+function sortProcesses(
+  processes: ProcessNode[],
+  sort: SortMode,
+  direction: SortDirection,
+  locale: string,
+): ProcessNode[] {
   const priorities: Record<Evaluation, number> = {
-    exposed: 0,
-    duplicate: 1,
-    review: 2,
-    active: 3,
-    ok: 4,
-    protected: 5,
+    exposed: 5,
+    duplicate: 4,
+    review: 3,
+    active: 2,
+    ok: 1,
+    protected: 0,
   };
 
   return [...processes].sort((left, right) => {
-    if (sort === "port") return (left.records[0]?.port ?? 0) - (right.records[0]?.port ?? 0);
-    if (sort === "activity") return right.activityScore - left.activityScore;
-    if (sort === "age") return (right.uptimeSeconds ?? 0) - (left.uptimeSeconds ?? 0);
-    return priorities[left.evaluation] - priorities[right.evaluation];
+    const comparison = sort === "name"
+      ? left.identification.localeCompare(right.identification, locale, { sensitivity: "base" })
+      : sort === "port"
+        ? minimumPort(left) - minimumPort(right)
+        : sort === "scope"
+          ? scopeRank(left) - scopeRank(right)
+          : sort === "activity"
+            ? compareActivity(left, right)
+            : priorities[left.evaluation] - priorities[right.evaluation];
+
+    return applyDirection(comparison, direction)
+      || left.identification.localeCompare(right.identification, locale, { sensitivity: "base" });
   });
+}
+
+function sortRecords(records: PortRecord[], sort: SortMode, direction: SortDirection): PortRecord[] {
+  return [...records].sort((left, right) => {
+    const comparison = sort === "scope"
+      ? Number(left.scope === "network") - Number(right.scope === "network")
+      : sort === "activity"
+        ? recordActivity(left) - recordActivity(right)
+        : sort === "evaluation"
+          ? recordEvaluationRank(left) - recordEvaluationRank(right)
+          : left.port - right.port;
+    return applyDirection(comparison, direction) || left.port - right.port;
+  });
+}
+
+function minimumPort(process: ProcessNode): number {
+  return Math.min(...process.records.map((record) => record.port));
+}
+
+function scopeRank(process: ProcessNode): number {
+  const scopes = new Set(process.records.map((record) => record.scope));
+  if (scopes.size > 1) return 1;
+  return scopes.has("network") ? 2 : 0;
+}
+
+function compareActivity(left: ProcessNode, right: ProcessNode): number {
+  return left.activityScore - right.activityScore
+    || left.activeConnections - right.activeConnections
+    || left.cpuUsage - right.cpuUsage;
+}
+
+function recordActivity(record: PortRecord): number {
+  return record.cpuUsage + record.activeConnections;
+}
+
+function recordEvaluationRank(record: PortRecord): number {
+  if (record.protected) return 0;
+  return record.scope === "network" ? 2 : 1;
+}
+
+function applyDirection(comparison: number, direction: SortDirection): number {
+  return direction === "ascending" ? comparison : -comparison;
 }
 
 function firstValue<T>(values: Array<T | null>): T | null {

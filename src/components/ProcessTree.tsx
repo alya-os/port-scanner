@@ -4,6 +4,7 @@ import {
   BracketsCurly,
   CaretDown,
   CaretRight,
+  CaretUp,
   Cube,
   Database,
   FilePy,
@@ -18,7 +19,7 @@ import {
 import { ActivityBars } from "./ActivityBars";
 import { evaluationCopy, formatDuration, shortAddress } from "../lib/format";
 import { useI18n, type Translator } from "../lib/i18n";
-import type { ProcessGroup, ProcessNode } from "../types";
+import type { ProcessGroup, ProcessNode, SortDirection, SortMode } from "../types";
 
 interface ProcessTreeProps {
   groups: ProcessGroup[];
@@ -26,9 +27,21 @@ interface ProcessTreeProps {
   onSelect: (process: ProcessNode) => void;
   scanning: boolean;
   platform: string;
+  sort: SortMode;
+  sortDirection: SortDirection;
+  onSortChange: (sort: SortMode) => void;
 }
 
-export function ProcessTree({ groups, selectedId, onSelect, scanning, platform }: ProcessTreeProps) {
+export function ProcessTree({
+  groups,
+  selectedId,
+  onSelect,
+  scanning,
+  platform,
+  sort,
+  sortDirection,
+  onSortChange,
+}: ProcessTreeProps) {
   const { language, t } = useI18n();
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [expandedProcesses, setExpandedProcesses] = useState<Set<string>>(new Set());
@@ -76,11 +89,11 @@ export function ProcessTree({ groups, selectedId, onSelect, scanning, platform }
     <section className="process-tree" aria-label={t("tree.families", { count: totalVisible })}>
       <div className="tree-scroll">
         <div className="tree-columns tree-header" role="row">
-          <span>{t("tree.element")}</span>
-          <span>{t("tree.port")}</span>
-          <span>{t("tree.scope")}</span>
-          <span>{t("tree.activity")}</span>
-          <span>{t("tree.evaluation")}</span>
+          <SortableHeader label={t("tree.element")} mode="name" activeSort={sort} direction={sortDirection} onSort={onSortChange} />
+          <SortableHeader label={t("tree.port")} mode="port" activeSort={sort} direction={sortDirection} onSort={onSortChange} />
+          <SortableHeader label={t("tree.scope")} mode="scope" activeSort={sort} direction={sortDirection} onSort={onSortChange} />
+          <SortableHeader label={t("tree.activity")} mode="activity" activeSort={sort} direction={sortDirection} onSort={onSortChange} />
+          <SortableHeader label={t("tree.evaluation")} mode="evaluation" activeSort={sort} direction={sortDirection} onSort={onSortChange} />
         </div>
         {groups.map((group) => {
           const groupOpen = expandedGroups.has(group.id);
@@ -195,6 +208,39 @@ export function ProcessTree({ groups, selectedId, onSelect, scanning, platform }
         })}
       </div>
     </section>
+  );
+}
+
+function SortableHeader({
+  label,
+  mode,
+  activeSort,
+  direction,
+  onSort,
+}: {
+  label: string;
+  mode: SortMode;
+  activeSort: SortMode;
+  direction: SortDirection;
+  onSort: (sort: SortMode) => void;
+}) {
+  const { t } = useI18n();
+  const active = mode === activeSort;
+  return (
+    <span className="tree-header-cell" role="columnheader" aria-sort={active ? direction : "none"}>
+      <button
+        className={`tree-sort-button ${active ? "is-active" : ""}`}
+        type="button"
+        onClick={() => onSort(mode)}
+        aria-label={t("tree.sortBy", { column: label })}
+        title={t("tree.sortBy", { column: label })}
+      >
+        <span>{label}</span>
+        {active && (direction === "ascending"
+          ? <CaretUp size={13} weight="bold" />
+          : <CaretDown size={13} weight="bold" />)}
+      </button>
+    </span>
   );
 }
 

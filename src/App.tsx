@@ -17,7 +17,7 @@ import {
   scanPorts,
   stopDockerContainer,
 } from "./lib/api";
-import { buildProcessTree } from "./lib/processTree";
+import { buildProcessTree, defaultSortDirection } from "./lib/processTree";
 import { createTranslator, I18nProvider, localizeRuleLabel, translate } from "./lib/i18n";
 import type {
   AppSettings,
@@ -25,6 +25,7 @@ import type {
   PortRecord,
   ProcessNode,
   ScanResult,
+  SortDirection,
   SortMode,
   ThemeMode,
 } from "./types";
@@ -41,6 +42,7 @@ export function App() {
   const [filter, setFilter] = useState<NavFilter>("all");
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortMode>("evaluation");
+  const [sortDirection, setSortDirection] = useState<SortDirection>(defaultSortDirection("evaluation"));
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [scanning, setScanning] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -101,8 +103,8 @@ export function App() {
     [scan?.records, settings],
   );
   const groups = useMemo(
-    () => buildProcessTree(records, filter, query, sort, settings.language),
-    [filter, query, records, settings.language, sort],
+    () => buildProcessTree(records, filter, query, sort, settings.language, sortDirection),
+    [filter, query, records, settings.language, sort, sortDirection],
   );
   const processes = useMemo(() => groups.flatMap((group) => group.processes), [groups]);
   const selected = processes.find((process) => process.id === selectedId) ?? processes[0] ?? null;
@@ -125,6 +127,15 @@ export function App() {
   const toggleTheme = () => {
     const nextTheme: ThemeMode = resolvedTheme === "dark" ? "light" : "dark";
     void persistSettings({ ...settings, theme: nextTheme });
+  };
+
+  const handleSortChange = (nextSort: SortMode) => {
+    if (nextSort === sort) {
+      setSortDirection((current) => current === "ascending" ? "descending" : "ascending");
+      return;
+    }
+    setSort(nextSort);
+    setSortDirection(defaultSortDirection(nextSort));
   };
 
   const handleReveal = async (path: string) => {
@@ -216,12 +227,19 @@ export function App() {
       <Toolbar
         query={query}
         onQueryChange={setQuery}
-        sort={sort}
-        onSortChange={setSort}
         onScan={runScan}
         scanning={scanning}
       />
-      <ProcessTree groups={groups} selectedId={selected?.id ?? null} onSelect={(process) => setSelectedId(process.id)} scanning={scanning} platform={scan?.platform ?? "macos"} />
+      <ProcessTree
+        groups={groups}
+        selectedId={selected?.id ?? null}
+        onSelect={(process) => setSelectedId(process.id)}
+        scanning={scanning}
+        platform={scan?.platform ?? "macos"}
+        sort={sort}
+        sortDirection={sortDirection}
+        onSortChange={handleSortChange}
+      />
       <Inspector
         process={selected}
         platform={scan?.platform ?? "macos"}

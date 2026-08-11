@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildProcessTree, defaultSortDirection, processIdentityKey } from "../src/lib/processTree.ts";
+import {
+  assessDuplicateProcesses,
+  buildProcessTree,
+  defaultSortDirection,
+  normalizeDuplicateCommand,
+  processIdentityKey,
+} from "../src/lib/processTree.ts";
 
 function record(overrides = {}) {
   return {
@@ -77,6 +83,60 @@ test("groups ports that belong to the same executable and working folder", () =>
     .flatMap((group) => group.processes);
   assert.equal(processes.length, 1);
   assert.deepEqual(processes[0].records.map((item) => item.port), [3000, 3001]);
+});
+
+test("confirms independent duplicate servers when only their port differs", () => {
+  const first = record({ command: "python -m uvicorn app.main:app --host 127.0.0.1 --port 5305", port: 5305 });
+  const second = record({
+    id: "tcp-127.0.0.1-5306-43",
+    pid: 43,
+    command: "python -m uvicorn app.main:app --host 127.0.0.1 --port 5306",
+    port: 5306,
+  });
+
+  const assessment = assessDuplicateProcesses([first, second]);
+  assert.equal(assessment.confidence, "confirmed");
+  assert.equal(assessment.instanceCount, 2);
+  assert.ok(assessment.evidence.includes("sameCommand"));
+  assert.ok(assessment.evidence.includes("independentProcesses"));
+  assert.equal(assessment.normalizedCommand, "python -m uvicorn app.main:app --host 127.0.0.1 --port=<port>");
+
+  const process = buildProcessTree([first, second], "all", "", "evaluation")
+    .flatMap((group) => group.processes)[0];
+  assert.equal(process.evaluation, "duplicateConfirmed");
+});
+
+test("keeps materially different commands at possible confidence", () => {
+  const first = record({ command: "node api.js", port: 3000 });
+  const second = record({ id: "worker", pid: 43, command: "node worker.js", port: 3001 });
+
+  const assessment = assessDuplicateProcesses([first, second]);
+  assert.equal(assessment.confidence, "possible");
+  assert.ok(assessment.evidence.includes("differentCommands"));
+});
+
+test("recognizes parent-child workers instead of calling them duplicates", () => {
+  const first = record({ command: "node server.js --port 3000", port: 3000 });
+  const second = record({ id: "child", pid: 43, parentPid: 42, command: "node server.js --port 3001", port: 3001 });
+
+  const assessment = assessDuplicateProcesses([first, second]);
+  assert.equal(assessment.confidence, "managed");
+  assert.ok(assessment.evidence.includes("parentChild"));
+});
+
+test("recognizes an explicit multi-worker runtime", () => {
+  const first = record({ command: "uvicorn api:app --workers 4 --port 3000", port: 3000 });
+  const second = record({ id: "worker-2", pid: 43, command: "uvicorn api:app --workers 4 --port 3001", port: 3001 });
+
+  const assessment = assessDuplicateProcesses([first, second]);
+  assert.equal(assessment.confidence, "managed");
+  assert.ok(assessment.evidence.includes("managedRuntime"));
+});
+
+test("normalizes common port syntaxes without erasing other arguments", () => {
+  assert.equal(normalizeDuplicateCommand("uvicorn api:app --port=5305 --reload", [5305]), "uvicorn api:app --port=<port> --reload");
+  assert.equal(normalizeDuplicateCommand("PORT=5305 node server.js", [5305]), "PORT=<port> node server.js");
+  assert.equal(normalizeDuplicateCommand("gunicorn api:app --bind 127.0.0.1:5305", [5305]), "gunicorn api:app --bind 127.0.0.1:<port>");
 });
 
 test("sorts process columns in both directions", () => {

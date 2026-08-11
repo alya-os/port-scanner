@@ -8,6 +8,8 @@ test("translates interface copy and interpolated values", () => {
   assert.equal(translate("en", "settings.languageTitle"), "Language");
   assert.equal(translate("en", "common.portMany", { count: 17 }), "17 ports");
   assert.equal(translate("en", "common.processOne", { count: 1 }), "1 process");
+  assert.equal(translate("en", "evaluation.duplicateConfirmed", { count: 4 }), "4 duplicates");
+  assert.equal(translate("fr", "evaluation.duplicatePossible", { count: 2 }), "2 similaires");
 });
 
 test("localizes built-in protection labels without changing custom labels", () => {

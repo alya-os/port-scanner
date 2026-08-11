@@ -71,7 +71,27 @@ export interface DockerStopRequest {
   force: boolean;
 }
 
-export type Evaluation = "protected" | "duplicate" | "exposed" | "review" | "active" | "ok";
+export type DuplicateConfidence = "none" | "possible" | "confirmed" | "managed";
+export type DuplicateEvidence =
+  | "sameExecutable"
+  | "sameWorkingDirectory"
+  | "sameCommand"
+  | "differentPorts"
+  | "independentProcesses"
+  | "differentCommands"
+  | "missingMetadata"
+  | "parentChild"
+  | "managedRuntime"
+  | "sharedListener";
+
+export interface DuplicateAssessment {
+  confidence: DuplicateConfidence;
+  instanceCount: number;
+  evidence: DuplicateEvidence[];
+  normalizedCommand: string | null;
+}
+
+export type Evaluation = "protected" | "duplicateConfirmed" | "duplicatePossible" | "exposed" | "review" | "active" | "ok";
 
 export interface ProcessNode {
   id: string;
@@ -88,6 +108,7 @@ export interface ProcessNode {
   evaluation: Evaluation;
   protected: boolean;
   duplicate: boolean;
+  duplicateAssessment: DuplicateAssessment;
   exposed: boolean;
   activityScore: number;
   cpuUsage: number;

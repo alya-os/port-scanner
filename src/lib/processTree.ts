@@ -1,5 +1,16 @@
 import { localeFor, translate } from "./i18n.ts";
-import type { Evaluation, Language, NavFilter, PortRecord, ProcessGroup, ProcessNode, SortDirection, SortMode } from "../types";
+import type {
+  DuplicateAssessment,
+  DuplicateEvidence,
+  Evaluation,
+  Language,
+  NavFilter,
+  PortRecord,
+  ProcessGroup,
+  ProcessNode,
+  SortDirection,
+  SortMode,
+} from "../types";
 
 export function buildProcessTree(
   records: PortRecord[],
@@ -77,6 +88,84 @@ export function processIdentityKey(record: PortRecord): string {
   ].join("::");
 }
 
+export function assessDuplicateProcesses(records: PortRecord[]): DuplicateAssessment {
+  const recordsByPid = new Map<number, PortRecord[]>();
+  for (const record of records) {
+    if (!record.pid) continue;
+    const profileRecords = recordsByPid.get(record.pid) ?? [];
+    profileRecords.push(record);
+    recordsByPid.set(record.pid, profileRecords);
+  }
+
+  const profiles = [...recordsByPid.entries()].map(([pid, profileRecords]) => ({
+    pid,
+    parentPid: firstValue(profileRecords.map((record) => record.parentPid)),
+    processPath: firstValue(profileRecords.map((record) => record.processPath)),
+    workingDirectory: firstValue(profileRecords.map((record) => record.workingDirectory)),
+    command: firstValue(profileRecords.map((record) => record.command)),
+    ports: [...new Set(profileRecords.map((record) => record.port))],
+  }));
+
+  if (profiles.length <= 1) return emptyDuplicateAssessment(profiles.length);
+
+  const pids = new Set(profiles.map((profile) => profile.pid));
+  const parentChild = profiles.some((profile) => profile.parentPid !== null && pids.has(profile.parentPid));
+  const managedRuntime = profiles.some((profile) => isManagedRuntime(profile.command))
+    || records.some((record) => Boolean(record.dockerContainerId));
+  const sharedListener = hasSharedListener(records);
+  const sameExecutable = hasOneCompleteValue(profiles.map((profile) => profile.processPath));
+  const sameWorkingDirectory = hasOneCompleteValue(profiles.map((profile) => profile.workingDirectory));
+  const normalizedCommands = profiles.map((profile) => normalizeDuplicateCommand(profile.command, profile.ports));
+  const sameCommand = hasOneCompleteValue(normalizedCommands);
+  const differentPorts = new Set(profiles.flatMap((profile) => profile.ports)).size > 1;
+  const independentProcesses = !parentChild && !managedRuntime && !sharedListener;
+
+  const evidence: DuplicateEvidence[] = [];
+  if (sameExecutable) evidence.push("sameExecutable");
+  if (sameWorkingDirectory) evidence.push("sameWorkingDirectory");
+  if (sameCommand) evidence.push("sameCommand");
+  if (differentPorts) evidence.push("differentPorts");
+  if (independentProcesses) evidence.push("independentProcesses");
+
+  if (parentChild || managedRuntime || sharedListener) {
+    if (parentChild) evidence.push("parentChild");
+    if (managedRuntime) evidence.push("managedRuntime");
+    if (sharedListener) evidence.push("sharedListener");
+    return { confidence: "managed", instanceCount: profiles.length, evidence, normalizedCommand: null };
+  }
+
+  if (sameExecutable && sameWorkingDirectory && sameCommand && differentPorts && independentProcesses) {
+    return {
+      confidence: "confirmed",
+      instanceCount: profiles.length,
+      evidence,
+      normalizedCommand: normalizedCommands[0],
+    };
+  }
+
+  if (normalizedCommands.some((command) => command === null) || !sameExecutable || !sameWorkingDirectory) {
+    evidence.push("missingMetadata");
+  } else if (!sameCommand) {
+    evidence.push("differentCommands");
+  }
+
+  return { confidence: "possible", instanceCount: profiles.length, evidence, normalizedCommand: null };
+}
+
+export function normalizeDuplicateCommand(command: string | null, ports: number[]): string | null {
+  if (!command?.trim()) return null;
+  let signature = command
+    .trim()
+    .replace(/(^|\s)(--port|-p)(?:=|\s+)\d{1,5}(?=\s|$)/gi, "$1$2=<port>")
+    .replace(/\b(PORT|HTTP_PORT|SERVER_PORT)=\d{1,5}\b/gi, "$1=<port>");
+
+  for (const port of ports) {
+    signature = signature.replace(new RegExp(`:${port}\\b`, "g"), ":<port>");
+  }
+
+  return signature.replace(/\s+/g, " ");
+}
+
 function toProcessNode(
   id: string,
   records: PortRecord[],
@@ -85,7 +174,8 @@ function toProcessNode(
   direction: SortDirection,
 ): ProcessNode {
   const pids = [...new Set(records.flatMap((record) => (record.pid ? [record.pid] : [])))];
-  const duplicate = pids.length > 1;
+  const duplicateAssessment = assessDuplicateProcesses(records);
+  const duplicate = duplicateAssessment.confidence === "confirmed" || duplicateAssessment.confidence === "possible";
   const protectedProcess = records.every((record) => record.protected);
   const exposed = records.some((record) => record.scope === "network") && !protectedProcess;
   const cpuUsage = records.reduce((total, record) => total + record.cpuUsage, 0);
@@ -104,9 +194,10 @@ function toProcessNode(
     processPath: firstValue(records.map((record) => record.processPath)),
     command: firstValue(records.map((record) => record.command)),
     dockerContainerId: firstValue(records.map((record) => record.dockerContainerId)),
-    evaluation: evaluate(records, duplicate, protectedProcess, exposed),
+    evaluation: evaluate(records, duplicateAssessment, protectedProcess, exposed),
     protected: protectedProcess,
     duplicate,
+    duplicateAssessment,
     exposed,
     activityScore: Math.min(5, Math.ceil(cpuUsage / 2 + activeConnections + (uptimeSeconds && uptimeSeconds < 1800 ? 2 : 0))),
     cpuUsage,
@@ -117,13 +208,14 @@ function toProcessNode(
 
 function evaluate(
   records: PortRecord[],
-  duplicate: boolean,
+  duplicateAssessment: DuplicateAssessment,
   protectedProcess: boolean,
   exposed: boolean,
 ): Evaluation {
   if (protectedProcess) return "protected";
-  if (duplicate) return "duplicate";
+  if (duplicateAssessment.confidence === "confirmed") return "duplicateConfirmed";
   if (exposed) return "exposed";
+  if (duplicateAssessment.confidence === "possible") return "duplicatePossible";
   const uptime = maximum(records.map((record) => record.uptimeSeconds));
   if (uptime && uptime > 7 * 86_400) return "review";
   if (uptime && uptime < 1800) return "active";
@@ -141,8 +233,9 @@ function sortProcesses(
   locale: string,
 ): ProcessNode[] {
   const priorities: Record<Evaluation, number> = {
+    duplicateConfirmed: 6,
     exposed: 5,
-    duplicate: 4,
+    duplicatePossible: 4,
     review: 3,
     active: 2,
     ok: 1,
@@ -214,4 +307,30 @@ function firstValue<T>(values: Array<T | null>): T | null {
 function maximum(values: Array<number | null>): number | null {
   const present = values.filter((value): value is number => value !== null);
   return present.length ? Math.max(...present) : null;
+}
+
+function emptyDuplicateAssessment(instanceCount: number): DuplicateAssessment {
+  return { confidence: "none", instanceCount, evidence: [], normalizedCommand: null };
+}
+
+function hasOneCompleteValue(values: Array<string | null>): boolean {
+  return values.every((value) => Boolean(value)) && new Set(values).size === 1;
+}
+
+function isManagedRuntime(command: string | null): boolean {
+  if (!command) return false;
+  return /\b(pm2-runtime|supervisord|circusd)\b/i.test(command)
+    || /(^|\s)--workers(?:=|\s+)[2-9]\d*(?=\s|$)/i.test(command);
+}
+
+function hasSharedListener(records: PortRecord[]): boolean {
+  const ownersByListener = new Map<string, Set<number>>();
+  for (const record of records) {
+    if (!record.pid) continue;
+    const listener = `${record.protocol}:${record.localAddress}:${record.port}`;
+    const owners = ownersByListener.get(listener) ?? new Set<number>();
+    owners.add(record.pid);
+    ownersByListener.set(listener, owners);
+  }
+  return [...ownersByListener.values()].some((owners) => owners.size > 1);
 }

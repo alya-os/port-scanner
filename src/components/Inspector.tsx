@@ -1,6 +1,7 @@
 import {
   AppleLogo,
   BracketsCurly,
+  CheckCircle,
   Copy,
   Cube,
   Database,
@@ -8,8 +9,10 @@ import {
   FolderOpen,
   LinuxLogo,
   LockSimple,
+  Info,
   ShieldCheck,
   ShieldPlus,
+  StackSimple,
   Stop,
   TerminalWindow,
   Warning,
@@ -17,8 +20,8 @@ import {
 } from "@phosphor-icons/react";
 import { useState } from "react";
 import { evaluationCopy, formatDuration, formatMemory, formatStartedAt, scopeLabel } from "../lib/format";
-import { useI18n } from "../lib/i18n";
-import type { ProcessNode } from "../types";
+import { useI18n, type TranslationKey, type Translator } from "../lib/i18n";
+import type { DuplicateConfidence, DuplicateEvidence, ProcessNode } from "../types";
 
 interface InspectorProps {
   process: ProcessNode | null;
@@ -44,7 +47,9 @@ export function Inspector({ process, platform, onReveal, onTerminal, onProtect, 
     );
   }
 
-  const evaluation = evaluationCopy(process.evaluation, language);
+  const evaluation = evaluationCopy(process.evaluation, language, {
+    count: process.duplicateAssessment.instanceCount,
+  });
   const path = process.workingDirectory;
   const primary = process.records[0];
   const isDocker = Boolean(process.dockerContainerId);
@@ -71,6 +76,9 @@ export function Inspector({ process, platform, onReveal, onTerminal, onProtect, 
         <div className={`inspector-status status-${evaluation.tone}`}>
           <i aria-hidden="true" /> {evaluation.label}
         </div>
+        {process.duplicateAssessment.confidence !== "none" && (
+          <DuplicateAnalysis process={process} t={t} />
+        )}
 
         <section className="origin-section">
           <div className="section-label">{t("inspector.origin")}</div>
@@ -210,5 +218,73 @@ function Detail({ label, value, mono = false }: { label: string; value: string; 
       <span>{label}</span>
       <strong className={mono ? "mono" : ""}>{value}</strong>
     </div>
+  );
+}
+
+const duplicateCopy: Record<Exclude<DuplicateConfidence, "none">, { badge: TranslationKey; description: TranslationKey }> = {
+  confirmed: {
+    badge: "inspector.duplicateConfirmedBadge",
+    description: "inspector.duplicateConfirmedDescription",
+  },
+  possible: {
+    badge: "inspector.duplicatePossibleBadge",
+    description: "inspector.duplicatePossibleDescription",
+  },
+  managed: {
+    badge: "inspector.duplicateManagedBadge",
+    description: "inspector.duplicateManagedDescription",
+  },
+};
+
+const duplicateEvidenceCopy: Record<DuplicateEvidence, TranslationKey> = {
+  sameExecutable: "inspector.evidenceSameExecutable",
+  sameWorkingDirectory: "inspector.evidenceSameWorkingDirectory",
+  sameCommand: "inspector.evidenceSameCommand",
+  differentPorts: "inspector.evidenceDifferentPorts",
+  independentProcesses: "inspector.evidenceIndependentProcesses",
+  differentCommands: "inspector.evidenceDifferentCommands",
+  missingMetadata: "inspector.evidenceMissingMetadata",
+  parentChild: "inspector.evidenceParentChild",
+  managedRuntime: "inspector.evidenceManagedRuntime",
+  sharedListener: "inspector.evidenceSharedListener",
+};
+
+function DuplicateAnalysis({ process, t }: { process: ProcessNode; t: Translator }) {
+  const assessment = process.duplicateAssessment;
+  if (assessment.confidence === "none") return null;
+  const copy = duplicateCopy[assessment.confidence];
+  const confirmed = assessment.confidence === "confirmed";
+
+  return (
+    <section
+      className={`duplicate-analysis is-${assessment.confidence}`}
+      aria-label={t("inspector.duplicateAnalysisTitle")}
+    >
+      <div className="duplicate-analysis-heading">
+        <StackSimple size={19} weight="duotone" aria-hidden="true" />
+        <div>
+          <strong>{t("inspector.duplicateAnalysisTitle")}</strong>
+          <span>{t(copy.description, { count: assessment.instanceCount })}</span>
+        </div>
+        <span className="duplicate-confidence">{t(copy.badge)}</span>
+      </div>
+      <ul>
+        {assessment.evidence.map((evidence) => (
+          <li key={evidence}>
+            {confirmed ? <CheckCircle size={14} weight="fill" /> : <Info size={14} weight="fill" />}
+            <span>{t(duplicateEvidenceCopy[evidence])}</span>
+          </li>
+        ))}
+      </ul>
+      {assessment.normalizedCommand && (
+        <div className="duplicate-signature">
+          <span>{t("inspector.duplicateSignature")}</span>
+          <code>{assessment.normalizedCommand}</code>
+        </div>
+      )}
+      {confirmed && (
+        <p className="duplicate-safety"><Info size={14} weight="fill" /> {t("inspector.duplicateSafety")}</p>
+      )}
+    </section>
   );
 }

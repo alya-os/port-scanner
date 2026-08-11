@@ -36,7 +36,7 @@ The product explains open ports through the developer's actual project hierarchy
 - Show port, protocol, bound address, network scope, PID, parent PID, executable, command, working directory, start time, uptime, CPU activity, memory, and active connection count when the OS permits it.
 - Categorize entries as Applications, operating-system services, or Others.
 - Search, sort, filter, expand, collapse, and inspect process families and their ports.
-- Detect likely duplicate process families that share an executable and working directory.
+- Distinguish confirmed identical independent processes from possible similarities and managed workers by comparing executable, working directory, normalized command, process relationships, and listener ownership.
 - Open the working folder and start a terminal in that folder.
 - Stop one or several selected process instances only after confirmation.
 - Stop the exact selected Docker container by container ID instead of treating Docker Desktop's shared backend PID as the target.

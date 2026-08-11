@@ -3,16 +3,21 @@ import type { Evaluation, Language, Scope } from "../types";
 
 const evaluationMeta: Record<Evaluation, { label: TranslationKey; tone: string }> = {
   protected: { label: "evaluation.protected", tone: "protected" },
-  duplicate: { label: "evaluation.duplicate", tone: "warning" },
+  duplicateConfirmed: { label: "evaluation.duplicateConfirmed", tone: "warning" },
+  duplicatePossible: { label: "evaluation.duplicatePossible", tone: "warning" },
   exposed: { label: "evaluation.exposed", tone: "danger" },
   review: { label: "evaluation.review", tone: "warning" },
   active: { label: "evaluation.active", tone: "success" },
   ok: { label: "evaluation.ok", tone: "success" },
 };
 
-export function evaluationCopy(evaluation: Evaluation, language: Language): { label: string; tone: string } {
+export function evaluationCopy(
+  evaluation: Evaluation,
+  language: Language,
+  values: Record<string, string | number> = {},
+): { label: string; tone: string } {
   const meta = evaluationMeta[evaluation];
-  return { label: translate(language, meta.label), tone: meta.tone };
+  return { label: translate(language, meta.label, values), tone: meta.tone };
 }
 
 export function formatDuration(totalSeconds: number | null, language: Language = "en"): string {

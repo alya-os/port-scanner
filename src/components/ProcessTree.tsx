@@ -131,7 +131,9 @@ export function ProcessTree({
                   {group.processes.map((process) => {
                     const processOpen = expandedProcesses.has(process.id);
                     const selected = selectedId === process.id;
-                    const evaluation = evaluationCopy(process.evaluation, language);
+                    const evaluation = evaluationCopy(process.evaluation, language, {
+                      count: process.duplicateAssessment.instanceCount,
+                    });
                     return (
                       <div className="process-branch" key={process.id}>
                         <div className={`tree-columns process-row ${selected ? "is-selected" : ""}`}>

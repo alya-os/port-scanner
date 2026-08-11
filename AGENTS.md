@@ -22,5 +22,6 @@ When implementing from a selected generated mock, treat that image as the source
 - Refreshing preserves the workbench geometry: the scan button keeps a fixed footprint and current results stay in place beneath a localized loading state until replacement data is ready.
 - English is the default interface language; a user's explicit French or English choice from Settings must persist across launches.
 - Make the working directory, duplicate processes, process activity, scope, and protection state easy to scan.
+- Duplicate analysis must distinguish confirmed identical independent instances from possible similarities and managed workers, and expose the supporting evidence in the inspector.
 - Destructive process actions require confirmation and backend protection checks.
 - The production target is Tauri 2 + React/TypeScript + Rust for macOS, Windows, and Linux.

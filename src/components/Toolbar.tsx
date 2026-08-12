@@ -29,7 +29,7 @@ export function Toolbar({
       <div className="toolbar-title">
         <span className="title-signal" aria-hidden="true" />
         <div>
-          <strong>PortRoot</strong>
+          <strong>Port Scanner</strong>
           <span>{t("app.tagline")}</span>
         </div>
       </div>

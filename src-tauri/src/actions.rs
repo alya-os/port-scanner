@@ -295,10 +295,10 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "requires PORTROOT_DOCKER_TEST_CONTAINER_ID and a live Docker daemon"]
+    #[ignore = "requires PORT_SCANNER_DOCKER_TEST_CONTAINER_ID and a live Docker daemon"]
     fn stops_the_exact_configured_docker_container() {
-        let container_id = std::env::var("PORTROOT_DOCKER_TEST_CONTAINER_ID")
-            .expect("PORTROOT_DOCKER_TEST_CONTAINER_ID must be set");
+        let container_id = std::env::var("PORT_SCANNER_DOCKER_TEST_CONTAINER_ID")
+            .expect("PORT_SCANNER_DOCKER_TEST_CONTAINER_ID must be set");
         let result = stop_docker_container_with_settings(
             &crate::settings::default_settings(),
             DockerStopRequest {

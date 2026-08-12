@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "PortRoot",
+  "productName": "Port Scanner",
   "version": "0.1.0",
-  "identifier": "ca.jplefebvre.portroot",
+  "identifier": "ca.jplefebvre.port-scanner",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "PortRoot",
+        "title": "Port Scanner",
         "width": 1440,
         "height": 960,
         "minWidth": 1080,

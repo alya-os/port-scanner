@@ -1,7 +1,13 @@
 {
-  "name": "portroot",
-  "version": "0.0.0",
+  "name": "port-scanner",
+  "version": "0.1.0",
+  "description": "Local-first desktop app that traces open ports to projects, processes, and Docker containers, then helps stop them safely.",
   "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/alya-os/port-scanner.git"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -2488,6 +2488,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "port-scanner"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "netstat2",
+ "serde",
+ "serde_json",
+ "sysinfo",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-log",
+]
+
+[[package]]
 name = "portable-atomic"
 version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2500,20 +2514,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a106d1259c23fac8e543272398ae0e3c0b8d33c88ed73d0cc71b0f1d902618"
 dependencies = [
  "portable-atomic",
-]
-
-[[package]]
-name = "portroot"
-version = "0.1.0"
-dependencies = [
- "log",
- "netstat2",
- "serde",
- "serde_json",
- "sysinfo",
- "tauri",
- "tauri-build",
- "tauri-plugin-log",
 ]
 
 [[package]]

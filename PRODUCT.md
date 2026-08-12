@@ -28,7 +28,7 @@ The product explains open ports through the developer's actual project hierarchy
 - Scans real sockets and process metadata on the current machine.
 - Opens a process working directory in the native file manager or terminal.
 - Supports frequent rescans while development tools are starting and stopping.
-- May later be published as an open-source GitHub repository.
+- Is prepared for publication as the open-source `alya-os/port-scanner` GitHub repository.
 
 ## Capabilities and Constraints
 
@@ -44,7 +44,7 @@ The product explains open ports through the developer's actual project hierarchy
 - Ship editable protection rules for processes, paths, and ports, with system services protected by default.
 - Default to dark mode, with light and system modes available.
 - Some system-owned process details can remain unavailable without elevated privileges; the product must report that limitation instead of pretending the scan is complete.
-- The confirmed public product name is **PortRoot** with the positioning line “Every port, traced to its root.” / “Chaque port, jusqu’à sa racine.”
+- The confirmed public product name is **Port Scanner** with the positioning line “Every port, traced to its root.” / “Chaque port, jusqu’à sa racine.”
 
 ## Brand Commitments
 
@@ -57,7 +57,9 @@ The product explains open ports through the developer's actual project hierarchy
 
 - Dark implementation target: `design/reference-dark.png`.
 - A real macOS scan in the originating conversation identified 34 listening TCP ports, 10 fixed UDP ports, Docker mappings, Local services, orphaned Python/Node servers, and system services.
-- No repository URL, analytics, or public distribution policy has been confirmed.
+- Repository target: `https://github.com/alya-os/port-scanner`.
+- License: MIT, copyright Jean-Philippe Lefebvre (2026).
+- No analytics or signed public distribution policy has been confirmed.
 
 ## Product Principles
 

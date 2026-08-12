@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use portroot_lib::{scanner::scan_with_settings, settings::default_settings};
+use port_scanner_lib::{scanner::scan_with_settings, settings::default_settings};
 
 fn main() {
     let result = scan_with_settings(&default_settings()).expect("live socket scan failed");

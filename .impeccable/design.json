@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedAt": "2026-08-10T15:37:21Z",
-  "title": "Design System: PortRoot",
+  "title": "Design System: Port Scanner",
   "extensions": {
     "colorMeta": {
       "graphite-canvas": { "role": "neutral", "displayName": "Graphite Canvas", "canonical": "#071017", "tonalRamp": ["#061016", "#0a151c", "#11232c", "#1d2c34", "#2b4049", "#5b7079", "#a8b7bd", "#eaf0f2"] },
@@ -124,7 +124,7 @@
   ],
   "narrative": {
     "northStar": "The Local Systems Workbench",
-    "overview": "PortRoot should feel like a purpose-built instrument on a developer's desk: quiet, exact, and ready for sustained daily use. Its density is deliberate. Graphite planes suppress visual noise so relationships, live state, risk, and origin can be read in one pass without turning the interface into a generic monitoring dashboard.\n\nThe visual world is relationship-first rather than widget-first. A persistent category rail, a structured process tree, a technical inspector, and a slim status strip form one continuous operating surface. Color is rare and semantic: teal marks current focus, green indicates healthy activity, amber requests review, red communicates exposure or destruction, and lavender marks protected system state.",
+    "overview": "Port Scanner should feel like a purpose-built instrument on a developer's desk: quiet, exact, and ready for sustained daily use. Its density is deliberate. Graphite planes suppress visual noise so relationships, live state, risk, and origin can be read in one pass without turning the interface into a generic monitoring dashboard.\n\nThe visual world is relationship-first rather than widget-first. A persistent category rail, a structured process tree, a technical inspector, and a slim status strip form one continuous operating surface. Color is rare and semantic: teal marks current focus, green indicates healthy activity, amber requests review, red communicates exposure or destruction, and lavender marks protected system state.",
     "keyCharacteristics": [
       "Dense, relationship-first process and port hierarchy",
       "Full-height desktop composition with persistent controls and inspector",

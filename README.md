@@ -1,6 +1,6 @@
 <div align="center">
-  <img src="docs/images/portroot-logo.png" alt="PortRoot logo" width="112" height="112">
-  <h1>PortRoot</h1>
+  <img src="docs/images/port-scanner-logo.png" alt="Port Scanner logo" width="112" height="112">
+  <h1>Port Scanner</h1>
   <p><strong>Every port, traced to its root.</strong></p>
   <p>
     A local-first desktop utility that turns open ports into an understandable map of<br>
@@ -12,18 +12,18 @@
 </div>
 
 <p align="center">
-  <img src="docs/images/portroot-interface-dark.png" alt="PortRoot displaying local processes, Docker containers, listening ports, network exposure, protection filters, and the process inspector in dark mode">
+  <img src="docs/images/port-scanner-interface-dark.png" alt="Port Scanner displaying local processes, Docker containers, listening ports, network exposure, protection filters, and the process inspector in dark mode">
 </p>
 
-PortRoot helps developers understand what is still running on their machine. Instead of showing an anonymous socket table, it traces each discoverable listener back through its process, application, Docker container, and working directory.
+Port Scanner helps developers understand what is still running on their machine. Instead of showing an anonymous socket table, it traces each discoverable listener back through its process, application, Docker container, and working directory.
 
 Use it to find forgotten development servers, review network exposure, confirm duplicate processes, protect critical services, and safely stop work that no longer belongs in the background.
 
-## Why PortRoot?
+## Why Port Scanner?
 
 Modern development environments accumulate state quickly: local APIs, Vite servers, Python workers, databases, browser helpers, Docker containers, and tools launched from terminals that were closed hours ago.
 
-PortRoot turns that state into a relationship-first tree:
+Port Scanner turns that state into a relationship-first tree:
 
 ```text
 Project or application
@@ -59,7 +59,7 @@ The result answers the questions that raw tools such as `lsof`, `netstat`, or `s
 
 ### Understand duplicates before stopping them
 
-PortRoot compares the executable, working directory, normalized command, listener ports, process relationships, and runtime ownership before assigning a duplicate status.
+Port Scanner compares the executable, working directory, normalized command, listener ports, process relationships, and runtime ownership before assigning a duplicate status.
 
 - **Confirmed duplicates** are independent processes launching the same normalized command from the same folder.
 - **Possible duplicates** share an origin but do not provide enough matching metadata for certainty.
@@ -98,13 +98,13 @@ Protection rules can target:
 - executable or working-directory paths;
 - exact Docker container names.
 
-Custom protections are reversible. If a protection rule covers several processes, PortRoot shows the full process and port impact before removing it. Removing a protection never stops a process.
+Custom protections are reversible. If a protection rule covers several processes, Port Scanner shows the full process and port impact before removing it. Removing a protection never stops a process.
 
-> PortRoot does not require `sudo`. Some process owners, paths, or commands may remain hidden by the operating system; partial visibility is reported instead of being treated as a complete scan.
+> Port Scanner does not require `sudo`. Some process owners, paths, or commands may remain hidden by the operating system; partial visibility is reported instead of being treated as a complete scan.
 
 ## Project status
 
-PortRoot is currently a pre-release `0.1.0` project.
+Port Scanner is currently a pre-release `0.1.0` project.
 
 | Platform | Status |
 | --- | --- |
@@ -131,7 +131,7 @@ The application is local-first and requires no account or cloud backend. Publicl
 - Node.js and npm
 - Rust stable — the native package declares Rust `1.77.2` as its minimum version
 - The Tauri 2 system dependencies for your operating system
-- Docker CLI, only if you want PortRoot to identify and stop Docker containers
+- Docker CLI, only if you want Port Scanner to identify and stop Docker containers
 
 ### Install and launch
 
@@ -191,11 +191,13 @@ The GitHub Actions workflow targets macOS, Windows, and Ubuntu. The full manual 
 
 ## Known limitations
 
-- UDP does not provide a universal `LISTEN` state. PortRoot excludes clearly ephemeral connected UDP endpoints to avoid presenting outbound traffic as an inbound service.
+- UDP does not provide a universal `LISTEN` state. Port Scanner excludes clearly ephemeral connected UDP endpoints to avoid presenting outbound traffic as an inbound service.
 - Process paths, commands, and PIDs can be hidden for processes owned by another user or restricted by the operating system.
 - Forced termination is supported by the native engine but is intentionally not exposed in the current interface.
 - Windows and Linux still require the manual validation documented in the cross-platform test plan before a public release.
 
 ## License
 
-No open-source license has been published yet. Until one is added, the source code remains all rights reserved.
+Port Scanner is released under the [MIT License](LICENSE).
+
+Copyright © 2026 Jean-Philippe Lefebvre.

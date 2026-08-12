@@ -1,5 +1,5 @@
 ---
-name: PortRoot
+name: Port Scanner
 description: A dense relationship-first desktop workbench for understanding and safely managing local ports and processes.
 colors:
   graphite-canvas: "#071017"
@@ -144,13 +144,13 @@ components:
     padding: "11px 10px"
 ---
 
-# Design System: PortRoot
+# Design System: Port Scanner
 
 ## Overview
 
 **Creative North Star: "The Local Systems Workbench"**
 
-PortRoot should feel like a purpose-built instrument on a developer's desk: quiet, exact, and ready for sustained daily use. Its density is deliberate. Graphite planes suppress visual noise so relationships, live state, risk, and origin can be read in one pass without turning the interface into a generic monitoring dashboard.
+Port Scanner should feel like a purpose-built instrument on a developer's desk: quiet, exact, and ready for sustained daily use. Its density is deliberate. Graphite planes suppress visual noise so relationships, live state, risk, and origin can be read in one pass without turning the interface into a generic monitoring dashboard.
 
 The visual world is relationship-first rather than widget-first. A persistent category rail, a structured process tree, a technical inspector, and a slim status strip form one continuous operating surface. Color is rare and semantic: teal marks current focus, green indicates healthy activity, amber requests review, red communicates exposure or destruction, and lavender marks protected system state.
 
@@ -233,7 +233,7 @@ Light mode is a semantic remap, not a separate visual identity. Preserve the sam
 
 **The Dense but Legible Rule.** Rows may be compact, but primary identity stays at 13–14px and tertiary labels never replace the main text contrast level.
 
-PortRoot supports English and French as complete interface languages. English is the first-launch default, while a user's explicit choice persists across launches. Translated layouts must preserve the same hierarchy, density, truncation behavior, technical formatting, and semantic color roles. Project names, commands, paths, PIDs, ports, and user-authored protection labels are never translated.
+Port Scanner supports English and French as complete interface languages. English is the first-launch default, while a user's explicit choice persists across launches. Translated layouts must preserve the same hierarchy, density, truncation behavior, technical formatting, and semantic color roles. Project names, commands, paths, PIDs, ports, and user-authored protection labels are never translated.
 
 ## Layout
 
@@ -243,7 +243,7 @@ At 1240px and below, the rail contracts to 88px and the inspector to 360px, seco
 
 Spacing follows a compact 4px-derived rhythm with frequent 8px, 12px, 16px, 20px, and 24px steps. Rows use height to express hierarchy: group rows are 43px, process rows 54px, and port rows 40px. Do not loosen this rhythm into airy card spacing; the application earns clarity through alignment, repetition, and controlled contrast.
 
-Scrollable work regions use thin graphite tracks and thumbs that belong to their surrounding surface. Teal is reserved for scrollbar hover and active feedback, preserving the same focus semantics as the rest of PortRoot.
+Scrollable work regions use thin graphite tracks and thumbs that belong to their surrounding surface. Teal is reserved for scrollbar hover and active feedback, preserving the same focus semantics as the rest of Port Scanner.
 
 ### Named Rules
 

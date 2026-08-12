@@ -5,8 +5,8 @@ import type { ActionResult, AppSettings, DockerStopRequest, KillRequest, ScanRes
 export const isTauriRuntime = () => "__TAURI_INTERNALS__" in window;
 
 const wait = (milliseconds: number) => new Promise((resolve) => window.setTimeout(resolve, milliseconds));
-const SETTINGS_STORAGE_KEY = "portroot-settings";
-const LEGACY_SETTINGS_STORAGE_KEY = "connexions-locales-settings";
+const SETTINGS_STORAGE_KEY = "port-scanner-settings";
+const LEGACY_SETTINGS_STORAGE_KEYS = ["portroot-settings", "connexions-locales-settings"];
 
 export async function scanPorts(): Promise<ScanResult> {
   if (isTauriRuntime()) return invoke<ScanResult>("scan_ports");
@@ -17,13 +17,19 @@ export async function scanPorts(): Promise<ScanResult> {
 export async function getSettings(): Promise<AppSettings> {
   if (isTauriRuntime()) return normalizeSettings(await invoke<AppSettings>("get_settings"));
   const stored = window.localStorage.getItem(SETTINGS_STORAGE_KEY);
-  const legacy = stored ? null : window.localStorage.getItem(LEGACY_SETTINGS_STORAGE_KEY);
-  if (legacy) {
-    window.localStorage.setItem(SETTINGS_STORAGE_KEY, legacy);
-    window.localStorage.removeItem(LEGACY_SETTINGS_STORAGE_KEY);
-  }
+  const legacyKey = stored
+    ? null
+    : LEGACY_SETTINGS_STORAGE_KEYS.find((key) => window.localStorage.getItem(key) !== null) ?? null;
+  const legacy = legacyKey ? window.localStorage.getItem(legacyKey) : null;
   const serialized = stored ?? legacy;
-  return serialized ? normalizeSettings(JSON.parse(serialized) as Partial<AppSettings>) : structuredClone(mockSettings);
+  const settings = serialized
+    ? normalizeSettings(JSON.parse(serialized) as Partial<AppSettings>)
+    : structuredClone(mockSettings);
+  if (legacy && legacyKey) {
+    window.localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+    window.localStorage.removeItem(legacyKey);
+  }
+  return settings;
 }
 
 export async function saveSettings(settings: AppSettings): Promise<AppSettings> {
@@ -57,11 +63,11 @@ export async function openTerminal(path: string): Promise<ActionResult> {
 export async function killProcess(request: KillRequest): Promise<ActionResult> {
   if (isTauriRuntime()) return invoke<ActionResult>("kill_process", { request });
   await wait(260);
-  throw new Error("L’arrêt réel nécessite l’application de bureau PortRoot.");
+  throw new Error("L’arrêt réel nécessite l’application de bureau Port Scanner.");
 }
 
 export async function stopDockerContainer(request: DockerStopRequest): Promise<ActionResult> {
   if (isTauriRuntime()) return invoke<ActionResult>("stop_docker_container", { request });
   await wait(260);
-  throw new Error("L’arrêt réel nécessite l’application de bureau PortRoot.");
+  throw new Error("L’arrêt réel nécessite l’application de bureau Port Scanner.");
 }

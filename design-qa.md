@@ -67,14 +67,14 @@ Fixes:
 
 - Applied the annotated sidebar feedback without changing the relationship-first hierarchy: the top control collapses the rail from 102 px to 64 px and expands the center workspace.
 - Moved theme and settings from the toolbar into a persistent bottom sidebar utility group. Both controls remain keyboard accessible and functional while the sidebar is collapsed.
-- Replaced generic browser scrollbars with PortRoot graphite thumbs/tracks and teal interaction states. Computed dark-mode inspector thumb color is `rgb(53, 80, 90)`.
+- Replaced generic browser scrollbars with Port Scanner graphite thumbs/tracks and teal interaction states. Computed dark-mode inspector thumb color is `rgb(53, 80, 90)`.
 - 1440 × 1024 interaction checks: sidebar width = 64 px when collapsed, toolbar left edge = 64 px, and category labels are visually hidden while accessible button names remain available.
 - 1080 × 760 compact check: body `clientWidth` = `scrollWidth` = 1080 px; toolbar `clientWidth` = `scrollWidth` = 992 px; tree `clientWidth` = `scrollWidth` = 631 px.
 - Settings opens from the new sidebar position; theme changes dark → light → dark; collapse changes expanded → collapsed → expanded.
 
 ### Pass 5
 
-- Replaced the operating-system `<select>` popup, whose white surface made dark-mode options unreadable, with a PortRoot-owned listbox menu.
+- Replaced the operating-system `<select>` popup, whose white surface made dark-mode options unreadable, with a Port Scanner-owned listbox menu.
 - The open menu now uses the raised graphite surface, strong graphite seam, teal selected state, checkmark, focus halo, and the same compact 7 px control radius as the toolbar.
 - Dark open-state colors: menu `rgb(13, 26, 34)`, unselected option text `rgb(195, 205, 209)`, selected text `rgb(34, 195, 189)`.
 - Light open-state colors: menu `rgb(255, 255, 255)`, unselected option text `rgb(52, 74, 83)`.

@@ -1,17 +1,17 @@
 [package]
-name = "portroot"
+name = "port-scanner"
 version = "0.1.0"
 description = "Inspect and safely manage local listening ports and their processes."
 authors = ["Jean-Philippe Lefebvre"]
-license = ""
-repository = ""
+license = "MIT"
+repository = "https://github.com/alya-os/port-scanner"
 edition = "2021"
 rust-version = "1.77.2"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
-name = "portroot_lib"
+name = "port_scanner_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

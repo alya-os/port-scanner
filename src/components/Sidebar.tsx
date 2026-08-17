@@ -6,6 +6,7 @@ import {
   LockSimple,
   Moon,
   PuzzlePiece,
+  Robot,
   SidebarSimple,
   SquaresFour,
   Sun,
@@ -32,6 +33,7 @@ const navItems: Array<{ id: NavFilter; label: TranslationKey; icon: Icon }> = [
   { id: "application", label: "sidebar.applications", icon: Desktop },
   { id: "system", label: "sidebar.system", icon: AppleLogo },
   { id: "other", label: "sidebar.other", icon: PuzzlePiece },
+  { id: "ai", label: "sidebar.ai", icon: Robot },
   { id: "protected", label: "sidebar.protected", icon: LockSimple },
 ];
 
@@ -47,14 +49,24 @@ export function Sidebar({
   onOpenSettings,
 }: SidebarProps) {
   const { t } = useI18n();
-  const SystemIcon = platform === "macos" ? AppleLogo : platform === "windows" ? WindowsLogo : LinuxLogo;
+  const SystemIcon =
+    platform === "macos"
+      ? AppleLogo
+      : platform === "windows"
+      ? WindowsLogo
+      : LinuxLogo;
   const processCount = (filter: NavFilter) => {
     const selected = records.filter((record) => {
       if (filter === "all") return true;
       if (filter === "protected") return record.protected;
+      if (filter === "ai") return record.ai;
       return record.category === filter;
     });
-    return new Set(selected.map((record) => `${record.processName}:${record.pid ?? record.port}`)).size;
+    return new Set(
+      selected.map(
+        (record) => `${record.processName}:${record.pid ?? record.port}`
+      )
+    ).size;
   };
 
   return (
@@ -73,18 +85,24 @@ export function Sidebar({
       <nav className="sidebar-nav" id="primary-navigation">
         {navItems.map((item) => {
           const IconComponent = item.id === "system" ? SystemIcon : item.icon;
-          const label = item.id === "system" ? systemLabel(platform, t) : t(item.label);
+          const label =
+            item.id === "system" ? systemLabel(platform, t) : t(item.label);
           return (
             <button
               key={item.id}
-              className={`sidebar-item ${active === item.id ? "is-active" : ""}`}
+              className={`sidebar-item ${
+                active === item.id ? "is-active" : ""
+              }`}
               type="button"
               onClick={() => onChange(item.id)}
               aria-pressed={active === item.id}
               title={label}
             >
               <span className="sidebar-icon-wrap">
-                <IconComponent size={24} weight={active === item.id ? "fill" : "regular"} />
+                <IconComponent
+                  size={24}
+                  weight={active === item.id ? "fill" : "regular"}
+                />
                 <span className="sidebar-count">{processCount(item.id)}</span>
               </span>
               <span className="sidebar-label">{label}</span>
@@ -98,8 +116,16 @@ export function Sidebar({
             className="sidebar-utility-button"
             type="button"
             onClick={onToggleTheme}
-            aria-label={theme === "dark" ? t("sidebar.switchLight") : t("sidebar.switchDark")}
-            title={theme === "dark" ? t("sidebar.lightTheme") : t("sidebar.darkTheme")}
+            aria-label={
+              theme === "dark"
+                ? t("sidebar.switchLight")
+                : t("sidebar.switchDark")
+            }
+            title={
+              theme === "dark"
+                ? t("sidebar.lightTheme")
+                : t("sidebar.darkTheme")
+            }
           >
             {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
           </button>

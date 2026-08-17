@@ -2,7 +2,7 @@ export type ThemeMode = "dark" | "light" | "system";
 export type Language = "fr" | "en";
 export type Category = "application" | "system" | "other";
 export type Scope = "local" | "network";
-export type NavFilter = "all" | Category | "protected";
+export type NavFilter = "all" | Category | "protected" | "ai";
 export type SortMode = "name" | "port" | "scope" | "activity" | "evaluation";
 export type SortDirection = "ascending" | "descending";
 export type StopMode = "all" | "duplicates";
@@ -15,6 +15,8 @@ export interface PortRecord {
   scope: Scope;
   pid: number | null;
   parentPid: number | null;
+  launcher: string | null;
+  launcherPid: number | null;
   processName: string;
   processPath: string | null;
   command: string | null;
@@ -23,13 +25,22 @@ export interface PortRecord {
   identification: string;
   dockerContainerId: string | null;
   category: Category;
+  ai: boolean;
   startedAt: number | null;
   uptimeSeconds: number | null;
   cpuUsage: number;
   memoryBytes: number;
   activeConnections: number;
   protected: boolean;
-  protectionReasons: string[];
+  protectionReasons: ProtectionReason[];
+}
+
+// Motif renvoyé par le backend sous forme d'identifiant. L'interface le traduit.
+export type ProtectionReasonKind = "systemDefault" | "systemMain" | "rule";
+
+export interface ProtectionReason {
+  kind: ProtectionReasonKind;
+  ruleId: string | null;
 }
 
 export interface ScanResult {
@@ -85,6 +96,7 @@ export type DuplicateEvidence =
   | "missingMetadata"
   | "parentChild"
   | "managedRuntime"
+  | "agentManaged"
   | "sharedListener";
 
 export interface DuplicateAssessment {
@@ -94,7 +106,14 @@ export interface DuplicateAssessment {
   normalizedCommand: string | null;
 }
 
-export type Evaluation = "protected" | "duplicateConfirmed" | "duplicatePossible" | "exposed" | "review" | "active" | "ok";
+export type Evaluation =
+  | "protected"
+  | "duplicateConfirmed"
+  | "duplicatePossible"
+  | "exposed"
+  | "review"
+  | "active"
+  | "ok";
 
 export interface ProcessNode {
   id: string;
@@ -107,6 +126,9 @@ export interface ProcessNode {
   workingDirectory: string | null;
   processPath: string | null;
   command: string | null;
+  launcher: string | null;
+  launcherPid: number | null;
+  ai: boolean;
   dockerContainerId: string | null;
   evaluation: Evaluation;
   protected: boolean;

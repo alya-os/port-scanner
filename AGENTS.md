@@ -31,3 +31,8 @@ When implementing from a selected generated mock, treat that image as the source
 - The inspector must allow custom protections to be removed. Shared rules must disclose their full process/port impact before removal, and new Docker protections must target the exact container name instead of Docker Desktop's shared data path.
 - The All view must offer a session-level toolbar filter for hiding protected processes without changing or deleting their protection rules.
 - The production target is Tauri 2 + React/TypeScript + Rust for macOS, Windows, and Linux.
+- A working directory is inherited from the parent process, so it answers "where was this launched from", not "who owns this". The folder stays the top-level grouping, but the inspector calls it the launch folder rather than the process origin, names the resolved launcher next to the raw parent PID, and says so explicitly when an agent passed its folder down.
+- AI is a cross-cutting marker (`ai`) alongside the category, with its own sidebar filter, exactly like `protected`. A process is never moved out of Applications or Other to be shown as AI.
+- A process counts as AI when its own executable is a known agent host, when its command carries an MCP marker, or when any ancestor is an agent host. The ancestry rule is the load-bearing one: it is the only thing that catches a helper with a neutral name such as `toolbox`, `npx`, or `uvx`.
+- Agent hosts are matched by exact process name, never by substring, so `codexample` is not mistaken for `codex`.
+- Several instances of the same agent helper, each attached to a distinct host session, are managed instances rather than confirmed duplicates. Without that rule the inspector would offer to stop another session's MCP server.

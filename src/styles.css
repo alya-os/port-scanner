@@ -41,6 +41,9 @@
   --protected-soft: rgba(180, 119, 255, 0.1);
   --protected-soft-strong: rgba(180, 119, 255, 0.16);
   --protected-border: rgba(180, 119, 255, 0.42);
+  --agent: #58a6ff;
+  --agent-soft: rgba(88, 166, 255, 0.14);
+  --agent-border: rgba(88, 166, 255, 0.4);
   --overlay: rgba(1, 7, 10, 0.72);
   --scan-scrim: rgba(7, 16, 23, 0.78);
   --shadow: 0 18px 48px rgba(0, 0, 0, 0.36);
@@ -76,6 +79,9 @@
   --protected-soft: rgba(124, 63, 193, 0.08);
   --protected-soft-strong: rgba(124, 63, 193, 0.14);
   --protected-border: rgba(124, 63, 193, 0.36);
+  --agent: #1f5fb3;
+  --agent-soft: rgba(31, 95, 179, 0.1);
+  --agent-border: rgba(31, 95, 179, 0.34);
   --overlay: rgba(17, 29, 34, 0.38);
   --scan-scrim: rgba(251, 252, 252, 0.82);
   --shadow: 0 18px 48px rgba(34, 49, 55, 0.18);
@@ -701,6 +707,22 @@ code {
   text-align: left;
 }
 
+/* Les lignes sont désormais les points d'entrée au clavier : sans marque de
+   focus visible, la navigation par flèches serait invisible. */
+.tree-group-row,
+.process-row,
+.port-row {
+  cursor: pointer;
+}
+
+.tree-group-row:focus-visible,
+.process-row:focus-visible,
+.port-row:focus-visible {
+  outline: 2px solid var(--accent-bright);
+  outline-offset: -2px;
+  border-radius: var(--radius-sm);
+}
+
 .tree-group-row:hover {
   background: var(--surface-hover);
 }
@@ -810,12 +832,43 @@ code {
   min-width: 0;
 }
 
-.process-select strong,
 .process-select small {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.process-select strong {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+/* Seul le nom s'abrège : le marqueur reste lisible quel que soit sa longueur. */
+.process-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ai-tag {
+  flex: 0 0 auto;
+  padding: 1px 6px;
+  border: 1px solid var(--agent-border);
+  border-radius: var(--radius-sm);
+  background: var(--agent-soft);
+  color: var(--agent);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.origin-note {
+  margin: 8px 0 0;
+  color: var(--text-faint);
+  font-size: 11px;
+  line-height: 1.45;
 }
 
 .process-select strong {

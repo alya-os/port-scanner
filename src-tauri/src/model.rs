@@ -10,6 +10,8 @@ pub struct PortRecord {
     pub scope: String,
     pub pid: Option<u32>,
     pub parent_pid: Option<u32>,
+    pub launcher: Option<String>,
+    pub launcher_pid: Option<u32>,
     pub process_name: String,
     pub process_path: Option<String>,
     pub command: Option<String>,
@@ -18,13 +20,50 @@ pub struct PortRecord {
     pub identification: String,
     pub docker_container_id: Option<String>,
     pub category: String,
+    pub ai: bool,
     pub started_at: Option<u64>,
     pub uptime_seconds: Option<u64>,
     pub cpu_usage: f32,
     pub memory_bytes: u64,
     pub active_connections: u32,
     pub protected: bool,
-    pub protection_reasons: Vec<String>,
+    pub protection_reasons: Vec<ProtectionReason>,
+}
+
+/// Motif de protection sous forme d'identifiant. L'interface le traduit; le
+/// backend le décrit en clair uniquement pour ses propres messages d'erreur.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProtectionReason {
+    pub kind: String,
+    pub rule_id: Option<String>,
+}
+
+impl ProtectionReason {
+    pub const SYSTEM_DEFAULT: &'static str = "systemDefault";
+    pub const SYSTEM_MAIN: &'static str = "systemMain";
+    pub const RULE: &'static str = "rule";
+
+    pub fn system_default() -> Self {
+        Self {
+            kind: Self::SYSTEM_DEFAULT.into(),
+            rule_id: None,
+        }
+    }
+
+    pub fn system_main() -> Self {
+        Self {
+            kind: Self::SYSTEM_MAIN.into(),
+            rule_id: None,
+        }
+    }
+
+    pub fn rule(rule_id: &str) -> Self {
+        Self {
+            kind: Self::RULE.into(),
+            rule_id: Some(rule_id.into()),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize)]

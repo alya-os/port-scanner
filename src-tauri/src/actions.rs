@@ -1,13 +1,13 @@
 use std::{path::Path, process::Command};
 
-use sysinfo::{Pid, Signal, System};
+use sysinfo::{Pid, ProcessesToUpdate, Signal, System};
 use tauri::AppHandle;
 
 use crate::{
     docker,
     model::{ActionResult, AppSettings, DockerStopRequest, KillRequest, PortRecord},
-    scanner::{current_ports_for_pid, detect_category, scan_with_settings},
-    settings::{load_settings, protection_reasons},
+    scanner::{current_ports_for_pid, detect_category, scan_with_options, CpuSampling},
+    settings::{describe_protection_reasons, load_settings, protection_reasons},
 };
 
 #[tauri::command]
@@ -35,9 +35,8 @@ pub fn open_terminal(path: String) -> Result<ActionResult, String> {
         .status();
 
     #[cfg(target_os = "windows")]
-    let status = Command::new("cmd")
-        .args(["/K", "cd", "/d"])
-        .arg(&path)
+    let status = windows_terminal_command()
+        .current_dir(&path)
         .status();
 
     #[cfg(all(unix, not(target_os = "macos")))]
@@ -56,9 +55,13 @@ pub fn kill_process(app: AppHandle, request: KillRequest) -> Result<ActionResult
         return Err("Ce processus système ne peut pas être arrêté.".into());
     }
 
-    let system = System::new_all();
+    // Un seul processus nous intéresse : recenser toute la machine serait du
+    // temps perdu là où l'attente se remarque le plus.
+    let target = Pid::from_u32(request.pid);
+    let mut system = System::new();
+    system.refresh_processes(ProcessesToUpdate::Some(&[target]), true);
     let process = system
-        .process(Pid::from_u32(request.pid))
+        .process(target)
         .ok_or_else(|| "Le processus n’existe plus. Relancez l’analyse.".to_string())?;
 
     if request
@@ -91,7 +94,10 @@ pub fn kill_process(app: AppHandle, request: KillRequest) -> Result<ActionResult
         );
         let reasons = protection_reasons(&settings, &record);
         if !reasons.is_empty() {
-            return Err(format!("Processus protégé : {}", reasons.join(" · ")));
+            return Err(format!(
+                "Processus protégé : {}",
+                describe_protection_reasons(&settings, &reasons).join(" · ")
+            ));
         }
     }
 
@@ -147,7 +153,11 @@ fn stop_docker_container_with_settings(
     settings: &AppSettings,
     request: DockerStopRequest,
 ) -> Result<ActionResult, String> {
-    let scan = scan_with_settings(settings)?;
+    // Ce scan ne sert qu'à retrouver les protections du conteneur : il doit rester
+    // complet, car un scan partiel ne reproduirait pas les champs sur lesquels une
+    // règle de chemin protège un conteneur. Il n'a en revanche aucun besoin des
+    // pourcentages d'occupation, donc de la pause qui les rend mesurables.
+    let scan = scan_with_options(settings, CpuSampling::Skipped)?;
     let matching_records = scan
         .records
         .iter()
@@ -160,14 +170,15 @@ fn stop_docker_container_with_settings(
         );
     }
 
-    let mut reasons = matching_records
+    let reasons = matching_records
         .iter()
         .flat_map(|record| record.protection_reasons.iter().cloned())
         .collect::<Vec<_>>();
-    reasons.sort();
-    reasons.dedup();
     if !reasons.is_empty() {
-        return Err(format!("Conteneur protégé : {}", reasons.join(" · ")));
+        return Err(format!(
+            "Conteneur protégé : {}",
+            describe_protection_reasons(settings, &reasons).join(" · ")
+        ));
     }
 
     let stopped = docker::stop_container(&request.container_id, request.force)?;
@@ -196,6 +207,8 @@ fn guard_record(
         scope: "local".into(),
         pid: Some(pid),
         parent_pid: None,
+        launcher: None,
+        launcher_pid: None,
         process_name: name.into(),
         process_path: path.map(str::to_string),
         command: None,
@@ -204,6 +217,7 @@ fn guard_record(
         identification: name.into(),
         docker_container_id: None,
         category: detect_category(name, path),
+        ai: false,
         started_at: None,
         uptime_seconds: None,
         cpu_usage: 0.0,
@@ -238,6 +252,23 @@ fn command_result(
         Ok(status) => Err(format!("{error_message} (code {:?}).", status.code())),
         Err(error) => Err(format!("{error_message} : {error}")),
     }
+}
+
+/// `cmd.exe` réanalyse sa ligne de commande selon ses propres règles, que
+/// l'échappement de Rust ne couvre pas : un dossier nommé `projet & calc`
+/// exécuterait `calc`. Le chemin ne doit donc jamais y figurer. Il est transmis
+/// par le répertoire de travail du processus, et `start` en hérite.
+///
+/// Tous les arguments sont des littéraux `&'static str` : le type interdit qu'un
+/// chemin s'y glisse à nouveau. L'argument vide est le titre de la fenêtre, que
+/// `start` réclame avant le programme, faute de quoi il prendrait le programme
+/// lui-même pour un titre.
+#[cfg(target_os = "windows")]
+fn windows_terminal_command() -> Command {
+    const ARGUMENTS: [&str; 4] = ["/C", "start", "", "cmd"];
+    let mut command = Command::new("cmd");
+    command.args(ARGUMENTS);
+    command
 }
 
 #[cfg(all(unix, not(target_os = "macos")))]
@@ -291,7 +322,26 @@ mod tests {
             }],
         };
 
-        assert_eq!(protection_reasons(&settings, &record), vec!["Projet A"]);
+        assert_eq!(
+            protection_reasons(&settings, &record),
+            vec![crate::model::ProtectionReason::rule("project-a")]
+        );
+    }
+
+    #[test]
+    #[cfg(target_os = "windows")]
+    fn the_windows_terminal_command_never_carries_the_folder() {
+        let command = windows_terminal_command();
+        let arguments = command
+            .get_args()
+            .map(|argument| argument.to_string_lossy().into_owned())
+            .collect::<Vec<_>>();
+
+        assert_eq!(command.get_program(), "cmd");
+        assert_eq!(arguments, ["/C", "start", "", "cmd"]);
+        // Le dossier arrive par le répertoire de travail, jamais par la ligne de
+        // commande : c'est ce qui met les métacaractères de `cmd.exe` hors jeu.
+        assert!(command.get_current_dir().is_none());
     }
 
     #[test]

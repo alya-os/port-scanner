@@ -15,6 +15,19 @@ test("translates interface copy and interpolated values", () => {
   assert.equal(translate("en", "inspector.removeProtection"), "Remove protection");
   assert.equal(translate("fr", "settings.kindContainer"), "Conteneur Docker");
   assert.equal(translate("en", "toolbar.hideProtected"), "Hide protected");
+  assert.equal(translate("fr", "sidebar.ai"), "IA");
+  assert.equal(translate("en", "sidebar.ai"), "AI");
+  assert.equal(
+    translate("fr", "tree.launchedBy", { name: "toolbox", launcher: "Claude Code" }),
+    "toolbox · lancé par Claude Code",
+  );
+  assert.equal(
+    translate("en", "inspector.launcherValue", { launcher: "Claude Code", pid: 79329 }),
+    "Claude Code (PID 79329)",
+  );
+  // Le dossier n'est plus présenté comme l'origine : il est hérité du lanceur.
+  assert.equal(translate("fr", "inspector.origin"), "Dossier de lancement");
+  assert.equal(translate("en", "inspector.origin"), "Launch folder");
 });
 
 test("localizes built-in protection labels without changing custom labels", () => {

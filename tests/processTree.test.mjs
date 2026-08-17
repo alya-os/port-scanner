@@ -18,6 +18,9 @@ function record(overrides = {}) {
     scope: "local",
     pid: 42,
     parentPid: 1,
+    launcher: null,
+    launcherPid: null,
+    ai: false,
     processName: "node",
     processPath: "/opt/homebrew/bin/node",
     command: "node server.js",
@@ -207,4 +210,83 @@ test("hides protected processes without removing their unprotected siblings or g
   assert.deepEqual(visibleGroups.map((group) => group.label), ["api"]);
   assert.deepEqual(visibleGroups.flatMap((group) => group.processes).map((process) => process.identification), ["Visible API"]);
   assert.equal(visibleGroups[0].protected, false);
+});
+
+function agentHelper(overrides = {}) {
+  return record({
+    id: "mcp-24186",
+    port: 24186,
+    pid: 79388,
+    parentPid: 79329,
+    launcher: "Claude Code",
+    launcherPid: 79329,
+    ai: true,
+    processName: "toolbox",
+    processPath: "/usr/local/bin/toolbox",
+    command: "/usr/local/bin/toolbox --prebuilt bigquery --stdio -p 24186",
+    workingDirectory: "/Users/jp/Projects/sillage",
+    groupName: "sillage",
+    identification: "sillage",
+    ...overrides,
+  });
+}
+
+test("the AI filter selects agent processes across every category", () => {
+  const records = [
+    record(),
+    agentHelper(),
+    record({ id: "system", pid: 99, port: 7000, category: "system", groupName: "System services" }),
+  ];
+
+  const groups = buildProcessTree(records, "ai", "", "name", "en", "ascending");
+  const processes = groups.flatMap((group) => group.processes);
+
+  assert.deepEqual(processes.map((process) => process.name), ["toolbox"]);
+  assert.equal(processes[0].launcher, "Claude Code");
+  assert.equal(processes[0].ai, true);
+});
+
+test("finds an agent process by the name of its launcher", () => {
+  const groups = buildProcessTree([record(), agentHelper()], "all", "claude code", "name", "en", "ascending");
+
+  assert.deepEqual(groups.flatMap((group) => group.processes).map((process) => process.name), ["toolbox"]);
+});
+
+test("one MCP server per agent session is managed, not a duplicate to clean up", () => {
+  // Même exécutable, même commande, même dossier hérité, ports distincts :
+  // sans la filiation, l'analyse conclurait à un doublon confirmé et proposerait
+  // d'arrêter le serveur de l'autre session.
+  const assessment = assessDuplicateProcesses([
+    agentHelper(),
+    agentHelper({
+      id: "mcp-21857",
+      port: 21857,
+      pid: 88641,
+      parentPid: 88563,
+      launcherPid: 88563,
+      command: "/usr/local/bin/toolbox --prebuilt bigquery --stdio -p 21857",
+    }),
+  ]);
+
+  assert.equal(assessment.confidence, "managed");
+  assert.ok(assessment.evidence.includes("agentManaged"));
+  assert.ok(!assessment.evidence.includes("independentProcesses"));
+});
+
+test("two unrelated instances of the same agent tool stay a confirmed duplicate", () => {
+  // Sans lanceur distinct, rien ne justifie l'exception : le verdict d'origine tient.
+  const assessment = assessDuplicateProcesses([
+    agentHelper({ launcher: null, launcherPid: null, parentPid: 1 }),
+    agentHelper({
+      id: "mcp-21857",
+      port: 21857,
+      pid: 88641,
+      parentPid: 1,
+      launcher: null,
+      launcherPid: null,
+      command: "/usr/local/bin/toolbox --prebuilt bigquery --stdio -p 21857",
+    }),
+  ]);
+
+  assert.equal(assessment.confidence, "confirmed");
 });

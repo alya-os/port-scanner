@@ -1,8 +1,20 @@
 use std::{
     collections::HashMap,
+    io::Read,
     path::PathBuf,
-    process::{Command, Output},
+    process::{Child, Command, Output, Stdio},
+    thread::JoinHandle,
+    time::{Duration, Instant},
 };
+
+/// Interroger Docker doit rester une formalité. Si le démon ne répond pas, mieux
+/// vaut une analyse sans conteneurs qu'une analyse qui ne se termine jamais.
+const PROBE_TIMEOUT: Duration = Duration::from_secs(3);
+
+/// `docker stop` laisse au conteneur le délai de grâce ci-dessous avant de le
+/// tuer, donc notre propre limite doit lui laisser cette marge.
+const STOP_GRACE_SECONDS: u64 = 10;
+const STOP_TIMEOUT: Duration = Duration::from_secs(STOP_GRACE_SECONDS + 10);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DockerPort {
@@ -46,10 +58,11 @@ pub fn stop_container(container_id: &str, force: bool) -> Result<StoppedContaine
         ));
     }
 
+    let grace = STOP_GRACE_SECONDS.to_string();
     let output = if force {
-        run_docker(&["kill", container_id])?
+        run_docker_within(&["kill", container_id], STOP_TIMEOUT)?
     } else {
-        run_docker(&["stop", "--time", "10", container_id])?
+        run_docker_within(&["stop", "--time", &grace, container_id], STOP_TIMEOUT)?
     };
 
     if !output.status.success() {
@@ -158,10 +171,23 @@ fn validate_container_id(container_id: &str) -> Result<(), String> {
 }
 
 fn run_docker(arguments: &[&str]) -> Result<Output, String> {
+    run_docker_within(arguments, PROBE_TIMEOUT)
+}
+
+fn run_docker_within(arguments: &[&str], timeout: Duration) -> Result<Output, String> {
     let mut not_found = None;
     for program in docker_candidates() {
-        match Command::new(&program).args(arguments).output() {
-            Ok(output) => return Ok(output),
+        let mut command = Command::new(&program);
+        command.args(arguments);
+
+        match run_within(&mut command, timeout) {
+            Ok(Some(output)) => return Ok(output),
+            Ok(None) => {
+                return Err(format!(
+                    "Docker n’a pas répondu en {} s. Le démon est peut-être en cours de démarrage ou bloqué.",
+                    timeout.as_secs()
+                ));
+            }
             Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
                 not_found = Some(error);
             }
@@ -180,6 +206,60 @@ fn run_docker(arguments: &[&str]) -> Result<Output, String> {
             .map(|error| format!(" ({error})"))
             .unwrap_or_default()
     ))
+}
+
+/// `Ok(None)` signale l'expiration du délai : l'enfant a été tué et n'a rien
+/// d'exploitable à offrir. Une erreur, elle, reste une erreur de lancement.
+fn run_within(command: &mut Command, timeout: Duration) -> std::io::Result<Option<Output>> {
+    let mut child = command
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()?;
+
+    // Les tuyaux sont vidés sur des fils dédiés : une sortie plus grosse que le
+    // tampon du système bloquerait l'enfant avant qu'il puisse se terminer, et
+    // l'attente ci-dessous ne verrait jamais la fin.
+    let stdout = drain(child.stdout.take());
+    let stderr = drain(child.stderr.take());
+    let status = wait_within(&mut child, timeout)?;
+
+    let stdout = stdout.join().unwrap_or_default();
+    let stderr = stderr.join().unwrap_or_default();
+
+    Ok(status.map(|status| Output {
+        status,
+        stdout,
+        stderr,
+    }))
+}
+
+fn wait_within(
+    child: &mut Child,
+    timeout: Duration,
+) -> std::io::Result<Option<std::process::ExitStatus>> {
+    let deadline = Instant::now() + timeout;
+    loop {
+        if let Some(status) = child.try_wait()? {
+            return Ok(Some(status));
+        }
+        if Instant::now() >= deadline {
+            let _ = child.kill();
+            let _ = child.wait();
+            return Ok(None);
+        }
+        std::thread::sleep(Duration::from_millis(20));
+    }
+}
+
+fn drain(pipe: Option<impl Read + Send + 'static>) -> JoinHandle<Vec<u8>> {
+    std::thread::spawn(move || {
+        let mut buffer = Vec::new();
+        if let Some(mut pipe) = pipe {
+            let _ = pipe.read_to_end(&mut buffer);
+        }
+        buffer
+    })
 }
 
 fn docker_candidates() -> Vec<PathBuf> {
@@ -240,6 +320,51 @@ mod tests {
         assert!(validate_container_id("guessly-mig").is_err());
         assert!(validate_container_id("86e7b3b652fb;touch /tmp/nope").is_err());
         assert!(validate_container_id("86e7b3b652fb").is_ok());
+    }
+
+    #[test]
+    #[cfg(unix)]
+    fn a_command_that_never_answers_is_killed_at_the_deadline() {
+        let mut command = Command::new("sleep");
+        command.arg("30");
+
+        let started = Instant::now();
+        let output = run_within(&mut command, Duration::from_millis(150)).expect("le lancement");
+
+        assert!(output.is_none(), "le délai doit être signalé, pas attendu");
+        assert!(
+            started.elapsed() < Duration::from_secs(5),
+            "l'appel a duré {:?}, il n'a donc pas été interrompu",
+            started.elapsed()
+        );
+    }
+
+    #[test]
+    #[cfg(unix)]
+    fn a_command_that_answers_still_returns_its_output() {
+        let mut command = Command::new("echo");
+        command.arg("bonjour");
+
+        let output = run_within(&mut command, Duration::from_secs(5))
+            .expect("le lancement")
+            .expect("la commande répond bien avant le délai");
+
+        assert!(String::from_utf8_lossy(&output.stdout).contains("bonjour"));
+    }
+
+    #[test]
+    #[cfg(unix)]
+    fn a_chatty_command_does_not_deadlock_on_a_full_pipe() {
+        // 200 ko dépassent largement le tampon d'un tuyau : sans les fils qui
+        // vident stdout, l'enfant se bloquerait et le délai expirerait.
+        let mut command = Command::new("head");
+        command.args(["-c", "200000", "/dev/zero"]);
+
+        let output = run_within(&mut command, Duration::from_secs(5))
+            .expect("le lancement")
+            .expect("la commande doit se terminer");
+
+        assert_eq!(output.stdout.len(), 200_000);
     }
 
     #[test]

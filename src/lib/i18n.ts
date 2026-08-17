@@ -1,4 +1,10 @@
-import { createContext, createElement, useContext, useMemo, type ReactNode } from "react";
+import {
+  createContext,
+  createElement,
+  useContext,
+  useMemo,
+  type ReactNode,
+} from "react";
 import type { Language, ProtectionRule } from "../types";
 
 const fr = {
@@ -28,6 +34,7 @@ const fr = {
   "sidebar.applications": "Applications",
   "sidebar.other": "Autres",
   "sidebar.protected": "Protégés",
+  "sidebar.ai": "IA",
   "sidebar.system": "Système",
   "sidebar.collapse": "Réduire la barre latérale",
   "sidebar.expand": "Déployer la barre latérale",
@@ -45,7 +52,8 @@ const fr = {
   "toolbar.analyze": "Analyser",
   "toolbar.scanning": "Analyse…",
   "settings.title": "Réglages",
-  "settings.description": "Personnalisez l’apparence, la langue et les barrières de sécurité.",
+  "settings.description":
+    "Personnalisez l’apparence, la langue et les barrières de sécurité.",
   "settings.close": "Fermer les réglages",
   "settings.appearanceTitle": "Apparence",
   "settings.appearanceDescription": "Le thème sombre reste le mode par défaut.",
@@ -54,14 +62,17 @@ const fr = {
   "settings.themeLight": "Clair",
   "settings.themeSystem": "Système",
   "settings.languageTitle": "Langue",
-  "settings.languageDescription": "Choisissez la langue utilisée dans toute l’application.",
+  "settings.languageDescription":
+    "Choisissez la langue utilisée dans toute l’application.",
   "settings.languageAria": "Langue de l’interface",
   "settings.languageFrench": "Français",
   "settings.languageEnglish": "English",
   "settings.autoProtectTitle": "Protéger automatiquement les services système",
-  "settings.autoProtectDescription": "Empêche l’arrêt des processus reconnus comme appartenant au système.",
+  "settings.autoProtectDescription":
+    "Empêche l’arrêt des processus reconnus comme appartenant au système.",
   "settings.rulesTitle": "Règles de protection",
-  "settings.rulesDescription": "Un chemin peut viser le dossier de travail ou l’exécutable d’un projet.",
+  "settings.rulesDescription":
+    "Un chemin peut viser le dossier de travail ou l’exécutable d’un projet.",
   "settings.activeRule": "{count} active",
   "settings.activeRules": "{count} actives",
   "settings.enableRule": "Activer la règle {label}",
@@ -88,7 +99,8 @@ const fr = {
   "evaluation.active": "Actif maintenant",
   "evaluation.ok": "OK",
   "tree.emptyTitle": "Aucune connexion ne correspond",
-  "tree.emptyDescription": "Modifiez les filtres ou relancez l’analyse pour actualiser les processus.",
+  "tree.emptyDescription":
+    "Modifiez les filtres ou relancez l’analyse pour actualiser les processus.",
   "tree.families": "{count} familles de processus",
   "tree.element": "Élément",
   "tree.port": "Port",
@@ -96,7 +108,12 @@ const fr = {
   "tree.activity": "Activité",
   "tree.evaluation": "Évaluation",
   "tree.sortBy": "Trier par {column}",
+  "tree.sortedAscending": "{column}, tri croissant. Activer pour inverser.",
+  "tree.sortedDescending": "{column}, tri décroissant. Activer pour inverser.",
   "tree.protected": "Protégé",
+  "tree.launchedBy": "{name} · lancé par {launcher}",
+  "tree.aiTag": "IA",
+  "tree.aiTagTitle": "Processus lié à un agent IA",
   "tree.collapsePorts": "Replier les ports",
   "tree.showPorts": "Afficher les ports",
   "tree.instancesPorts": "{instances} instances · {ports} ports",
@@ -110,13 +127,18 @@ const fr = {
   "tree.unknown": "Inconnu",
   "activity.aria": "Activité {score} sur 5",
   "inspector.selectProcess": "Sélectionnez un processus",
-  "inspector.selectDescription": "Son dossier, sa commande et ses ports apparaîtront ici.",
+  "inspector.selectDescription":
+    "Son dossier, sa commande et ses ports apparaîtront ici.",
   "inspector.details": "Détails de {name}",
-  "inspector.origin": "Origine du processus",
+  "inspector.origin": "Dossier de lancement",
   "inspector.missingFolder": "Dossier de travail indisponible",
   "inspector.copyPath": "Copier le chemin",
   "inspector.metadata": "Métadonnées du processus",
   "inspector.parentPid": "PID parent",
+  "inspector.launcher": "Lancé par",
+  "inspector.launcherValue": "{launcher} (PID {pid})",
+  "inspector.inheritedFolder":
+    "Dossier hérité de {launcher}, pas choisi par ce processus.",
   "inspector.containerId": "ID du conteneur",
   "inspector.hostProcessPid": "PID du moteur Docker",
   "inspector.startedAt": "Démarré le",
@@ -131,20 +153,26 @@ const fr = {
   "inspector.duplicateConfirmedBadge": "Confirmé",
   "inspector.duplicatePossibleBadge": "À confirmer",
   "inspector.duplicateManagedBadge": "Géré",
-  "inspector.duplicateConfirmedDescription": "{count} processus indépendants lancent la même commande depuis le même dossier.",
-  "inspector.duplicatePossibleDescription": "{count} processus partagent la même origine, mais leurs commandes ou métadonnées ne permettent pas encore de confirmer un doublon.",
-  "inspector.duplicateManagedDescription": "{count} processus appartiennent à une famille de workers ou partagent volontairement le même écouteur.",
-  "inspector.duplicateSafety": "Confirmation technique uniquement : vérifiez le nombre d’instances attendu avant d’arrêter ce groupe.",
+  "inspector.duplicateConfirmedDescription":
+    "{count} processus indépendants lancent la même commande depuis le même dossier.",
+  "inspector.duplicatePossibleDescription":
+    "{count} processus partagent la même origine, mais leurs commandes ou métadonnées ne permettent pas encore de confirmer un doublon.",
+  "inspector.duplicateManagedDescription":
+    "{count} processus appartiennent à une famille de workers ou partagent volontairement le même écouteur.",
+  "inspector.duplicateSafety":
+    "Confirmation technique uniquement : vérifiez le nombre d’instances attendu avant d’arrêter ce groupe.",
   "inspector.duplicateSignature": "Signature comparée",
   "inspector.evidenceSameExecutable": "Même exécutable",
   "inspector.evidenceSameWorkingDirectory": "Même dossier de travail",
   "inspector.evidenceSameCommand": "Même commande, port normalisé",
   "inspector.evidenceDifferentPorts": "Ports d’écoute distincts",
-  "inspector.evidenceIndependentProcesses": "PID indépendants, sans lien parent-enfant",
+  "inspector.evidenceIndependentProcesses":
+    "PID indépendants, sans lien parent-enfant",
   "inspector.evidenceDifferentCommands": "Commandes différentes détectées",
   "inspector.evidenceMissingMetadata": "Métadonnées incomplètes",
   "inspector.evidenceParentChild": "Relation parent-enfant détectée",
   "inspector.evidenceManagedRuntime": "Gestionnaire de workers reconnu",
+  "inspector.evidenceAgentManaged": "Un exemplaire par session d’agent hôte",
   "inspector.evidenceSharedListener": "Écouteur réseau partagé",
   "inspector.command": "Commande",
   "inspector.copyCommand": "Copier la commande",
@@ -160,13 +188,20 @@ const fr = {
   "inspector.stopTitle": "Arrêt du processus",
   "inspector.stopDuplicatesTitle": "Nettoyage des doublons",
   "inspector.stopContainerTitle": "Arrêt du conteneur Docker",
-  "inspector.stopDescriptionOne": "Fermera {count} port et les connexions associées.",
-  "inspector.stopDescriptionMany": "Fermera {count} ports et les connexions associées.",
-  "inspector.stopContainerDescriptionOne": "Arrêtera ce conteneur et fermera son port publié.",
-  "inspector.stopContainerDescriptionMany": "Arrêtera ce conteneur et fermera ses {count} ports publiés.",
-  "inspector.stopDuplicatesDescription": "{count} instances identiques confirmées. Conservez-en une ou arrêtez tout le groupe.",
-  "inspector.duplicateProtectionConflict": "Plusieurs instances sont protégées. Modifiez les protections avant ce nettoyage.",
-  "inspector.desktopRequired": "L’arrêt réel est disponible dans l’application de bureau.",
+  "inspector.stopDescriptionOne":
+    "Fermera {count} port et les connexions associées.",
+  "inspector.stopDescriptionMany":
+    "Fermera {count} ports et les connexions associées.",
+  "inspector.stopContainerDescriptionOne":
+    "Arrêtera ce conteneur et fermera son port publié.",
+  "inspector.stopContainerDescriptionMany":
+    "Arrêtera ce conteneur et fermera ses {count} ports publiés.",
+  "inspector.stopDuplicatesDescription":
+    "{count} instances identiques confirmées. Conservez-en une ou arrêtez tout le groupe.",
+  "inspector.duplicateProtectionConflict":
+    "Plusieurs instances sont protégées. Modifiez les protections avant ce nettoyage.",
+  "inspector.desktopRequired":
+    "L’arrêt réel est disponible dans l’application de bureau.",
   "inspector.desktopApp": "App de bureau requise",
   "inspector.stopBlocked": "Arrêt bloqué",
   "inspector.stopProcesses": "Arrêter {count} processus",
@@ -177,13 +212,19 @@ const fr = {
   "kill.close": "Fermer",
   "kill.title": "Arrêter {name} ?",
   "kill.duplicatesTitle": "Arrêter {count} doublons ?",
-  "kill.description": "Cette action demandera l’arrêt de {processes} {processLabel} et fermera {ports} {portLabel}. Les connexions actives seront interrompues.",
-  "kill.duplicatesDescription": "Choisissez l’instance de {name} à conserver. Les {count} autres processus seront arrêtés avec leurs connexions.",
-  "kill.containerDescription": "Docker arrêtera précisément le conteneur {name} et fermera {ports} {portLabel}. Les connexions actives seront interrompues.",
+  "kill.description":
+    "Cette action demandera l’arrêt de {processes} {processLabel} et fermera {ports} {portLabel}. Les connexions actives seront interrompues.",
+  "kill.duplicatesDescription":
+    "Choisissez l’instance de {name} à conserver. Les {count} autres processus seront arrêtés avec leurs connexions.",
+  "kill.containerDescription":
+    "Docker arrêtera précisément le conteneur {name} et fermera {ports} {portLabel}. Les connexions actives seront interrompues.",
   "kill.keepInstance": "Instance à conserver",
-  "kill.keepInstanceDescription": "L’instance la plus récente est présélectionnée. Changez-la si un client utilise un autre port.",
-  "kill.keepProtectedDescription": "L’instance protégée doit rester ouverte. Les autres peuvent être arrêtées.",
-  "kill.keepSelectionRequired": "Choisissez l’instance à conserver avant de continuer.",
+  "kill.keepInstanceDescription":
+    "L’instance la plus récente est présélectionnée. Changez-la si un client utilise un autre port.",
+  "kill.keepProtectedDescription":
+    "L’instance protégée doit rester ouverte. Les autres peuvent être arrêtées.",
+  "kill.keepSelectionRequired":
+    "Choisissez l’instance à conserver avant de continuer.",
   "kill.instancePortOne": "Port {ports}",
   "kill.instancePortMany": "Ports {ports}",
   "kill.instanceStarted": "démarré le {date}",
@@ -195,7 +236,8 @@ const fr = {
   "kill.container": "Conteneur",
   "kill.containerId": "ID Docker",
   "kill.folder": "Dossier",
-  "kill.safety": "Les protections seront revérifiées par le moteur avant chaque arrêt.",
+  "kill.safety":
+    "Les protections seront revérifiées par le moteur avant chaque arrêt.",
   "kill.cancel": "Annuler",
   "kill.stopping": "Arrêt en cours…",
   "kill.confirmProcess": "Arrêter le processus",
@@ -205,20 +247,25 @@ const fr = {
   "kill.confirmContainer": "Arrêter le conteneur",
   "protection.close": "Fermer",
   "protection.removeTitle": "Retirer la protection de {name} ?",
-  "protection.removeDescriptionOne": "La règle personnalisée qui protège ce processus sera supprimée.",
-  "protection.removeDescriptionMany": "Cette protection est partagée : elle couvre {processes} et {ports}.",
+  "protection.removeDescriptionOne":
+    "La règle personnalisée qui protège ce processus sera supprimée.",
+  "protection.removeDescriptionMany":
+    "Cette protection est partagée : elle couvre {processes} et {ports}.",
   "protection.selected": "Sélection",
   "protection.rules": "Règles supprimées",
   "protection.scope": "Portée affectée",
-  "protection.safety": "Aucun processus ne sera arrêté. Seules les règles de protection personnalisées seront supprimées.",
+  "protection.safety":
+    "Aucun processus ne sera arrêté. Seules les règles de protection personnalisées seront supprimées.",
   "protection.cancel": "Annuler",
   "protection.removing": "Retrait…",
   "protection.confirm": "Retirer la protection",
   "status.scanning": "Analyse en cours",
   "status.complete": "Analyse terminée",
-  "status.demoTitle": "L’aperçu web utilise un jeu de données fictif. L’application installée analyse la machine.",
+  "status.demoTitle":
+    "L’aperçu web utilise un jeu de données fictif. L’application installée analyse la machine.",
   "status.demo": "Données de démonstration",
-  "status.partialTitle": "Certains propriétaires de sockets sont masqués par le système",
+  "status.partialTitle":
+    "Certains propriétaires de sockets sont masqués par le système",
   "status.partial": "Accès partiel",
   "status.protectedPort": "{count} port protégé",
   "status.protectedPorts": "{count} ports protégés",
@@ -230,11 +277,13 @@ const fr = {
   "toast.protectionRemoved": "Protection retirée pour {name}.",
   "toast.processStoppedOne": "{count} processus arrêté.",
   "toast.processStoppedMany": "{count} processus arrêtés.",
-  "toast.duplicatesStopped": "{count} doublons arrêtés. Le PID {pid} reste ouvert.",
+  "toast.duplicatesStopped":
+    "{count} doublons arrêtés. Le PID {pid} reste ouvert.",
   "toast.containerStopped": "Conteneur Docker {name} arrêté.",
   "toast.close": "Fermer la notification",
   "protection.systemDefault": "Service du système protégé par défaut",
   "protection.systemMain": "Processus principal du système",
+  "protection.unknownRule": "Règle de protection",
   "rule.port53": "DNS et découverte locale",
   "rule.appleContinuity": "Continuité Apple",
   "rule.controlCenter": "Centre de contrôle / AirPlay",
@@ -273,6 +322,7 @@ const en: Record<TranslationKey, string> = {
   "sidebar.applications": "Applications",
   "sidebar.other": "Other",
   "sidebar.protected": "Protected",
+  "sidebar.ai": "AI",
   "sidebar.system": "System",
   "sidebar.collapse": "Collapse sidebar",
   "sidebar.expand": "Expand sidebar",
@@ -290,7 +340,8 @@ const en: Record<TranslationKey, string> = {
   "toolbar.analyze": "Analyze",
   "toolbar.scanning": "Scanning…",
   "settings.title": "Settings",
-  "settings.description": "Customize appearance, language, and safety barriers.",
+  "settings.description":
+    "Customize appearance, language, and safety barriers.",
   "settings.close": "Close settings",
   "settings.appearanceTitle": "Appearance",
   "settings.appearanceDescription": "Dark theme remains the default.",
@@ -299,14 +350,17 @@ const en: Record<TranslationKey, string> = {
   "settings.themeLight": "Light",
   "settings.themeSystem": "System",
   "settings.languageTitle": "Language",
-  "settings.languageDescription": "Choose the language used throughout the application.",
+  "settings.languageDescription":
+    "Choose the language used throughout the application.",
   "settings.languageAria": "Interface language",
   "settings.languageFrench": "Français",
   "settings.languageEnglish": "English",
   "settings.autoProtectTitle": "Automatically protect system services",
-  "settings.autoProtectDescription": "Prevents processes identified as system-owned from being stopped.",
+  "settings.autoProtectDescription":
+    "Prevents processes identified as system-owned from being stopped.",
   "settings.rulesTitle": "Protection rules",
-  "settings.rulesDescription": "A path can target a project’s working folder or executable.",
+  "settings.rulesDescription":
+    "A path can target a project’s working folder or executable.",
   "settings.activeRule": "{count} active",
   "settings.activeRules": "{count} active",
   "settings.enableRule": "Enable rule {label}",
@@ -333,7 +387,8 @@ const en: Record<TranslationKey, string> = {
   "evaluation.active": "Active now",
   "evaluation.ok": "OK",
   "tree.emptyTitle": "No matching connection",
-  "tree.emptyDescription": "Adjust the filters or scan again to refresh the processes.",
+  "tree.emptyDescription":
+    "Adjust the filters or scan again to refresh the processes.",
   "tree.families": "{count} process families",
   "tree.element": "Item",
   "tree.port": "Port",
@@ -341,7 +396,12 @@ const en: Record<TranslationKey, string> = {
   "tree.activity": "Activity",
   "tree.evaluation": "Evaluation",
   "tree.sortBy": "Sort by {column}",
+  "tree.sortedAscending": "{column}, sorted ascending. Activate to reverse.",
+  "tree.sortedDescending": "{column}, sorted descending. Activate to reverse.",
   "tree.protected": "Protected",
+  "tree.launchedBy": "{name} · launched by {launcher}",
+  "tree.aiTag": "AI",
+  "tree.aiTagTitle": "Process tied to an AI agent",
   "tree.collapsePorts": "Collapse ports",
   "tree.showPorts": "Show ports",
   "tree.instancesPorts": "{instances} instances · {ports} ports",
@@ -355,13 +415,18 @@ const en: Record<TranslationKey, string> = {
   "tree.unknown": "Unknown",
   "activity.aria": "Activity {score} out of 5",
   "inspector.selectProcess": "Select a process",
-  "inspector.selectDescription": "Its folder, command, and ports will appear here.",
+  "inspector.selectDescription":
+    "Its folder, command, and ports will appear here.",
   "inspector.details": "Details for {name}",
-  "inspector.origin": "Process origin",
+  "inspector.origin": "Launch folder",
   "inspector.missingFolder": "Working folder unavailable",
   "inspector.copyPath": "Copy path",
   "inspector.metadata": "Process metadata",
   "inspector.parentPid": "Parent PID",
+  "inspector.launcher": "Launched by",
+  "inspector.launcherValue": "{launcher} (PID {pid})",
+  "inspector.inheritedFolder":
+    "Folder inherited from {launcher}, not chosen by this process.",
   "inspector.containerId": "Container ID",
   "inspector.hostProcessPid": "Docker engine PID",
   "inspector.startedAt": "Started",
@@ -376,20 +441,26 @@ const en: Record<TranslationKey, string> = {
   "inspector.duplicateConfirmedBadge": "Confirmed",
   "inspector.duplicatePossibleBadge": "Needs confirmation",
   "inspector.duplicateManagedBadge": "Managed",
-  "inspector.duplicateConfirmedDescription": "{count} independent processes launch the same command from the same folder.",
-  "inspector.duplicatePossibleDescription": "{count} processes share the same origin, but their commands or metadata do not yet confirm a duplicate.",
-  "inspector.duplicateManagedDescription": "{count} processes belong to a worker family or intentionally share the same listener.",
-  "inspector.duplicateSafety": "Technical confirmation only: verify the expected instance count before stopping this group.",
+  "inspector.duplicateConfirmedDescription":
+    "{count} independent processes launch the same command from the same folder.",
+  "inspector.duplicatePossibleDescription":
+    "{count} processes share the same origin, but their commands or metadata do not yet confirm a duplicate.",
+  "inspector.duplicateManagedDescription":
+    "{count} processes belong to a worker family or intentionally share the same listener.",
+  "inspector.duplicateSafety":
+    "Technical confirmation only: verify the expected instance count before stopping this group.",
   "inspector.duplicateSignature": "Compared signature",
   "inspector.evidenceSameExecutable": "Same executable",
   "inspector.evidenceSameWorkingDirectory": "Same working folder",
   "inspector.evidenceSameCommand": "Same command with normalized port",
   "inspector.evidenceDifferentPorts": "Distinct listening ports",
-  "inspector.evidenceIndependentProcesses": "Independent PIDs with no parent-child link",
+  "inspector.evidenceIndependentProcesses":
+    "Independent PIDs with no parent-child link",
   "inspector.evidenceDifferentCommands": "Different commands detected",
   "inspector.evidenceMissingMetadata": "Incomplete metadata",
   "inspector.evidenceParentChild": "Parent-child relationship detected",
   "inspector.evidenceManagedRuntime": "Known worker manager detected",
+  "inspector.evidenceAgentManaged": "One instance per host agent session",
   "inspector.evidenceSharedListener": "Shared network listener",
   "inspector.command": "Command",
   "inspector.copyCommand": "Copy command",
@@ -405,13 +476,20 @@ const en: Record<TranslationKey, string> = {
   "inspector.stopTitle": "Stop process",
   "inspector.stopDuplicatesTitle": "Duplicate cleanup",
   "inspector.stopContainerTitle": "Stop Docker container",
-  "inspector.stopDescriptionOne": "Closes {count} port and its associated connections.",
-  "inspector.stopDescriptionMany": "Closes {count} ports and their associated connections.",
-  "inspector.stopContainerDescriptionOne": "Stops this container and closes its published port.",
-  "inspector.stopContainerDescriptionMany": "Stops this container and closes its {count} published ports.",
-  "inspector.stopDuplicatesDescription": "{count} confirmed identical instances. Keep one running or stop the entire group.",
-  "inspector.duplicateProtectionConflict": "Several instances are protected. Update protections before cleaning up this group.",
-  "inspector.desktopRequired": "Real stop actions are available in the desktop application.",
+  "inspector.stopDescriptionOne":
+    "Closes {count} port and its associated connections.",
+  "inspector.stopDescriptionMany":
+    "Closes {count} ports and their associated connections.",
+  "inspector.stopContainerDescriptionOne":
+    "Stops this container and closes its published port.",
+  "inspector.stopContainerDescriptionMany":
+    "Stops this container and closes its {count} published ports.",
+  "inspector.stopDuplicatesDescription":
+    "{count} confirmed identical instances. Keep one running or stop the entire group.",
+  "inspector.duplicateProtectionConflict":
+    "Several instances are protected. Update protections before cleaning up this group.",
+  "inspector.desktopRequired":
+    "Real stop actions are available in the desktop application.",
   "inspector.desktopApp": "Desktop app required",
   "inspector.stopBlocked": "Stop blocked",
   "inspector.stopProcesses": "Stop {count} processes",
@@ -422,13 +500,19 @@ const en: Record<TranslationKey, string> = {
   "kill.close": "Close",
   "kill.title": "Stop {name}?",
   "kill.duplicatesTitle": "Stop {count} duplicates?",
-  "kill.description": "This action will request that {processes} {processLabel} stop and will close {ports} {portLabel}. Active connections will be interrupted.",
-  "kill.duplicatesDescription": "Choose the {name} instance to keep running. The other {count} processes and their connections will be stopped.",
-  "kill.containerDescription": "Docker will stop the exact {name} container and close {ports} {portLabel}. Active connections will be interrupted.",
+  "kill.description":
+    "This action will request that {processes} {processLabel} stop and will close {ports} {portLabel}. Active connections will be interrupted.",
+  "kill.duplicatesDescription":
+    "Choose the {name} instance to keep running. The other {count} processes and their connections will be stopped.",
+  "kill.containerDescription":
+    "Docker will stop the exact {name} container and close {ports} {portLabel}. Active connections will be interrupted.",
   "kill.keepInstance": "Instance to keep",
-  "kill.keepInstanceDescription": "The newest instance is preselected. Change it if a client uses a different port.",
-  "kill.keepProtectedDescription": "The protected instance must remain open. The others can be stopped.",
-  "kill.keepSelectionRequired": "Choose the instance to keep before continuing.",
+  "kill.keepInstanceDescription":
+    "The newest instance is preselected. Change it if a client uses a different port.",
+  "kill.keepProtectedDescription":
+    "The protected instance must remain open. The others can be stopped.",
+  "kill.keepSelectionRequired":
+    "Choose the instance to keep before continuing.",
   "kill.instancePortOne": "Port {ports}",
   "kill.instancePortMany": "Ports {ports}",
   "kill.instanceStarted": "started {date}",
@@ -440,7 +524,8 @@ const en: Record<TranslationKey, string> = {
   "kill.container": "Container",
   "kill.containerId": "Docker ID",
   "kill.folder": "Folder",
-  "kill.safety": "The engine will recheck protections before every stop request.",
+  "kill.safety":
+    "The engine will recheck protections before every stop request.",
   "kill.cancel": "Cancel",
   "kill.stopping": "Stopping…",
   "kill.confirmProcess": "Stop process",
@@ -450,18 +535,22 @@ const en: Record<TranslationKey, string> = {
   "kill.confirmContainer": "Stop container",
   "protection.close": "Close",
   "protection.removeTitle": "Remove protection from {name}?",
-  "protection.removeDescriptionOne": "The custom rule protecting this process will be removed.",
-  "protection.removeDescriptionMany": "This protection is shared: it covers {processes} and {ports}.",
+  "protection.removeDescriptionOne":
+    "The custom rule protecting this process will be removed.",
+  "protection.removeDescriptionMany":
+    "This protection is shared: it covers {processes} and {ports}.",
   "protection.selected": "Selected",
   "protection.rules": "Rules removed",
   "protection.scope": "Affected scope",
-  "protection.safety": "No process will be stopped. Only custom protection rules will be removed.",
+  "protection.safety":
+    "No process will be stopped. Only custom protection rules will be removed.",
   "protection.cancel": "Cancel",
   "protection.removing": "Removing…",
   "protection.confirm": "Remove protection",
   "status.scanning": "Scan in progress",
   "status.complete": "Scan complete",
-  "status.demoTitle": "The web preview uses sample data. The installed application scans the machine.",
+  "status.demoTitle":
+    "The web preview uses sample data. The installed application scans the machine.",
   "status.demo": "Sample data",
   "status.partialTitle": "Some socket owners are hidden by the system",
   "status.partial": "Partial access",
@@ -475,11 +564,13 @@ const en: Record<TranslationKey, string> = {
   "toast.protectionRemoved": "Protection removed from {name}.",
   "toast.processStoppedOne": "{count} process stopped.",
   "toast.processStoppedMany": "{count} processes stopped.",
-  "toast.duplicatesStopped": "{count} duplicates stopped. PID {pid} remains open.",
+  "toast.duplicatesStopped":
+    "{count} duplicates stopped. PID {pid} remains open.",
   "toast.containerStopped": "Docker container {name} stopped.",
   "toast.close": "Close notification",
   "protection.systemDefault": "System service protected by default",
   "protection.systemMain": "Main system process",
+  "protection.unknownRule": "Protection rule",
   "rule.port53": "DNS and local discovery",
   "rule.appleContinuity": "Apple Continuity",
   "rule.controlCenter": "Control Center / AirPlay",
@@ -489,12 +580,25 @@ const en: Record<TranslationKey, string> = {
   "rule.systemPath": "System path",
 };
 
-const translations: Record<Language, Record<TranslationKey, string>> = { fr, en };
+const translations: Record<Language, Record<TranslationKey, string>> = {
+  fr,
+  en,
+};
 
-export type Translator = (key: TranslationKey, values?: Record<string, string | number>) => string;
+export type Translator = (
+  key: TranslationKey,
+  values?: Record<string, string | number>
+) => string;
 
-export function translate(language: Language, key: TranslationKey, values: Record<string, string | number> = {}): string {
-  return translations[language][key].replace(/\{(\w+)\}/g, (match, name: string) => String(values[name] ?? match));
+export function translate(
+  language: Language,
+  key: TranslationKey,
+  values: Record<string, string | number> = {}
+): string {
+  return translations[language][key].replace(
+    /\{(\w+)\}/g,
+    (match, name: string) => String(values[name] ?? match)
+  );
 }
 
 export function createTranslator(language: Language): Translator {
@@ -505,7 +609,10 @@ export function localeFor(language: Language): string {
   return language === "en" ? "en-CA" : "fr-CA";
 }
 
-export function localizeRuleLabel(rule: ProtectionRule, language: Language): string {
+export function localizeRuleLabel(
+  rule: ProtectionRule,
+  language: Language
+): string {
   if (!rule.builtin) return rule.label;
   const t = createTranslator(language);
   if (rule.id === "port-53") return t("rule.port53");
@@ -530,8 +637,21 @@ const I18nContext = createContext<I18nValue>({
   t: createTranslator("en"),
 });
 
-export function I18nProvider({ language, children }: { language: Language; children: ReactNode }) {
-  const value = useMemo<I18nValue>(() => ({ language, locale: localeFor(language), t: createTranslator(language) }), [language]);
+export function I18nProvider({
+  language,
+  children,
+}: {
+  language: Language;
+  children: ReactNode;
+}) {
+  const value = useMemo<I18nValue>(
+    () => ({
+      language,
+      locale: localeFor(language),
+      t: createTranslator(language),
+    }),
+    [language]
+  );
   return createElement(I18nContext.Provider, { value }, children);
 }
 

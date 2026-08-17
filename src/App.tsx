@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Check, Warning, X } from "@phosphor-icons/react";
 import { Inspector } from "./components/Inspector";
 import { KillDialog } from "./components/KillDialog";
@@ -18,9 +18,13 @@ import {
   scanPorts,
   stopDockerContainer,
 } from "./lib/api";
-import { buildProcessTree, defaultSortDirection, hideProtectedProcesses } from "./lib/processTree";
-import { createTranslator, I18nProvider, localizeRuleLabel, translate } from "./lib/i18n";
-import { getProtectionControl, ruleMatchesRecord } from "./lib/protectionRules";
+import {
+  buildProcessTree,
+  defaultSortDirection,
+  hideProtectedProcesses,
+} from "./lib/processTree";
+import { createTranslator, I18nProvider, translate } from "./lib/i18n";
+import { getProtectionControl } from "./lib/protectionRules";
 import type { TranslationKey } from "./lib/i18n";
 import type {
   AppSettings,
@@ -52,40 +56,66 @@ interface ProtectionTarget {
 }
 
 const MINIMUM_SCAN_FEEDBACK_MS = 450;
+const TOAST_DURATION_MS = 4200;
 
 export function App() {
   const previewMode = !isTauriRuntime();
   const [scan, setScan] = useState<ScanResult | null>(null);
-  const [settings, setSettings] = useState<AppSettings>({ theme: "dark", language: "en", protectSystemProcesses: true, rules: [] });
+  const [settings, setSettings] = useState<AppSettings>({
+    theme: "dark",
+    language: "en",
+    protectSystemProcesses: true,
+    rules: [],
+  });
   const [filter, setFilter] = useState<NavFilter>("all");
   const [hideProtected, setHideProtected] = useState(false);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortMode>("evaluation");
-  const [sortDirection, setSortDirection] = useState<SortDirection>(defaultSortDirection("evaluation"));
+  const [sortDirection, setSortDirection] = useState<SortDirection>(
+    defaultSortDirection("evaluation")
+  );
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [scanning, setScanning] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [stopTarget, setStopTarget] = useState<StopTarget | null>(null);
   const [stopping, setStopping] = useState(false);
-  const [protectionTarget, setProtectionTarget] = useState<ProtectionTarget | null>(null);
+  const [protectionTarget, setProtectionTarget] =
+    useState<ProtectionTarget | null>(null);
   const [protectionSaving, setProtectionSaving] = useState(false);
   const [toast, setToast] = useState<ToastState | null>(null);
   const t = createTranslator(settings.language);
 
+  // Sans annuler le minuteur précédent, la première notification effacerait la
+  // seconde à sa propre échéance, en pleine lecture.
+  const toastTimer = useRef<number | null>(null);
   const notify = useCallback((type: ToastState["type"], message: string) => {
+    if (toastTimer.current !== null) window.clearTimeout(toastTimer.current);
     setToast({ type, message });
-    window.setTimeout(() => setToast(null), 4200);
+    toastTimer.current = window.setTimeout(() => {
+      toastTimer.current = null;
+      setToast(null);
+    }, TOAST_DURATION_MS);
   }, []);
+
+  useEffect(
+    () => () => {
+      if (toastTimer.current !== null) window.clearTimeout(toastTimer.current);
+    },
+    []
+  );
 
   const runScan = useCallback(async () => {
     const startedAt = performance.now();
     setScanning(true);
     try {
       const result = await scanPorts();
-      const remainingFeedbackTime = MINIMUM_SCAN_FEEDBACK_MS - (performance.now() - startedAt);
+      const remainingFeedbackTime =
+        MINIMUM_SCAN_FEEDBACK_MS - (performance.now() - startedAt);
       if (remainingFeedbackTime > 0) {
-        await new Promise((resolve) => window.setTimeout(resolve, remainingFeedbackTime));
+        await new Promise((resolve) =>
+          window.setTimeout(resolve, remainingFeedbackTime)
+        );
       }
       setScan(result);
     } catch (error) {
@@ -102,7 +132,9 @@ export function App() {
     void runScan();
   }, [notify, runScan]);
 
-  const resolvedTheme = resolveTheme(settings.theme);
+  const systemScheme = useSystemColorScheme();
+  const resolvedTheme =
+    settings.theme === "system" ? systemScheme : settings.theme;
   useEffect(() => {
     document.documentElement.dataset.theme = resolvedTheme;
     document.documentElement.style.colorScheme = resolvedTheme;
@@ -113,7 +145,9 @@ export function App() {
     const handler = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        document.querySelector<HTMLInputElement>(".search-field input")?.focus();
+        document
+          .querySelector<HTMLInputElement>(".search-field input")
+          ?.focus();
       }
       if (event.key === "Escape") {
         if (protectionTarget && !protectionSaving) setProtectionTarget(null);
@@ -125,27 +159,44 @@ export function App() {
     return () => window.removeEventListener("keydown", handler);
   }, [protectionSaving, protectionTarget, settingsOpen, stopTarget, stopping]);
 
-  const records = useMemo(
-    () => applyProtectionSettings(scan?.records ?? [], settings),
-    [scan?.records, settings],
-  );
+  const records = useMemo(() => scan?.records ?? [], [scan?.records]);
   const matchingGroups = useMemo(
-    () => buildProcessTree(records, filter, query, sort, settings.language, sortDirection),
-    [filter, query, records, settings.language, sort, sortDirection],
+    () =>
+      buildProcessTree(
+        records,
+        filter,
+        query,
+        sort,
+        settings.language,
+        sortDirection
+      ),
+    [filter, query, records, settings.language, sort, sortDirection]
   );
   const protectedProcessCount = useMemo(
-    () => matchingGroups.flatMap((group) => group.processes).filter((process) => process.protected).length,
-    [matchingGroups],
+    () =>
+      matchingGroups
+        .flatMap((group) => group.processes)
+        .filter((process) => process.protected).length,
+    [matchingGroups]
   );
   const groups = useMemo(
-    () => filter === "all" && hideProtected ? hideProtectedProcesses(matchingGroups) : matchingGroups,
-    [filter, hideProtected, matchingGroups],
+    () =>
+      filter === "all" && hideProtected
+        ? hideProtectedProcesses(matchingGroups)
+        : matchingGroups,
+    [filter, hideProtected, matchingGroups]
   );
-  const processes = useMemo(() => groups.flatMap((group) => group.processes), [groups]);
-  const selected = processes.find((process) => process.id === selectedId) ?? processes[0] ?? null;
+  const processes = useMemo(
+    () => groups.flatMap((group) => group.processes),
+    [groups]
+  );
+  const selected =
+    processes.find((process) => process.id === selectedId) ??
+    processes[0] ??
+    null;
   const selectedProtectionControl = useMemo(
-    () => selected ? getProtectionControl(selected, settings, records) : null,
-    [records, selected, settings],
+    () => (selected ? getProtectionControl(selected, settings, records) : null),
+    [records, selected, settings]
   );
 
   useEffect(() => {
@@ -155,12 +206,17 @@ export function App() {
   const persistSettings = async (
     nextSettings: AppSettings,
     successKey: TranslationKey = "toast.settingsSaved",
-    values: Record<string, string | number> = {},
+    values: Record<string, string | number> = {}
   ) => {
     try {
       const saved = await saveSettings(nextSettings);
+      const protectionChanged =
+        protectionSignature(saved) !== protectionSignature(settings);
       setSettings(saved);
       notify("success", translate(saved.language, successKey, values));
+      // Les protections sont évaluées par le moteur : seule une nouvelle analyse
+      // les met à jour dans l'arbre.
+      if (protectionChanged) void runScan();
     } catch (error) {
       notify("error", String(error));
       throw error;
@@ -174,7 +230,9 @@ export function App() {
 
   const handleSortChange = (nextSort: SortMode) => {
     if (nextSort === sort) {
-      setSortDirection((current) => current === "ascending" ? "descending" : "ascending");
+      setSortDirection((current) =>
+        current === "ascending" ? "descending" : "ascending"
+      );
       return;
     }
     setSort(nextSort);
@@ -217,7 +275,11 @@ export function App() {
 
     const isDocker = Boolean(process.dockerContainerId);
     const path = process.workingDirectory ?? process.processPath;
-    const kind = isDocker ? "container" as const : path ? "path" as const : "process" as const;
+    const kind = isDocker
+      ? ("container" as const)
+      : path
+      ? ("path" as const)
+      : ("process" as const);
     const rule = {
       id: `custom-${kind}-${Date.now()}`,
       label: t("toast.projectRule", { name: process.identification }),
@@ -229,7 +291,7 @@ export function App() {
     void persistSettings(
       { ...settings, rules: [...settings.rules, rule] },
       "toast.protectionAdded",
-      { name: process.identification },
+      { name: process.identification }
     ).catch(() => undefined);
   };
 
@@ -239,9 +301,12 @@ export function App() {
     try {
       const removedIds = new Set(protectionTarget.ruleIds);
       await persistSettings(
-        { ...settings, rules: settings.rules.filter((rule) => !removedIds.has(rule.id)) },
+        {
+          ...settings,
+          rules: settings.rules.filter((rule) => !removedIds.has(rule.id)),
+        },
         "toast.protectionRemoved",
-        { name: protectionTarget.process.identification },
+        { name: protectionTarget.process.identification }
       );
       setProtectionTarget(null);
     } catch {
@@ -254,11 +319,15 @@ export function App() {
   const confirmStop = async (keepPid: number | null) => {
     if (!stopTarget) return;
     const targetProcess = stopTarget.process;
-    const pidsToStop = stopTarget.mode === "duplicates"
-      ? targetProcess.pids.filter((pid) => pid !== keepPid)
-      : targetProcess.pids;
+    const pidsToStop =
+      stopTarget.mode === "duplicates"
+        ? targetProcess.pids.filter((pid) => pid !== keepPid)
+        : targetProcess.pids;
 
-    if (stopTarget.mode === "duplicates" && (!keepPid || !targetProcess.pids.includes(keepPid))) {
+    if (
+      stopTarget.mode === "duplicates" &&
+      (!keepPid || !targetProcess.pids.includes(keepPid))
+    ) {
       notify("error", t("kill.keepSelectionRequired"));
       return;
     }
@@ -270,16 +339,25 @@ export function App() {
 
     if (targetProcess.dockerContainerId) {
       try {
-        await stopDockerContainer({ containerId: targetProcess.dockerContainerId, force: false });
+        await stopDockerContainer({
+          containerId: targetProcess.dockerContainerId,
+          force: false,
+        });
         stoppedContainer = targetProcess.identification;
       } catch (error) {
         failures.push(String(error));
       }
     } else {
       for (const pid of pidsToStop) {
-        const matchingRecord = targetProcess.records.find((record) => record.pid === pid);
+        const matchingRecord = targetProcess.records.find(
+          (record) => record.pid === pid
+        );
         try {
-          await killProcess({ pid, expectedStartTime: matchingRecord?.startedAt ?? null, force: false });
+          await killProcess({
+            pid,
+            expectedStartTime: matchingRecord?.startedAt ?? null,
+            force: false,
+          });
           stoppedPids.push(pid);
         } catch (error) {
           failures.push(`PID ${pid} : ${String(error)}`);
@@ -290,114 +368,174 @@ export function App() {
     setStopping(false);
     setStopTarget(null);
     if (failures.length) notify("error", failures.join(" · "));
-    else if (stoppedContainer) notify("success", t("toast.containerStopped", { name: stoppedContainer }));
-    else if (stopTarget.mode === "duplicates") notify("success", t("toast.duplicatesStopped", { count: stoppedPids.length, pid: keepPid ?? "—" }));
-    else notify("success", t(stoppedPids.length === 1 ? "toast.processStoppedOne" : "toast.processStoppedMany", { count: stoppedPids.length }));
+    else if (stoppedContainer)
+      notify(
+        "success",
+        t("toast.containerStopped", { name: stoppedContainer })
+      );
+    else if (stopTarget.mode === "duplicates")
+      notify(
+        "success",
+        t("toast.duplicatesStopped", {
+          count: stoppedPids.length,
+          pid: keepPid ?? "—",
+        })
+      );
+    else
+      notify(
+        "success",
+        t(
+          stoppedPids.length === 1
+            ? "toast.processStoppedOne"
+            : "toast.processStoppedMany",
+          { count: stoppedPids.length }
+        )
+      );
 
     if (isTauriRuntime()) {
       window.setTimeout(() => void runScan(), 500);
     }
   };
 
-  const processCount = new Set(records.flatMap((record) => (record.pid ? [record.pid] : []))).size;
+  const processCount = new Set(
+    records.flatMap((record) => (record.pid ? [record.pid] : []))
+  ).size;
   const protectedCount = records.filter((record) => record.protected).length;
 
   return (
     <I18nProvider language={settings.language}>
-      <main className={`app-shell ${sidebarCollapsed ? "is-sidebar-collapsed" : ""}`}>
-      <Sidebar
-        active={filter}
-        onChange={setFilter}
-        records={records}
-        platform={scan?.platform ?? "macos"}
-        theme={resolvedTheme}
-        collapsed={sidebarCollapsed}
-        onToggleCollapsed={() => setSidebarCollapsed((current) => !current)}
-        onToggleTheme={toggleTheme}
-        onOpenSettings={() => setSettingsOpen(true)}
-      />
-      <Toolbar
-        query={query}
-        onQueryChange={setQuery}
-        protectedFilterAvailable={filter === "all"}
-        hideProtected={hideProtected}
-        protectedProcessCount={protectedProcessCount}
-        onToggleProtected={() => setHideProtected((current) => !current)}
-        onScan={runScan}
-        scanning={scanning}
-      />
-      <ProcessTree
-        groups={groups}
-        selectedId={selected?.id ?? null}
-        onSelect={(process) => setSelectedId(process.id)}
-        scanning={scanning}
-        platform={scan?.platform ?? "macos"}
-        sort={sort}
-        sortDirection={sortDirection}
-        onSortChange={handleSortChange}
-      />
-      <Inspector
-        process={selected}
-        platform={scan?.platform ?? "macos"}
-        onReveal={(path) => void handleReveal(path)}
-        onTerminal={(path) => void handleTerminal(path)}
-        protectionAction={selectedProtectionControl?.action ?? "add"}
-        onProtectionAction={handleProtectionAction}
-        onRequestStop={(process, mode) => setStopTarget({ process, mode })}
-        canStop={!previewMode}
-      />
-      <StatusBar
-        scannedAt={scan?.scannedAt ?? null}
-        processCount={processCount}
-        portCount={records.length}
-        protectedCount={protectedCount}
-        permissionLimited={scan?.permissionLimited ?? false}
-        scanning={scanning}
-        demoMode={previewMode}
-      />
-      <SettingsDialog open={settingsOpen} settings={settings} onClose={() => setSettingsOpen(false)} onSave={persistSettings} />
-      <ProtectionDialog
-        process={protectionTarget?.process ?? null}
-        rules={settings.rules.filter((rule) => protectionTarget?.ruleIds.includes(rule.id))}
-        affectedProcessCount={protectionTarget?.affectedProcessCount ?? 0}
-        affectedPortCount={protectionTarget?.affectedPortCount ?? 0}
-        saving={protectionSaving}
-        onCancel={() => setProtectionTarget(null)}
-        onConfirm={() => void confirmProtectionRemoval()}
-      />
-      <KillDialog
-        process={stopTarget?.process ?? null}
-        mode={stopTarget?.mode ?? "all"}
-        stopping={stopping}
-        onCancel={() => setStopTarget(null)}
-        onConfirm={(keepPid) => void confirmStop(keepPid)}
-      />
-      {toast && (
-        <div className={`toast toast-${toast.type}`} role="status">
-          {toast.type === "success" ? <Check size={18} weight="bold" /> : <Warning size={18} weight="fill" />}
-          <span>{toast.message}</span>
-          <button type="button" onClick={() => setToast(null)} aria-label={t("toast.close")}><X size={16} /></button>
-        </div>
-      )}
+      <main
+        className={`app-shell ${
+          sidebarCollapsed ? "is-sidebar-collapsed" : ""
+        }`}
+      >
+        <Sidebar
+          active={filter}
+          onChange={setFilter}
+          records={records}
+          platform={scan?.platform ?? "macos"}
+          theme={resolvedTheme}
+          collapsed={sidebarCollapsed}
+          onToggleCollapsed={() => setSidebarCollapsed((current) => !current)}
+          onToggleTheme={toggleTheme}
+          onOpenSettings={() => setSettingsOpen(true)}
+        />
+        <Toolbar
+          query={query}
+          onQueryChange={setQuery}
+          protectedFilterAvailable={filter === "all"}
+          hideProtected={hideProtected}
+          protectedProcessCount={protectedProcessCount}
+          onToggleProtected={() => setHideProtected((current) => !current)}
+          onScan={runScan}
+          scanning={scanning}
+        />
+        <ProcessTree
+          groups={groups}
+          selectedId={selected?.id ?? null}
+          onSelect={(process) => setSelectedId(process.id)}
+          scanning={scanning}
+          platform={scan?.platform ?? "macos"}
+          sort={sort}
+          sortDirection={sortDirection}
+          onSortChange={handleSortChange}
+        />
+        <Inspector
+          process={selected}
+          platform={scan?.platform ?? "macos"}
+          rules={settings.rules}
+          onReveal={(path) => void handleReveal(path)}
+          onTerminal={(path) => void handleTerminal(path)}
+          protectionAction={selectedProtectionControl?.action ?? "add"}
+          onProtectionAction={handleProtectionAction}
+          onRequestStop={(process, mode) => setStopTarget({ process, mode })}
+          canStop={!previewMode}
+        />
+        <StatusBar
+          scannedAt={scan?.scannedAt ?? null}
+          processCount={processCount}
+          portCount={records.length}
+          protectedCount={protectedCount}
+          permissionLimited={scan?.permissionLimited ?? false}
+          scanning={scanning}
+          demoMode={previewMode}
+        />
+        <SettingsDialog
+          open={settingsOpen}
+          settings={settings}
+          onClose={() => setSettingsOpen(false)}
+          onSave={persistSettings}
+        />
+        <ProtectionDialog
+          process={protectionTarget?.process ?? null}
+          rules={settings.rules.filter((rule) =>
+            protectionTarget?.ruleIds.includes(rule.id)
+          )}
+          affectedProcessCount={protectionTarget?.affectedProcessCount ?? 0}
+          affectedPortCount={protectionTarget?.affectedPortCount ?? 0}
+          saving={protectionSaving}
+          onCancel={() => setProtectionTarget(null)}
+          onConfirm={() => void confirmProtectionRemoval()}
+        />
+        <KillDialog
+          process={stopTarget?.process ?? null}
+          mode={stopTarget?.mode ?? "all"}
+          stopping={stopping}
+          onCancel={() => setStopTarget(null)}
+          onConfirm={(keepPid) => void confirmStop(keepPid)}
+        />
+        {toast && (
+          <div className={`toast toast-${toast.type}`} role="status">
+            {toast.type === "success" ? (
+              <Check size={18} weight="bold" />
+            ) : (
+              <Warning size={18} weight="fill" />
+            )}
+            <span>{toast.message}</span>
+            <button
+              type="button"
+              onClick={() => setToast(null)}
+              aria-label={t("toast.close")}
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
       </main>
     </I18nProvider>
   );
 }
 
-function resolveTheme(theme: ThemeMode): "dark" | "light" {
-  if (theme !== "system") return theme;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+const DARK_SCHEME_QUERY = "(prefers-color-scheme: dark)";
+
+// Le thème « système » doit suivre le système, pas la valeur qu'il avait au
+// démarrage. jsdom n'implémente pas `matchMedia`, d'où l'appel facultatif et le
+// repli sur le thème clair.
+function useSystemColorScheme(): "dark" | "light" {
+  const [scheme, setScheme] = useState<"dark" | "light">(() =>
+    window.matchMedia?.(DARK_SCHEME_QUERY).matches ? "dark" : "light"
+  );
+
+  useEffect(() => {
+    const query = window.matchMedia?.(DARK_SCHEME_QUERY);
+    if (!query) return;
+
+    const update = (event: MediaQueryListEvent) =>
+      setScheme(event.matches ? "dark" : "light");
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+
+  return scheme;
 }
 
-function applyProtectionSettings(records: PortRecord[], settings: AppSettings): PortRecord[] {
-  const t = createTranslator(settings.language);
-  return records.map((record) => {
-    const reasons: string[] = [];
-    if (settings.protectSystemProcesses && record.category === "system") reasons.push(t("protection.systemDefault"));
-    if (record.pid === 1) reasons.push(t("protection.systemMain"));
-    for (const rule of settings.rules.filter((candidate) => candidate.enabled)) {
-      if (ruleMatchesRecord(rule, record)) reasons.push(localizeRuleLabel(rule, settings.language));
-    }
-    return { ...record, protected: reasons.length > 0, protectionReasons: [...new Set(reasons)] };
-  });
+// Ce qui, dans les réglages, change le verdict du moteur. Modifier le thème ou
+// la langue ne justifie pas de relancer une analyse.
+function protectionSignature(settings: AppSettings): string {
+  return JSON.stringify([
+    settings.protectSystemProcesses,
+    settings.rules
+      .filter((rule) => rule.enabled)
+      .map((rule) => [rule.id, rule.kind, rule.value]),
+  ]);
 }

@@ -36,6 +36,9 @@ jobs:
       - name: Test process grouping
         run: npm run test:web
 
+      - name: Test the stop path through the interface
+        run: npm run test:ui
+
       - name: Build the interface
         run: npm run build
 

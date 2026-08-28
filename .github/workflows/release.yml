@@ -1,0 +1,111 @@
+name: Release
+
+# Builds installers for macOS, Windows and Linux and attaches them to a GitHub
+# Release. Push a tag like v0.1.0, or run it by hand from the Actions tab.
+#
+# The toolchain here deliberately mirrors ci.yml (node 24, rustup default stable,
+# the same Linux dependency list). ci.yml already compiles the app on all three
+# operating systems, so matching it keeps this on a known-good configuration; the
+# only thing this adds is bundling and upload.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to build and release (e.g. v0.1.0)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # One universal macOS build covers both Apple Silicon and Intel, so users
+          # do not have to know which Mac they own.
+          - os: macos-latest
+            label: macOS (universal)
+            args: '--target universal-apple-darwin'
+            rust-targets: 'aarch64-apple-darwin,x86_64-apple-darwin'
+          - os: windows-latest
+            label: Windows (x64)
+            args: ''
+            rust-targets: ''
+          - os: ubuntu-22.04
+            label: Linux (x64)
+            args: ''
+            rust-targets: ''
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install Tauri dependencies on Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+
+      - name: Select stable Rust
+        run: rustup default stable
+
+      - name: Add macOS cross targets
+        if: matrix.rust-targets != ''
+        run: rustup target add ${{ matrix.rust-targets }}
+
+      - name: Cache Rust build
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './src-tauri -> target'
+
+      - name: Install JavaScript dependencies
+        run: npm ci
+
+      - name: Build and publish the installers
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.event.inputs.tag || github.ref_name }}
+          releaseName: 'Port Scanner __VERSION__'
+          releaseDraft: true
+          prerelease: false
+          args: ${{ matrix.args }}
+          releaseBody: |
+            Local-first desktop app that traces open ports back to the projects,
+            processes and Docker containers that own them, then helps you stop them
+            safely. Nothing leaves your machine.
+
+            ## Install
+
+            | Platform | Download |
+            |---|---|
+            | macOS (Apple Silicon or Intel) | the `.dmg` below |
+            | Windows | the `.exe` or `.msi` below |
+            | Linux | the `.AppImage` or `.deb` below |
+
+            ## First launch
+
+            These builds are not code-signed yet, so the operating system will warn
+            you the first time.
+
+            - **macOS**: right-click the app and choose Open, then Open again. Or run
+              `xattr -dr com.apple.quarantine "/Applications/Port Scanner.app"`.
+            - **Windows**: SmartScreen shows "Windows protected your PC". Click More
+              info, then Run anyway.
+            - **Linux**: `chmod +x` the AppImage before running it.
+
+            Built from source by GitHub Actions. See the workflow run attached to
+            this tag for the full build log.

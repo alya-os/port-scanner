@@ -8,8 +8,8 @@ When implementing from a selected generated mock, treat that image as the source
 
 # Product decisions
 
-- The confirmed public product name is **Port Scanner**. Use `port-scanner` for package/repository slugs, `port_scanner` for Rust identifiers, and `ca.jplefebvre.port-scanner` for the desktop identifier.
-- Port Scanner is released under the MIT License with Jean-Philippe Lefebvre as the 2026 copyright holder.
+- The confirmed public product name is **Port Scanner**. Use `port-scanner` for package/repository slugs, `port_scanner` for Rust identifiers, and `ai.alya.port-scanner` for the desktop identifier.
+- Port Scanner is released under the MIT License with ALYA Labs as the 2026 copyright holder.
 - The confirmed application logo is `src-tauri/icons/icon.png`; README and distribution visuals should reuse it rather than inventing a replacement.
 - The product promise is “Every port, traced to its root.” / “Chaque port, jusqu’à sa racine.”
 - The selected source is `design/reference-dark.png`.

@@ -2,7 +2,7 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Port Scanner",
   "version": "0.1.0",
-  "identifier": "ca.jplefebvre.port-scanner",
+  "identifier": "ai.alya.port-scanner",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:1420",
@@ -29,6 +29,7 @@
   },
   "bundle": {
     "active": true,
+    "publisher": "ALYA Labs",
     "targets": "all",
     "macOS": {
       "signingIdentity": "-"

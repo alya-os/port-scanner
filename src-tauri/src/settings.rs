@@ -8,8 +8,10 @@ use tauri::{AppHandle, Manager};
 use crate::model::{AppSettings, PortRecord, ProtectionReason, ProtectionRule};
 
 const SETTINGS_FILE: &str = "settings.json";
-const LEGACY_APP_IDENTIFIERS: [&str; 2] =
-    ["ca.jplefebvre.portroot", "ca.jplefebvre.connexions-locales"];
+// Former identifiers whose settings should be migrated into the current one.
+// Empty: the builds that used a personal namespace were never released publicly,
+// so there is nothing to migrate from. Add entries here if that ever changes.
+const LEGACY_APP_IDENTIFIERS: [&str; 0] = [];
 
 pub fn default_settings() -> AppSettings {
     let mut rules = vec![
@@ -429,15 +431,9 @@ mod tests {
     }
 
     #[test]
-    fn resolves_portroot_and_connexions_locales_as_legacy_settings() {
-        let current = Path::new("/config/ca.jplefebvre.port-scanner/settings.json");
-        assert_eq!(
-            legacy_settings_paths(current),
-            vec![
-                PathBuf::from("/config/ca.jplefebvre.portroot/settings.json"),
-                PathBuf::from("/config/ca.jplefebvre.connexions-locales/settings.json"),
-            ]
-        );
+    fn reports_no_legacy_settings_paths() {
+        let current = Path::new("/config/ai.alya.port-scanner/settings.json");
+        assert!(legacy_settings_paths(current).is_empty());
     }
 
     fn sample_record() -> PortRecord {

@@ -58,7 +58,7 @@ The product explains open ports through the developer's actual project hierarchy
 - Dark implementation target: `design/reference-dark.png`.
 - A real macOS scan in the originating conversation identified 34 listening TCP ports, 10 fixed UDP ports, Docker mappings, Local services, orphaned Python/Node servers, and system services.
 - Repository target: `https://github.com/alya-os/port-scanner`.
-- License: MIT, copyright Jean-Philippe Lefebvre (2026).
+- License: MIT, copyright ALYA Labs (2026).
 - No analytics or signed public distribution policy has been confirmed.
 
 ## Product Principles

@@ -2,7 +2,7 @@
 name = "port-scanner"
 version = "0.1.0"
 description = "Inspect and safely manage local listening ports and their processes."
-authors = ["Jean-Philippe Lefebvre"]
+authors = ["ALYA Labs"]
 license = "MIT"
 repository = "https://github.com/alya-os/port-scanner"
 edition = "2021"

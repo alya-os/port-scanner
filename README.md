@@ -200,4 +200,4 @@ The GitHub Actions workflow targets macOS, Windows, and Ubuntu. The full manual 
 
 Port Scanner is released under the [MIT License](LICENSE).
 
-Copyright © 2026 Jean-Philippe Lefebvre.
+Copyright © 2026 ALYA Labs.

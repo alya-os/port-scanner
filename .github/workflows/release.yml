@@ -34,7 +34,10 @@ jobs:
           - os: macos-latest
             label: macOS (universal)
             args: '--target universal-apple-darwin'
-            rust-targets: 'aarch64-apple-darwin,x86_64-apple-darwin'
+            # SPACE separated, not comma. `rustup target add a,b` treats the whole
+            # string as one target name and fails with
+            #   toolchain 'stable-aarch64-apple-darwin' does not support target 'a,b'
+            rust-targets: 'aarch64-apple-darwin x86_64-apple-darwin'
           - os: windows-latest
             label: Windows (x64)
             args: ''
